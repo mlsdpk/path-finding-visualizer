@@ -1,3 +1,0 @@
-/home/phone/path-finding-visualizer/build/CMakeFiles/rebuild_cache.dir
-/home/phone/path-finding-visualizer/build/CMakeFiles/edit_cache.dir
-/home/phone/path-finding-visualizer/build/CMakeFiles/main.dir
