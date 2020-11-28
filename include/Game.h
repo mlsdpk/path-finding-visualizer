@@ -1,8 +1,6 @@
 #pragma once
 
-#include "BFS.h"
 #include "MainMenu_State.h"
-#include "Node.h"
 
 class Game
 {

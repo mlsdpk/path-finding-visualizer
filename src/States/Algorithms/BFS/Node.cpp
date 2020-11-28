@@ -43,6 +43,11 @@ Node* Node::getParentNode()
   return parent_;
 }
 
+std::vector<Node*>* Node::getNeighbours()
+{
+  return &vecNeighbours_;
+}
+
 // Mutators
 void Node::setObstacle(bool b)
 {
