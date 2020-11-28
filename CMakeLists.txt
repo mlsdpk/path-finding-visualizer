@@ -22,6 +22,10 @@ add_library(main_menu
   src/States/MainMenu_State.cpp
 )
 
+add_library(button
+  src/Elements/Button.cpp
+)
+
 add_library(bfs
   src/States/Algorithms/BFS/BFS.cpp
   src/States/Algorithms/BFS/Node.cpp
@@ -37,5 +41,6 @@ target_link_libraries(${EXECUTABLE_NAME}
   sfml-window
   sfml-system
   main_menu
+  button
   bfs
 )

@@ -29,6 +29,7 @@ public:
   // Accessors
   sf::Vector2i getPos();
   Node* getParentNode();
+  std::vector<Node*>* getNeighbours();
 
   // Mutators
   void setObstacle(bool b);

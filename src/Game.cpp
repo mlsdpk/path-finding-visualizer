@@ -9,7 +9,7 @@ void Game::initWindow(sf::RenderWindow* window)
   */
 
   window_ = window;
-  window_->setFramerateLimit(60);
+  window_->setFramerateLimit(100);
 }
 
 void Game::initStates()
@@ -20,7 +20,7 @@ void Game::initStates()
     - initialization of state (BFS)
   */
 
-  states_.push(new MainMenu_State(window_));
+  states_.push(new MainMenu_State(window_, &states_));
 }
 
 // Constructor
@@ -96,7 +96,7 @@ void Game::render()
     Render the game objects
   */
 
-  window_->clear(sf::Color::Red);
+  window_->clear();
 
   if (!states_.empty()) {
     states_.top()->render();
