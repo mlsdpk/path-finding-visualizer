@@ -9,9 +9,11 @@
 class BFS: public State
 {
 private:
+  // window related
   sf::Vector2u windowSize_;
   sf::VideoMode videoMode_;
 
+  // fonts
   sf::Font font_;
 
   // buttons
@@ -23,21 +25,22 @@ private:
   unsigned int mapWidth_;
   unsigned int mapHeight_;
 
-  // Node Variables
+  // BFS related
   Node* nodes_;
   Node* nodeStart_;
   Node* nodeEnd_;
-
   std::queue<Node*> frontier_;
 
+  // logic flags
   bool BFS_running_;
   bool BFS_initialized_;
   bool BFS_reset_;
 
-  // Functions
+  // initialization Functions
   void initFonts();
   void initButtons();
-
+  void initVariables();
+  void initNodes();
   void initBFS();
 
 public:
@@ -45,20 +48,17 @@ public:
 
   virtual ~BFS();
 
-  // Functions
+  // Override Functions
   void endState();
   void updateKeybinds();
   void update();
   void render();
 
-  void initVariables();
-  void initializeNodes();
-
-  void updateNodes();
-  void renderNodes();
-
   void updateButtons();
+  void updateNodes();
+
   void renderButtons();
+  void renderNodes();
 
   void solve_BFS();
 };

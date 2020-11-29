@@ -1,14 +1,16 @@
 #include "BFS.h"
 
+// Constructor
 BFS::BFS(sf::RenderWindow* window, std::stack<State*>* states)
     : State(window, states) {
   initVariables();
   initFonts();
   initButtons();
-  initializeNodes();
+  initNodes();
   initBFS();
 }
 
+// Destructor
 BFS::~BFS()
 {
   delete[] nodes_;
@@ -16,6 +18,12 @@ BFS::~BFS()
 
 void BFS::initFonts()
 {
+  /*
+    @return void
+
+    - load font from file
+  */
+
   if (!font_.loadFromFile("../fonts/ostrich-regular.ttf")) {
     throw("ERROR::MainMenuSTATE::COULD NOT LOAD FONT.");
   }
@@ -23,6 +31,12 @@ void BFS::initFonts()
 
 void BFS::initButtons()
 {
+  /*
+    @return void
+
+    - initialize two buttons
+  */
+
   buttons_["START"] = new Button(5, 5, 100, 30,
       &font_, "START", 15,
       sf::Color(70, 70, 70, 200),
@@ -38,6 +52,7 @@ void BFS::initButtons()
   );
 }
 
+// TODO: Hardcoded, need to update this
 void BFS::initVariables()
 {
   /*
@@ -59,7 +74,7 @@ void BFS::initVariables()
   BFS_reset_ = false;
 }
 
-void BFS::initializeNodes()
+void BFS::initNodes()
 {
   /*
     @return void
@@ -102,18 +117,127 @@ void BFS::initializeNodes()
   nodeEnd_   = &nodes_[(mapWidth_/gridSize_) * (mapWidth_/gridSize_ - 1) + (mapHeight_/gridSize_ - 1)];
 }
 
+void BFS::initBFS()
+{
+  /*
+    @return void
+
+    - initialize BFS by clearing frontier and add start node
+  */
+
+  // clear frontier
+  while (!frontier_.empty()) {
+    frontier_.pop();
+  }
+
+  frontier_.push(nodeStart_);
+}
+
 void BFS::endState()
 {
+  /*
+    @return void
+
+    - ending state function
+  */
+
   std::cout << "Ending BFS State" << '\n';
 }
 
 void BFS::updateKeybinds()
 {
+  /*
+    @return void
+
+    - checking ESCAPE key to exit
+  */
+
   checkForQuit();
+}
+
+// TODO: Add elapsedTime for getting inputs
+void BFS::updateButtons()
+{
+  /*
+    @return void
+
+    - assigns boolean flags
+  */
+
+  for (auto &it: buttons_) {
+    it.second->update(sf::Vector2f(mousePositionWindow_));
+  }
+
+  // START the algorithm
+  if (buttons_["START"]->isPressed()) {
+    BFS_running_ = true;
+  }
+
+  // RESET the nodes
+  if (buttons_["RESET"]->isPressed()) {
+    BFS_reset_ = true;
+  }
+}
+
+void BFS::update()
+{
+  /*
+    @return void
+
+    - update mouse, keys and buttons
+    - logic to start and reset the program
+  */
+
+  updateMousePosition(); // from base class
+  updateKeybinds();
+  updateButtons();
+
+  if (BFS_reset_) {
+    initNodes();
+    BFS_running_ = false;
+    BFS_initialized_ = false;
+    BFS_reset_ = false;
+  }
+
+  if (BFS_running_) {
+    BFS_reset_ = false;
+
+    // initialize BFS from starting node
+    if (!BFS_initialized_) {
+      initBFS();
+      BFS_initialized_ = true;
+    }
+
+    // run the main algorithm
+    solve_BFS();
+  }
+  else {
+    // only allow mouse and key inputs
+    // if the algorithm is not running
+    updateNodes();
+  }
+}
+
+void BFS::render()
+{
+  /*
+    @return void
+
+    - render buttons and nodes
+  */
+
+  renderButtons();
+  renderNodes();
 }
 
 void BFS::updateNodes()
 {
+  /*
+    @return void
+
+    - update nodes accordingly using mouse and keys pressed
+  */
+
   if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
     int localX = (mousePositionWindow_.x / gridSize_) - ((offset_/2)/gridSize_);
     int localY = (mousePositionWindow_.y / gridSize_) - ((offset_/2)/gridSize_);
@@ -135,40 +259,17 @@ void BFS::updateNodes()
   }
 }
 
-void BFS::update()
+void BFS::renderButtons()
 {
-  updateMousePosition();
-  updateKeybinds();
-  updateButtons();
+  /*
+    @return
 
-  if (BFS_reset_) {
-    std::cout << "resetted" << '\n';
-    initializeNodes();
-    BFS_running_ = false;
-    BFS_initialized_ = false;
-    BFS_reset_ = false;
+    - render all the buttons
+  */
+
+  for (auto &it: buttons_) {
+    it.second->render(window_);
   }
-
-  if (BFS_running_) {
-    BFS_reset_ = false;
-
-    // initialize BFS from starting node
-    if (!BFS_initialized_) {
-      initBFS();
-      BFS_initialized_ = true;
-    }
-
-    solve_BFS();
-  }
-  else {
-    updateNodes();
-  }
-}
-
-void BFS::render()
-{
-  renderButtons();
-  renderNodes();
 }
 
 void BFS::renderNodes()
@@ -177,12 +278,13 @@ void BFS::renderNodes()
     @return void
 
     - render all the nodes to their respective colors
-    - empty node    (WHITE)
-    - obstacle node (GRAY)
-    - start node    (GREEN)
-    - end node      (RED)
-    - visited node  (CYAN)
-    - frontier node (MAGENTA)
+      - empty node    (WHITE)
+      - obstacle node (GRAY)
+      - start node    (GREEN)
+      - end node      (RED)
+      - visited node  (CYAN)
+      - frontier node (MAGENTA)
+    - render final path with backtracking
   */
 
   for (int x = 0; x < mapWidth_/gridSize_; x++) {
@@ -231,8 +333,6 @@ void BFS::renderNodes()
       float x2 = static_cast<float>((current->getParentNode()->getPos().x * gridSize_) + (gridSize_/2) + offset_/2);
       float y2 = static_cast<float>((current->getParentNode()->getPos().y * gridSize_) + (gridSize_/2) + offset_/2);
 
-      std::cout << "x1: " << x1 << "y1: " << y1 << '\n';
-
       sf::VertexArray line(sf::Lines, 2);
 
       line[0].position = sf::Vector2f(x1, y1);
@@ -248,32 +348,14 @@ void BFS::renderNodes()
   }
 }
 
-void BFS::updateButtons()
-{
-  for (auto &it: buttons_) {
-    it.second->update(sf::Vector2f(mousePositionWindow_));
-  }
-
-  // START/RESET the algorithm
-  if (buttons_["START"]->isPressed()) {
-    // run BFS here
-    BFS_running_ = true;
-  }
-
-  if (buttons_["RESET"]->isPressed()) {
-    BFS_reset_ = true;
-  }
-}
-
-void BFS::renderButtons()
-{
-  for (auto &it: buttons_) {
-    it.second->render(window_);
-  }
-}
-
 void BFS::solve_BFS()
 {
+  /*
+    @return void
+
+    - BFS algorithm
+  */
+
   if (!frontier_.empty()) {
     Node* nodeCurrent = frontier_.front();
     nodeCurrent->setFrontier(false);
@@ -292,14 +374,4 @@ void BFS::solve_BFS()
       }
     }
   }
-}
-
-void BFS::initBFS()
-{
-  // clear frontier
-  while (!frontier_.empty()) {
-    frontier_.pop();
-  }
-
-  frontier_.push(nodeStart_);
 }
