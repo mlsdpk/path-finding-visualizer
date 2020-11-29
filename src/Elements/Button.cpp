@@ -9,17 +9,20 @@ Button::Button(float x, float y, float width, float height,
   hoverColor_{hoverColor},
   activeColor_{activeColor}
 {
+  shape_.setOrigin(width/2.f, height/2.f);
   shape_.setPosition(sf::Vector2f(x, y));
   shape_.setSize(sf::Vector2f(width, height));
   shape_.setFillColor(idleColor_);
+  shape_.setOutlineThickness(2.f);
+  shape_.setOutlineColor(sf::Color::Black);
 
   text_.setFont(*font_);
   text_.setString(text);
-  text_.setFillColor(sf::Color::White);
+  text_.setFillColor(sf::Color::Black);
   text_.setCharacterSize(fontSize);
   text_.setPosition(
-    shape_.getPosition().x + (shape_.getGlobalBounds().width / 2.f) - text_.getGlobalBounds().width / 2.f,
-    shape_.getPosition().y + (shape_.getGlobalBounds().height / 2.f) - text_.getGlobalBounds().height / 2.f
+    shape_.getPosition().x - text_.getGlobalBounds().width / 2.f,
+    shape_.getPosition().y - text_.getGlobalBounds().height
   );
 }
 

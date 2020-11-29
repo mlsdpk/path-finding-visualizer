@@ -96,7 +96,7 @@ void Game::render()
     Render the game objects
   */
 
-  window_->clear();
+  window_->clear(sf::Color::White);
 
   if (!states_.empty()) {
     states_.top()->render();

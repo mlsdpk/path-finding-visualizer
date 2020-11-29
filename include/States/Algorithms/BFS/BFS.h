@@ -35,6 +35,7 @@ private:
   bool BFS_running_;
   bool BFS_initialized_;
   bool BFS_reset_;
+  bool BFS_solved_;
 
   // initialization Functions
   void initFonts();

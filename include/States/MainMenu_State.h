@@ -11,11 +11,13 @@ class MainMenu_State: public State
 private:
   sf::Font font_;
   sf::RectangleShape background_;
+  sf::Texture backgroundTexture_;
 
   std::map<std::string, Button*> buttons_;
 
   // Functions
   void initFonts();
+  void initBackground();
   void initButtons();
 
 public:
@@ -29,6 +31,7 @@ public:
   void update();
   void render();
 
+  void renderBackground();
   void updateButtons();
   void renderButtons();
 };

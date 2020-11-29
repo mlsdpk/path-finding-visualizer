@@ -3,11 +3,9 @@
 // Constructor
 MainMenu_State::MainMenu_State(sf::RenderWindow* window, std::stack<State*>* states)
     : State(window, states) {
+  initBackground();
   initFonts();
   initButtons();
-
-  background_.setSize(sf::Vector2f(window->getSize().x, window->getSize().y));
-  background_.setFillColor(sf::Color::Black);
 }
 
 // Destructor
@@ -16,6 +14,17 @@ MainMenu_State::~MainMenu_State()
   for (auto it = buttons_.begin(); it != buttons_.end(); ++it) {
     delete it->second;
   }
+}
+
+void MainMenu_State::initBackground()
+{
+  background_.setSize(sf::Vector2f(window_->getSize().x, window_->getSize().y));
+
+  if (!backgroundTexture_.loadFromFile("../figures/main_menu.jpeg")) {
+    throw("ERROR::MainMenuSTATE::COULD NOT LOAD FIGURE.");
+  }
+
+  background_.setTexture(&backgroundTexture_);
 }
 
 void MainMenu_State::initFonts()
@@ -27,19 +36,26 @@ void MainMenu_State::initFonts()
 
 void MainMenu_State::initButtons()
 {
-  buttons_["START"] = new Button(100, 100, 150, 50,
-      &font_, "START", 20,
-      sf::Color(70, 70, 70, 200),
-      sf::Color(150, 150, 150, 255),
-      sf::Color(20, 20, 20, 200)
+
+  // int x = window_->getSize().x/2;
+
+  int x = window_->getSize().x / 2 - 200;
+  int y = window_->getSize().y / 2 - 150;
+
+  buttons_["START"] = new Button(x, y, 150, 50,
+      &font_, "RUN", 25,
+      sf::Color(255, 255, 255, 255),
+      sf::Color(240, 240, 240, 200),
+      sf::Color(240, 240, 240, 200)
   );
 
-  buttons_["EXIT"] = new Button(100, 300, 150, 50,
-      &font_, "EXIT", 20,
-      sf::Color(70, 70, 70, 200),
-      sf::Color(150, 150, 150, 255),
-      sf::Color(20, 20, 20, 200)
+  buttons_["EXIT"] = new Button(x, y+100, 150, 50,
+      &font_, "EXIT", 25,
+      sf::Color(255, 255, 255, 255),
+      sf::Color(240, 240, 240, 200),
+      sf::Color(240, 240, 240, 200)
   );
+
 }
 
 void MainMenu_State::updateButtons()
@@ -66,6 +82,11 @@ void MainMenu_State::renderButtons()
   }
 }
 
+void MainMenu_State::renderBackground()
+{
+  window_->draw(background_);
+}
+
 void MainMenu_State::endState()
 {
   std::cout << "Ending MainMenu State" << '\n';
@@ -85,5 +106,6 @@ void MainMenu_State::update()
 
 void MainMenu_State::render()
 {
+  renderBackground();
   renderButtons();
 }

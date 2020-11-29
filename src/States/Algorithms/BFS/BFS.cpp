@@ -72,6 +72,7 @@ void BFS::initVariables()
   BFS_running_ = false;
   BFS_initialized_ = false;
   BFS_reset_ = false;
+  BFS_solved_ = false;
 }
 
 void BFS::initNodes()
@@ -197,6 +198,7 @@ void BFS::update()
     BFS_running_ = false;
     BFS_initialized_ = false;
     BFS_reset_ = false;
+    BFS_solved_ = false;
   }
 
   if (BFS_running_) {
@@ -245,14 +247,21 @@ void BFS::updateNodes()
     if (localX >= 0 && localX < mapWidth_/gridSize_) {
       if (localY >= 0 && localY < mapHeight_/gridSize_) {
 
-        if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))) {
-          nodeStart_ = &nodes_[(mapWidth_/gridSize_) * localX + localY];
-        }
-        else if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {
-          nodeEnd_ = &nodes_[(mapWidth_/gridSize_) * localX + localY];
+        if (!BFS_solved_) {
+          if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))) {
+            nodeStart_ = &nodes_[(mapWidth_/gridSize_) * localX + localY];
+          }
+          else if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {
+            nodeEnd_ = &nodes_[(mapWidth_/gridSize_) * localX + localY];
+          }
+          else {
+            nodes_[(mapWidth_/gridSize_) * localX + localY].setObstacle(!nodes_[(mapWidth_/gridSize_) * localX + localY].isObstacle());
+          }
         }
         else {
-          nodes_[(mapWidth_/gridSize_) * localX + localY].setObstacle(!nodes_[(mapWidth_/gridSize_) * localX + localY].isObstacle());
+          if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {
+            nodeEnd_ = &nodes_[(mapWidth_/gridSize_) * localX + localY];
+          }
         }
       }
     }
@@ -363,6 +372,7 @@ void BFS::solve_BFS()
 
     if (nodeCurrent == nodeEnd_) {
       BFS_running_ = false;
+      BFS_solved_ = true;
     }
 
     for (auto nodeNeighbour : *nodeCurrent->getNeighbours()) {
