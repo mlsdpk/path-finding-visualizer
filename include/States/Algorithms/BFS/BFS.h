@@ -3,7 +3,7 @@
 #include <queue>
 
 #include "State.h"
-#include "Button.h"
+#include "Gui.h"
 #include "Node.h"
 
 class BFS: public State
@@ -17,7 +17,7 @@ private:
   sf::Font font_;
 
   // buttons
-  std::map<std::string, Button*> buttons_;
+  std::map<std::string, gui::Button*> buttons_;
 
   // Map Variables
   unsigned int gridSize_;
@@ -52,7 +52,7 @@ public:
   // Override Functions
   void endState();
   void updateKeybinds();
-  void update();
+  void update(const float &dt);
   void render();
 
   void updateButtons();

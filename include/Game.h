@@ -9,6 +9,9 @@ private:
   sf::RenderWindow* window_;
   sf::Event ev_;
 
+  sf::Clock dtClock_;
+  float dt_;
+
   // States
   std::stack<State*> states_;
 
@@ -28,6 +31,7 @@ public:
 
   // Functions
   void pollEvents();
+  void updateDt();
   void update();
   void render();
 };

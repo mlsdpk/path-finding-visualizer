@@ -1,7 +1,7 @@
 #pragma once
 
 #include "State.h"
-#include "Button.h"
+#include "Gui.h"
 
 // Algorithms headers
 #include "BFS.h"
@@ -13,7 +13,9 @@ private:
   sf::RectangleShape background_;
   sf::Texture backgroundTexture_;
 
-  std::map<std::string, Button*> buttons_;
+  std::map<std::string, gui::Button*> buttons_;
+
+  gui::DropDownList* testDDL_;
 
   // Functions
   void initFonts();
@@ -28,10 +30,10 @@ public:
   // Functions
   void endState();
   void updateKeybinds();
-  void update();
+  void update(const float &dt);
   void render();
 
   void renderBackground();
-  void updateButtons();
+  void updateButtons(const float &dt);
   void renderButtons();
 };

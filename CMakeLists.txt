@@ -8,7 +8,6 @@ include_directories(/usr/local/include)
 include_directories(include)
 include_directories(include/States)
 include_directories(include/States/Algorithms/BFS)
-include_directories(include/Elements)
 
 set(EXECUTABLE_NAME "main")
 
@@ -16,14 +15,11 @@ add_executable(${EXECUTABLE_NAME}
   src/main.cpp
   src/Game.cpp
   src/State.cpp
+  src/Gui.cpp
 )
 
 add_library(main_menu
   src/States/MainMenu_State.cpp
-)
-
-add_library(button
-  src/Elements/Button.cpp
 )
 
 add_library(bfs
@@ -41,6 +37,5 @@ target_link_libraries(${EXECUTABLE_NAME}
   sfml-window
   sfml-system
   main_menu
-  button
   bfs
 )

@@ -37,14 +37,14 @@ void BFS::initButtons()
     - initialize two buttons
   */
 
-  buttons_["START"] = new Button(5, 5, 100, 30,
+  buttons_["START"] = new gui::Button(5, 5, 100, 30,
       &font_, "START", 15,
       sf::Color(70, 70, 70, 200),
       sf::Color(150, 150, 150, 255),
       sf::Color(20, 20, 20, 200)
   );
 
-  buttons_["RESET"] = new Button(110, 5, 100, 30,
+  buttons_["RESET"] = new gui::Button(110, 5, 100, 30,
       &font_, "RESET", 15,
       sf::Color(70, 70, 70, 200),
       sf::Color(150, 150, 150, 255),
@@ -180,7 +180,7 @@ void BFS::updateButtons()
   }
 }
 
-void BFS::update()
+void BFS::update(const float &dt)
 {
   /*
     @return void

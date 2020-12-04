@@ -42,6 +42,6 @@ public:
   // virtual functions
   virtual void endState() = 0;
   virtual void updateKeybinds() = 0;
-  virtual void update() = 0;
+  virtual void update(const float &dt) = 0;
   virtual void render() = 0;
 };

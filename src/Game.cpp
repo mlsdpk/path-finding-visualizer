@@ -69,12 +69,17 @@ void Game::pollEvents()
 }
 
 // Functions
+void Game::updateDt() {
+  dt_ = dtClock_.restart().asSeconds();
+}
+
 void Game::update()
 {
   pollEvents();
+  updateDt();
 
   if (!states_.empty()) {
-    states_.top()->update();
+    states_.top()->update(dt_);
 
     if (states_.top()->getQuit()) {
       states_.top()->endState();
