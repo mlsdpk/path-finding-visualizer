@@ -9,7 +9,7 @@ void Game::initWindow(sf::RenderWindow* window)
   */
 
   window_ = window;
-  window_->setFramerateLimit(60);
+  window_->setFramerateLimit(100);
 }
 
 void Game::initStates()
@@ -20,7 +20,7 @@ void Game::initStates()
     - initialization of state (BFS)
   */
 
-  states_.push(new MainMenu_State(window_));
+  states_.push(new MainMenu_State(window_, &states_));
 }
 
 // Constructor
@@ -69,12 +69,17 @@ void Game::pollEvents()
 }
 
 // Functions
+void Game::updateDt() {
+  dt_ = dtClock_.restart().asSeconds();
+}
+
 void Game::update()
 {
   pollEvents();
+  updateDt();
 
   if (!states_.empty()) {
-    states_.top()->update();
+    states_.top()->update(dt_);
 
     if (states_.top()->getQuit()) {
       states_.top()->endState();
@@ -96,7 +101,7 @@ void Game::render()
     Render the game objects
   */
 
-  window_->clear(sf::Color::Red);
+  window_->clear(sf::Color::White);
 
   if (!states_.empty()) {
     states_.top()->render();

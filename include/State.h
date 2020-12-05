@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <vector>
 #include <map>
 #include <stack>
@@ -18,13 +20,15 @@ class State
 private:
 
 protected:
+  std::stack<State*>* states_;
+
   sf::RenderWindow* window_;
   sf::Vector2i mousePositionWindow_;
   bool quit_;
 
 public:
   // Constructor
-  State(sf::RenderWindow* window);
+  State(sf::RenderWindow* window, std::stack<State*>* states);
 
   // Destructor
   virtual ~State();
@@ -39,6 +43,6 @@ public:
   // virtual functions
   virtual void endState() = 0;
   virtual void updateKeybinds() = 0;
-  virtual void update() = 0;
+  virtual void update(const float &dt) = 0;
   virtual void render() = 0;
 };
