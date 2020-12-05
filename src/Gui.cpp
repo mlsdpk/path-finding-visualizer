@@ -150,7 +150,7 @@ gui::DropDownList::DropDownList(float x, float y,
     float height,
     sf::Font* font,
     std::string text,
-    std::string list[],
+    const std::vector<std::string> &algo_vec,
     unsigned numOfElements,
     unsigned default_index)
     : font_{font},
@@ -170,7 +170,7 @@ gui::DropDownList::DropDownList(float x, float y,
     list_.push_back(
       new gui::Button(
         x, y + ((i+1)*height), width, height,
-        font_, list[i], 25,
+        font_, algo_vec[i], 25,
         sf::Color(255, 255, 255, 255),
         sf::Color(240, 240, 240, 200),
         sf::Color(240, 240, 240, 200)

@@ -13,13 +13,15 @@ private:
   sf::RectangleShape background_;
   sf::Texture backgroundTexture_;
 
-  std::map<std::string, gui::Button*> buttons_;
+  std::vector<std::string> algo_vec_;
 
+  std::map<std::string, gui::Button*> buttons_;
   gui::DropDownList* testDDL_;
 
   // Functions
   void initFonts();
   void initBackground();
+  void initAlgorithms();
   void initButtons();
 
 public:

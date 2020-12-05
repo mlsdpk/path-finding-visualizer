@@ -69,7 +69,7 @@ namespace gui
   public:
     // Constructor
     DropDownList(float x, float y, float width, float height,
-      sf::Font* font, std::string text, std::string list[],
+      sf::Font* font, std::string text, const std::vector<std::string> &algo_vec,
       unsigned numOfElements, unsigned default_index = 0);
 
     // Destructor
