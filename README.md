@@ -25,3 +25,7 @@ A tool for visualizing numerous pathfinding algorithms. The project extensively 
 2. Make a build directory in the top level project directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./main`.
+
+### SFML Build Failed Issues
+
+- Follow this [thread](https://en.sfml-dev.org/forums/index.php?topic=20638.0) to build SFML from source on Ubuntu.
