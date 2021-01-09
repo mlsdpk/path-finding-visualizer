@@ -2,8 +2,8 @@
 
 int main()
 {
-  sf::VideoMode videoMode(800, 800);
-  sf::RenderWindow window(videoMode, "Path-Planning Visualizer");
+  sf::VideoMode videoMode(1200, 700);
+  sf::RenderWindow window(videoMode, "Path-Planning Visualizer", sf::Style::Titlebar | sf::Style::Close);
 
   // Initialize Game
   Game game(&window);

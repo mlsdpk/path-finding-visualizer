@@ -9,9 +9,13 @@
 class MainMenu_State: public State
 {
 private:
-  sf::Font font_;
+
+  sf::Color BGN_COL, FONT_COL, IDLE_COL, HOVER_COL;
+
+  sf::Font font1_, font2_;
   sf::RectangleShape background_;
   sf::Texture backgroundTexture_;
+  sf::Text backgroundText_, versionText_;
 
   std::vector<std::string> algo_vec_;
 
@@ -20,6 +24,7 @@ private:
 
   // Functions
   void initFonts();
+  void initColors();
   void initBackground();
   void initAlgorithms();
   void initButtons();
