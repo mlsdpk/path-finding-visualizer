@@ -1,12 +1,12 @@
-<img src="figures/cover0.png" alt="drawing" width="600"/>
 
+![](figures/cover0.png)
 # Pathfinding Visualizer
 
 ## Overview
 
 A tool for visualizing numerous pathfinding algorithms. The project extensively uses SFML and C++.
 
-<img src="figures/cover1.png" alt="drawing" width="600"/>
+![](figures/cover1.png)
 
 ## Dependencies
 
