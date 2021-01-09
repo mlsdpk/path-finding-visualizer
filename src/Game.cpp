@@ -5,7 +5,7 @@ void Game::initWindow(sf::RenderWindow* window)
   /*
     @return void
 
-    - initialize window and set FPS limit to 60
+    - initialize window and set FPS limit to 100
   */
 
   window_ = window;

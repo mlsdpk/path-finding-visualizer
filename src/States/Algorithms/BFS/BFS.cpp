@@ -2,9 +2,13 @@
 
 // Constructor
 BFS::BFS(sf::RenderWindow* window, std::stack<State*>* states)
-    : State(window, states) {
+    : State(window, states),
+      keyTimeMax_{1.f},
+      keyTime_{0.f} {
   initVariables();
   initFonts();
+  initColors();
+  initBackground();
   initButtons();
   initNodes();
   initBFS();
@@ -16,56 +20,18 @@ BFS::~BFS()
   delete[] nodes_;
 }
 
-void BFS::initFonts()
-{
-  /*
-    @return void
-
-    - load font from file
-  */
-
-  if (!font_.loadFromFile("../fonts/ostrich-regular.ttf")) {
-    throw("ERROR::MainMenuSTATE::COULD NOT LOAD FONT.");
-  }
-}
-
-void BFS::initButtons()
-{
-  /*
-    @return void
-
-    - initialize two buttons
-  */
-
-  buttons_["START"] = new gui::Button(5, 5, 100, 30,
-      &font_, "START", 15,
-      sf::Color(70, 70, 70, 200),
-      sf::Color(150, 150, 150, 255),
-      sf::Color(20, 20, 20, 200)
-  );
-
-  buttons_["RESET"] = new gui::Button(110, 5, 100, 30,
-      &font_, "RESET", 15,
-      sf::Color(70, 70, 70, 200),
-      sf::Color(150, 150, 150, 255),
-      sf::Color(20, 20, 20, 200)
-  );
-}
-
-// TODO: Hardcoded, need to update this
-void BFS::initVariables()
-{
+void BFS::initVariables() {
   /*
     @return void
 
     - initialize all variables
   */
 
-  windowSize_ = window_->getSize();
+  // these variables depend on the visualizer
+  // for now, just use these and can improve it later
   gridSize_   = 20;
-  offset_     = 80;
-  mapWidth_   = 800  - offset_;
-  mapHeight_  = 800  - offset_;
+  mapWidth_   = 900;
+  mapHeight_  = 640;
 
   nodes_ = new Node[(mapWidth_/gridSize_)*(mapHeight_/gridSize_)];
 
@@ -75,8 +41,77 @@ void BFS::initVariables()
   BFS_solved_ = false;
 }
 
-void BFS::initNodes()
-{
+void BFS::initFonts() {
+  /*
+    @return void
+
+    - load font from file
+  */
+
+  if (!font1_.loadFromFile("../fonts/bungee-inline-regular.ttf")) {
+    throw("ERROR::MainMenuSTATE::COULD NOT LOAD FONT1.");
+  }
+  if (!font2_.loadFromFile("../fonts/american-typewriter-regular.ttf")) {
+    throw("ERROR::MainMenuSTATE::COULD NOT LOAD FONT2.");
+  }
+}
+
+void BFS::initColors() {
+  BGN_COL = sf::Color(246, 229, 245, 255);
+  FONT_COL = sf::Color(78, 95, 131, 255);
+  IDLE_COL = sf::Color(251, 244, 249, 255);
+  HOVER_COL = sf::Color(245, 238, 243, 255);
+  ACTIVE_COL= sf::Color(232, 232, 232);
+  START_COL = sf::Color(190, 242, 227, 255);
+  END_BORDER_COL = sf::Color(67, 246, 130);
+  VISITED_COL = sf::Color(198, 202, 229, 255);
+  FRONTIER_COL = sf::Color(242, 204, 209, 255);
+  OBST_COL = sf::Color(186, 186, 186, 255);
+  PATH_COL = sf::Color(190, 242, 227, 255);
+}
+
+void BFS::initBackground() {
+  // Main title
+  titleText_.setFont(font1_);
+  titleText_.setString("BREADTH FIRST SEARCH");
+  titleText_.setFillColor(FONT_COL);
+  titleText_.setCharacterSize(20);
+  sf::FloatRect textRect = titleText_.getLocalBounds();
+  titleText_.setOrigin(textRect.left + textRect.width/2.0f,
+    textRect.top  + textRect.height/2.0f);
+  titleText_.setPosition(
+    sf::Vector2f(mapWidth_/6.0f, 50.0f)
+  );
+
+  // Cell names description
+  cellNamesBGN_.setPosition(sf::Vector2f(mapWidth_/3.0f, 0.f));
+  cellNamesBGN_.setSize(sf::Vector2f(mapWidth_, 60));
+  cellNamesBGN_.setFillColor(IDLE_COL);
+}
+
+void BFS::initButtons() {
+  /*
+    @return void
+
+    - initialize two buttons
+  */
+
+  buttons_["RUN"] = new gui::Button(150, 150, 150, 40,
+      &font2_, "RUN", 18,
+      IDLE_COL,
+      HOVER_COL,
+      ACTIVE_COL
+  );
+
+  buttons_["RESET"] = new gui::Button(150, 210, 150, 40,
+      &font2_, "RESET", 18,
+      IDLE_COL,
+      HOVER_COL,
+      ACTIVE_COL
+  );
+}
+
+void BFS::initNodes() {
   /*
     @return void
 
@@ -86,20 +121,21 @@ void BFS::initNodes()
   */
 
   // set all nodes to free obsts and respective positions
-  for (int x = 0; x < mapWidth_/gridSize_; x++) {
-    for (int y = 0; y < mapHeight_/gridSize_; y++) {
+  for (int x = 0; x < mapHeight_/gridSize_; x++) {
+    for (int y = 0; y < mapWidth_/gridSize_; y++) {
       int nodeIndex = (mapWidth_/gridSize_) * x + y;
       nodes_[nodeIndex].setPosition(sf::Vector2i(x, y));
       nodes_[nodeIndex].setObstacle(false);
       nodes_[nodeIndex].setVisited(false);
       nodes_[nodeIndex].setFrontier(false);
+      nodes_[nodeIndex].setPath(false);
       nodes_[nodeIndex].setParentNode(nullptr);
     }
   }
 
   // add all neighbours to respective nodes
-  for (int x = 0; x < mapWidth_/gridSize_; x++) {
-    for (int y = 0; y < mapHeight_/gridSize_; y++) {
+  for (int x = 0; x < mapHeight_/gridSize_; x++) {
+    for (int y = 0; y < mapWidth_/gridSize_; y++) {
       int nodeIndex = (mapWidth_/gridSize_) * x + y;
       if(y>0)
         nodes_[nodeIndex].setNeighbours(&nodes_[x * (mapWidth_/gridSize_) + (y - 1)]);
@@ -107,7 +143,7 @@ void BFS::initNodes()
         nodes_[nodeIndex].setNeighbours(&nodes_[x * (mapWidth_/gridSize_) + (y + 1)]);
       if (x>0)
         nodes_[nodeIndex].setNeighbours(&nodes_[(x - 1) * (mapWidth_/gridSize_) + y]);
-      if(x<((mapWidth_/gridSize_)-1))
+      if(x<((mapHeight_/gridSize_)-1))
         nodes_[nodeIndex].setNeighbours(&nodes_[(x + 1) * (mapWidth_/gridSize_) + y]);
     }
   }
@@ -115,11 +151,10 @@ void BFS::initNodes()
   // initialize Start and End nodes ptrs (upper left and lower right corners)
   nodeStart_ = &nodes_[(mapWidth_/gridSize_) * 0 + 0];
   nodeStart_->setParentNode(nullptr);
-  nodeEnd_   = &nodes_[(mapWidth_/gridSize_) * (mapWidth_/gridSize_ - 1) + (mapHeight_/gridSize_ - 1)];
+  nodeEnd_   = &nodes_[(mapWidth_/gridSize_) * (mapHeight_/gridSize_ - 1) + (mapWidth_/gridSize_ - 1)];
 }
 
-void BFS::initBFS()
-{
+void BFS::initBFS() {
   /*
     @return void
 
@@ -134,8 +169,7 @@ void BFS::initBFS()
   frontier_.push(nodeStart_);
 }
 
-void BFS::endState()
-{
+void BFS::endState() {
   /*
     @return void
 
@@ -145,8 +179,7 @@ void BFS::endState()
   std::cout << "Ending BFS State" << '\n';
 }
 
-void BFS::updateKeybinds()
-{
+void BFS::updateKeybinds() {
   /*
     @return void
 
@@ -156,9 +189,7 @@ void BFS::updateKeybinds()
   checkForQuit();
 }
 
-// TODO: Add elapsedTime for getting inputs
-void BFS::updateButtons()
-{
+void BFS::updateButtons() {
   /*
     @return void
 
@@ -170,25 +201,24 @@ void BFS::updateButtons()
   }
 
   // START the algorithm
-  if (buttons_["START"]->isPressed()) {
+  if (buttons_["RUN"]->isPressed() && getKeyTime() && !BFS_solved_) {
     BFS_running_ = true;
   }
 
   // RESET the nodes
-  if (buttons_["RESET"]->isPressed()) {
+  if (buttons_["RESET"]->isPressed() && getKeyTime()) {
     BFS_reset_ = true;
   }
 }
 
-void BFS::update(const float &dt)
-{
+void BFS::update(const float &dt) {
   /*
     @return void
 
     - update mouse, keys and buttons
     - logic to start and reset the program
   */
-
+  updateKeyTime(dt);
   updateMousePosition(); // from base class
   updateKeybinds();
   updateButtons();
@@ -220,32 +250,64 @@ void BFS::update(const float &dt)
   }
 }
 
-void BFS::render()
-{
+void BFS::render() {
   /*
     @return void
 
     - render buttons and nodes
   */
 
+  renderBackground();
   renderButtons();
   renderNodes();
 }
 
-void BFS::updateNodes()
-{
+void BFS::renderBackground() {
+  window_->clear(BGN_COL);
+
+  window_->draw(titleText_);
+  window_->draw(cellNamesBGN_);
+}
+
+/**
+ * Getter function for BFS key timer.
+ *
+ * @param none.
+ * @return true if keytime > keytime_max else false.
+ */
+const bool BFS::getKeyTime() {
+  if (keyTime_ >= keyTimeMax_) {
+    keyTime_ = 0.f;
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Update the current time of key timer.
+ *
+ * @param dt delta time.
+ * @return void.
+ */
+void BFS::updateKeyTime(const float &dt) {
+  if (keyTime_ < keyTimeMax_) {
+    keyTime_ += 5.f * dt;
+  }
+}
+
+void BFS::updateNodes() {
   /*
     @return void
 
     - update nodes accordingly using mouse and keys pressed
   */
 
-  if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-    int localX = (mousePositionWindow_.x / gridSize_) - ((offset_/2)/gridSize_);
-    int localY = (mousePositionWindow_.y / gridSize_) - ((offset_/2)/gridSize_);
+  if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && getKeyTime()) {
+    int localY = ((mousePositionWindow_.x - 300) / gridSize_);
+    int localX = ((mousePositionWindow_.y - 60) / gridSize_);
 
-    if (localX >= 0 && localX < mapWidth_/gridSize_) {
-      if (localY >= 0 && localY < mapHeight_/gridSize_) {
+    if (localX >= 0 && localX < mapHeight_/gridSize_) {
+      if (localY >= 0 && localY < mapWidth_/gridSize_) {
 
         if (!BFS_solved_) {
           if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))) {
@@ -268,8 +330,7 @@ void BFS::updateNodes()
   }
 }
 
-void BFS::renderButtons()
-{
+void BFS::renderButtons() {
   /*
     @return
 
@@ -281,84 +342,67 @@ void BFS::renderButtons()
   }
 }
 
-void BFS::renderNodes()
-{
+void BFS::renderNodes() {
   /*
     @return void
 
     - render all the nodes to their respective colors
-      - empty node    (WHITE)
-      - obstacle node (GRAY)
-      - start node    (GREEN)
-      - end node      (RED)
-      - visited node  (CYAN)
-      - frontier node (MAGENTA)
     - render final path with backtracking
   */
 
-  for (int x = 0; x < mapWidth_/gridSize_; x++) {
+  for (int x = 0; x < mapHeight_/gridSize_; x++) {
     for (int y = 0; y < mapWidth_/gridSize_; y++) {
 
       float size = static_cast<float>(gridSize_);
       sf::RectangleShape rectangle(sf::Vector2f(size, size));
       rectangle.setOutlineThickness(2.f);
-      rectangle.setOutlineColor(sf::Color::Black);
-      rectangle.setPosition(offset_/2 + x*size, offset_/2 + y*size);
+      rectangle.setOutlineColor(BGN_COL);
+      rectangle.setPosition(300 + y*size, 60 + x*size);
 
       if (nodes_[(mapWidth_/gridSize_) * x + y].isObstacle()) {
-        rectangle.setFillColor(sf::Color(128,128,128));
+        rectangle.setFillColor(OBST_COL);
       }
       else {
-        rectangle.setFillColor(sf::Color::White);
+        rectangle.setFillColor(IDLE_COL);
       }
 
       if (nodes_[(mapWidth_/gridSize_) * x + y].isVisited()) {
-        rectangle.setFillColor(sf::Color::Cyan);
+        rectangle.setFillColor(VISITED_COL);
       }
 
       if (nodes_[(mapWidth_/gridSize_) * x + y].isFrontier()) {
-        rectangle.setFillColor(sf::Color::Magenta);
+        rectangle.setFillColor(FRONTIER_COL);
+      }
+
+      if (nodes_[(mapWidth_/gridSize_) * x + y].isPath()) {
+        rectangle.setFillColor(START_COL);
+        nodes_[(mapWidth_/gridSize_) * x + y].setPath(false);
       }
 
       if (&nodes_[(mapWidth_/gridSize_) * x + y] == nodeStart_) {
-        rectangle.setFillColor(sf::Color::Green);
+        rectangle.setFillColor(START_COL);
       }
 
       if (&nodes_[(mapWidth_/gridSize_) * x + y] == nodeEnd_) {
-        rectangle.setFillColor(sf::Color::Red);
+        rectangle.setFillColor(END_BORDER_COL);
       }
 
       window_->draw(rectangle);
     }
   }
 
+  // visualizing path
   if (nodeEnd_ != nullptr) {
     Node* current = nodeEnd_;
 
     while (current->getParentNode() != nullptr && current != nodeStart_) {
-
-      float x1 = static_cast<float>((current->getPos().x * gridSize_) + (gridSize_/2) + offset_/2);
-      float y1 = static_cast<float>((current->getPos().y * gridSize_) + (gridSize_/2) + offset_/2);
-      float x2 = static_cast<float>((current->getParentNode()->getPos().x * gridSize_) + (gridSize_/2) + offset_/2);
-      float y2 = static_cast<float>((current->getParentNode()->getPos().y * gridSize_) + (gridSize_/2) + offset_/2);
-
-      sf::VertexArray line(sf::Lines, 2);
-
-      line[0].position = sf::Vector2f(x1, y1);
-      line[1].position = sf::Vector2f(x2, y2);
-
-      line[0].color = sf::Color::Red;
-      line[1].color = sf::Color::Red;
-
-      window_->draw(line);
-
+      current->setPath(true);
       current = current->getParentNode();
     }
   }
 }
 
-void BFS::solve_BFS()
-{
+void BFS::solve_BFS() {
   /*
     @return void
 

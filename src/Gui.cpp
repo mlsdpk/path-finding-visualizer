@@ -15,11 +15,11 @@ gui::Button::Button(float x, float y, float width, float height,
   shape_.setSize(sf::Vector2f(width, height));
   shape_.setFillColor(idleColor_);
   shape_.setOutlineThickness(2.f);
-  shape_.setOutlineColor(sf::Color::Black);
+  shape_.setOutlineColor(sf::Color(246, 229, 245, 255));
 
   text_.setFont(*font_);
   text_.setString(text);
-  text_.setFillColor(sf::Color(32, 33, 36));
+  text_.setFillColor(sf::Color(78, 95, 131, 255));
   text_.setCharacterSize(fontSize);
   text_.setPosition(
     shape_.getPosition().x - text_.getGlobalBounds().width / 2.f,
@@ -161,18 +161,18 @@ gui::DropDownList::DropDownList(float x, float y,
       activeMode_{false} {
   mainButton_ = new gui::Button(
       x, y, width, height,
-      font_, text, 25,
-      sf::Color(255, 255, 255, 255),
-      sf::Color(214, 214, 215, 200),
+      font_, text, 20,
+      sf::Color(251, 244, 249, 255),
+      sf::Color(245, 238, 243, 255),
       sf::Color(214, 214, 215, 200)
   );
   for (size_t i = 0; i < numOfElements; i++) {
     list_.push_back(
       new gui::Button(
         x, y + ((i+1)*height), width, height,
-        font_, algo_vec[i], 25,
-        sf::Color(255, 255, 255, 255),
-        sf::Color(240, 240, 240, 200),
+        font_, algo_vec[i], 20,
+        sf::Color(251, 244, 249, 255),
+        sf::Color(245, 238, 243, 255),
         sf::Color(240, 240, 240, 200)
       )
     );

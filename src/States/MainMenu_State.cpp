@@ -3,8 +3,9 @@
 // Constructor
 MainMenu_State::MainMenu_State(sf::RenderWindow* window, std::stack<State*>* states)
     : State(window, states) {
-  initBackground();
+  initColors();
   initFonts();
+  initBackground();
   initAlgorithms();
   initButtons();
 }
@@ -18,20 +19,50 @@ MainMenu_State::~MainMenu_State() {
   delete testDDL_;
 }
 
-void MainMenu_State::initBackground() {
-  background_.setSize(sf::Vector2f(window_->getSize().x, window_->getSize().y));
-
-  if (!backgroundTexture_.loadFromFile("../figures/main_menu.jpeg")) {
-    throw("ERROR::MainMenuSTATE::COULD NOT LOAD FIGURE.");
-  }
-
-  background_.setTexture(&backgroundTexture_);
+void MainMenu_State::initColors() {
+  BGN_COL = sf::Color(246, 229, 245, 255);
+  FONT_COL = sf::Color(78, 95, 131, 255);
+  IDLE_COL = sf::Color(251, 244, 249, 255);
+  HOVER_COL = sf::Color(245, 238, 243, 255);
 }
 
 void MainMenu_State::initFonts() {
-  if (!font_.loadFromFile("../fonts/ostrich-regular.ttf")) {
-    throw("ERROR::MainMenuSTATE::COULD NOT LOAD FONT.");
+  if (!font1_.loadFromFile("../fonts/bungee-inline-regular.ttf")) {
+    throw("ERROR::MainMenuSTATE::COULD NOT LOAD FONT1.");
   }
+  if (!font2_.loadFromFile("../fonts/american-typewriter-regular.ttf")) {
+    throw("ERROR::MainMenuSTATE::COULD NOT LOAD FONT2.");
+  }
+}
+
+void MainMenu_State::initBackground() {
+  // Main title
+  backgroundText_.setFont(font1_);
+  backgroundText_.setString("PATHFINDING VISUALIZER");
+  backgroundText_.setFillColor(FONT_COL);
+  backgroundText_.setCharacterSize(50);
+
+  sf::FloatRect textRect = backgroundText_.getLocalBounds();
+  backgroundText_.setOrigin(textRect.left + textRect.width/2.0f,
+    textRect.top  + textRect.height/2.0f);
+  backgroundText_.setPosition(
+    sf::Vector2f(window_->getSize().x/2.0f,
+                 window_->getSize().y/10.0f)
+  );
+
+  // Version title
+  versionText_.setFont(font2_);
+  versionText_.setString("v1.0.0");
+  versionText_.setFillColor(FONT_COL);
+  versionText_.setCharacterSize(25);
+
+  textRect = versionText_.getLocalBounds();
+  versionText_.setOrigin(textRect.left + textRect.width/2.0f,
+    textRect.top  + textRect.height/2.0f);
+  versionText_.setPosition(
+    sf::Vector2f(window_->getSize().x - window_->getSize().x/4.2f,
+                 window_->getSize().y/6.5f)
+  );
 }
 
 void MainMenu_State::initAlgorithms() {
@@ -48,15 +79,15 @@ void MainMenu_State::initAlgorithms() {
 }
 
 void MainMenu_State::initButtons() {
-  int x = window_->getSize().x / 2 - 200;
+  int x = window_->getSize().x / 2;
   int y = window_->getSize().y / 2 - 150;
 
-  testDDL_ = new gui::DropDownList(x, y,  150, 50, &font_, "Select Algorithm", algo_vec_, 4);
+  testDDL_ = new gui::DropDownList(x, y,  250, 50, &font2_, "SELECT ALGORITHM", algo_vec_, 4);
 
-  buttons_["EXIT"] = new gui::Button(x, y+400, 150, 50,
-      &font_, "EXIT", 25,
-      sf::Color(255, 255, 255, 255),
-      sf::Color(240, 240, 240, 200),
+  buttons_["EXIT"] = new gui::Button(x, y+410, 150, 50,
+      &font2_, "EXIT", 20,
+      IDLE_COL,
+      HOVER_COL,
       sf::Color(240, 240, 240, 200)
   );
 }
@@ -114,7 +145,13 @@ void MainMenu_State::renderButtons() {
 }
 
 void MainMenu_State::renderBackground() {
-  window_->draw(background_);
+  window_->clear(BGN_COL);
+
+  // render main title
+  window_->draw(backgroundText_);
+
+  // render version title
+  window_->draw(versionText_);
 }
 
 void MainMenu_State::endState() {
