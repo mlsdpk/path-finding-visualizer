@@ -118,6 +118,7 @@ void MainMenu_State::updateButtons(const float &dt) {
         break;
       case 1:
         // DFS
+        states_->push(new DFS(window_, states_));
         break;
       case 2:
         // A-Star

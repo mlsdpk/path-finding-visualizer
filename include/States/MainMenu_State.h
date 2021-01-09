@@ -5,6 +5,7 @@
 
 // Algorithms headers
 #include "BFS.h"
+#include "DFS.h"
 
 class MainMenu_State: public State
 {
