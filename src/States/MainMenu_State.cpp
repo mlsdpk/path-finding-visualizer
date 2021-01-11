@@ -1,7 +1,8 @@
 #include "MainMenu_State.h"
 
 // Constructor
-MainMenu_State::MainMenu_State(sf::RenderWindow* window, std::stack<State*>* states)
+MainMenu_State::MainMenu_State(sf::RenderWindow *window,
+                               std::stack<State *> *states)
     : State(window, states) {
   initColors();
   initFonts();
@@ -43,12 +44,10 @@ void MainMenu_State::initBackground() {
   backgroundText_.setCharacterSize(50);
 
   sf::FloatRect textRect = backgroundText_.getLocalBounds();
-  backgroundText_.setOrigin(textRect.left + textRect.width/2.0f,
-    textRect.top  + textRect.height/2.0f);
+  backgroundText_.setOrigin(textRect.left + textRect.width / 2.0f,
+                            textRect.top + textRect.height / 2.0f);
   backgroundText_.setPosition(
-    sf::Vector2f(window_->getSize().x/2.0f,
-                 window_->getSize().y/10.0f)
-  );
+      sf::Vector2f(window_->getSize().x / 2.0f, window_->getSize().y / 10.0f));
 
   // Version title
   versionText_.setFont(font2_);
@@ -57,12 +56,11 @@ void MainMenu_State::initBackground() {
   versionText_.setCharacterSize(25);
 
   textRect = versionText_.getLocalBounds();
-  versionText_.setOrigin(textRect.left + textRect.width/2.0f,
-    textRect.top  + textRect.height/2.0f);
+  versionText_.setOrigin(textRect.left + textRect.width / 2.0f,
+                         textRect.top + textRect.height / 2.0f);
   versionText_.setPosition(
-    sf::Vector2f(window_->getSize().x - window_->getSize().x/4.2f,
-                 window_->getSize().y/6.5f)
-  );
+      sf::Vector2f(window_->getSize().x - window_->getSize().x / 4.2f,
+                   window_->getSize().y / 6.5f));
 }
 
 void MainMenu_State::initAlgorithms() {
@@ -82,25 +80,22 @@ void MainMenu_State::initButtons() {
   int x = window_->getSize().x / 2;
   int y = window_->getSize().y / 2 - 150;
 
-  testDDL_ = new gui::DropDownList(x, y,  250, 50, &font2_, "SELECT ALGORITHM", algo_vec_, 4);
+  testDDL_ = new gui::DropDownList(x, y, 250, 50, &font2_, "SELECT ALGORITHM",
+                                   algo_vec_, 4);
 
-  buttons_["EXIT"] = new gui::Button(x, y+410, 150, 50,
-      &font2_, "EXIT", 20,
-      IDLE_COL,
-      HOVER_COL,
-      sf::Color(240, 240, 240, 200)
-  );
+  buttons_["EXIT"] =
+      new gui::Button(x, y + 410, 150, 50, &font2_, "EXIT", 20, IDLE_COL,
+                      HOVER_COL, sf::Color(240, 240, 240, 200));
 }
 
 void MainMenu_State::updateButtons(const float &dt) {
-  for (auto &it: buttons_) {
+  for (auto &it : buttons_) {
     it.second->update(sf::Vector2f(mousePositionWindow_));
   }
 
   testDDL_->update(sf::Vector2f(mousePositionWindow_), dt);
 
   if (testDDL_->hasActiveButton()) {
-
     std::string algo = testDDL_->getActiveButton()->getText();
 
     int index = -1;
@@ -138,7 +133,7 @@ void MainMenu_State::updateButtons(const float &dt) {
 }
 
 void MainMenu_State::renderButtons() {
-  for (auto &it: buttons_) {
+  for (auto &it : buttons_) {
     it.second->render(window_);
   }
 
@@ -159,9 +154,7 @@ void MainMenu_State::endState() {
   std::cout << "Ending MainMenu State" << '\n';
 }
 
-void MainMenu_State::updateKeybinds() {
-  checkForQuit();
-}
+void MainMenu_State::updateKeybinds() { checkForQuit(); }
 
 void MainMenu_State::update(const float &dt) {
   updateMousePosition();

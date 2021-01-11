@@ -1,16 +1,16 @@
 #include "Gui.h"
 
 // Constructor
-gui::Button::Button(float x, float y, float width, float height,
-  sf::Font* font, std::string text, int fontSize,
-  sf::Color idleColor, sf::Color hoverColor, sf::Color activeColor)
-  :  buttonState_{BTN_IDLE},
-     font_{font},
-     idleColor_{idleColor},
-     hoverColor_{hoverColor},
-     activeColor_{activeColor},
-     selected_{false} {
-  shape_.setOrigin(width/2.f, height/2.f);
+gui::Button::Button(float x, float y, float width, float height, sf::Font* font,
+                    std::string text, int fontSize, sf::Color idleColor,
+                    sf::Color hoverColor, sf::Color activeColor)
+    : buttonState_{BTN_IDLE},
+      font_{font},
+      idleColor_{idleColor},
+      hoverColor_{hoverColor},
+      activeColor_{activeColor},
+      selected_{false} {
+  shape_.setOrigin(width / 2.f, height / 2.f);
   shape_.setPosition(sf::Vector2f(x, y));
   shape_.setSize(sf::Vector2f(width, height));
   shape_.setFillColor(idleColor_);
@@ -22,9 +22,8 @@ gui::Button::Button(float x, float y, float width, float height,
   text_.setFillColor(sf::Color(78, 95, 131, 255));
   text_.setCharacterSize(fontSize);
   text_.setPosition(
-    shape_.getPosition().x - text_.getGlobalBounds().width / 2.f,
-    shape_.getPosition().y - text_.getGlobalBounds().height
-  );
+      shape_.getPosition().x - text_.getGlobalBounds().width / 2.f,
+      shape_.getPosition().y - text_.getGlobalBounds().height);
 }
 
 // Destructor
@@ -37,8 +36,7 @@ gui::Button::~Button() {}
  * @return true if button is idle, else false.
  */
 const bool gui::Button::isIdled() const {
-  if (buttonState_ == BTN_IDLE)
-    return true;
+  if (buttonState_ == BTN_IDLE) return true;
   return false;
 }
 
@@ -48,10 +46,8 @@ const bool gui::Button::isIdled() const {
  * @param none.
  * @return true if button is idle, else false.
  */
-const bool gui::Button::isHovered() const
-{
-  if (buttonState_ == BTN_HOVER)
-    return true;
+const bool gui::Button::isHovered() const {
+  if (buttonState_ == BTN_HOVER) return true;
 
   return false;
 }
@@ -62,10 +58,8 @@ const bool gui::Button::isHovered() const
  * @param none.
  * @return true if button is idle, else false.
  */
-const bool gui::Button::isPressed() const
-{
-  if (buttonState_ == BTN_ACTIVE)
-    return true;
+const bool gui::Button::isPressed() const {
+  if (buttonState_ == BTN_ACTIVE) return true;
 
   return false;
 }
@@ -76,9 +70,7 @@ const bool gui::Button::isPressed() const
  * @param none.
  * @return text of button.
  */
-const sf::String& gui::Button::getText() {
-  return text_.getString();
-}
+const sf::String& gui::Button::getText() { return text_.getString(); }
 
 /**
  * Setter function for button.
@@ -88,9 +80,7 @@ const sf::String& gui::Button::getText() {
  * @param i boolean state.
  * @return void.
  */
-void gui::Button::setSelected(bool i) {
-  selected_ = i;
-}
+void gui::Button::setSelected(bool i) { selected_ = i; }
 
 /**
  * Update function of button.
@@ -99,8 +89,7 @@ void gui::Button::setSelected(bool i) {
  *    information.
  * @return void.
  */
-void gui::Button::update(const sf::Vector2f mousePos)
-{
+void gui::Button::update(const sf::Vector2f mousePos) {
   buttonState_ = BTN_IDLE;
 
   if (shape_.getGlobalBounds().contains(mousePos)) {
@@ -145,14 +134,10 @@ void gui::Button::render(sf::RenderWindow* window) {
 // ===== END BUTTON ======
 
 // Constructor
-gui::DropDownList::DropDownList(float x, float y,
-    float width,
-    float height,
-    sf::Font* font,
-    std::string text,
-    const std::vector<std::string> &algo_vec,
-    unsigned numOfElements,
-    unsigned default_index)
+gui::DropDownList::DropDownList(float x, float y, float width, float height,
+                                sf::Font* font, std::string text,
+                                const std::vector<std::string>& algo_vec,
+                                unsigned numOfElements, unsigned default_index)
     : font_{font},
       showList_{false},
       keyTimeMax_{1.f},
@@ -160,29 +145,20 @@ gui::DropDownList::DropDownList(float x, float y,
       activeButton_{nullptr},
       activeMode_{false} {
   mainButton_ = new gui::Button(
-      x, y, width, height,
-      font_, text, 20,
-      sf::Color(251, 244, 249, 255),
-      sf::Color(245, 238, 243, 255),
-      sf::Color(214, 214, 215, 200)
-  );
+      x, y, width, height, font_, text, 20, sf::Color(251, 244, 249, 255),
+      sf::Color(245, 238, 243, 255), sf::Color(214, 214, 215, 200));
   for (size_t i = 0; i < numOfElements; i++) {
-    list_.push_back(
-      new gui::Button(
-        x, y + ((i+1)*height), width, height,
-        font_, algo_vec[i], 20,
-        sf::Color(251, 244, 249, 255),
-        sf::Color(245, 238, 243, 255),
-        sf::Color(240, 240, 240, 200)
-      )
-    );
+    list_.push_back(new gui::Button(
+        x, y + ((i + 1) * height), width, height, font_, algo_vec[i], 20,
+        sf::Color(251, 244, 249, 255), sf::Color(245, 238, 243, 255),
+        sf::Color(240, 240, 240, 200)));
   }
 }
 
 // Destructor
 gui::DropDownList::~DropDownList() {
   delete mainButton_;
-  for (auto i: list_) {
+  for (auto i : list_) {
     delete i;
   }
 }
@@ -206,9 +182,7 @@ const bool gui::DropDownList::hasActiveButton() const {
  * @param none.
  * @return current active button ptr.
  */
-gui::Button* gui::DropDownList::getActiveButton() {
-  return activeButton_;
-}
+gui::Button* gui::DropDownList::getActiveButton() { return activeButton_; }
 
 /**
  * Getter function for DropDownList key timer.
@@ -230,7 +204,7 @@ const bool gui::DropDownList::getKeyTime() {
  * @param dt delta time.
  * @return void.
  */
-void gui::DropDownList::updateKeyTime(const float &dt) {
+void gui::DropDownList::updateKeyTime(const float& dt) {
   if (keyTime_ < keyTimeMax_) {
     keyTime_ += 5.f * dt;
   }
@@ -244,7 +218,7 @@ void gui::DropDownList::updateKeyTime(const float &dt) {
  * @param dt delta time.
  * @return void.
  */
-void gui::DropDownList::update(const sf::Vector2f mousePos, const float &dt) {
+void gui::DropDownList::update(const sf::Vector2f mousePos, const float& dt) {
   updateKeyTime(dt);
   mainButton_->update(mousePos);
 
@@ -255,14 +229,13 @@ void gui::DropDownList::update(const sf::Vector2f mousePos, const float &dt) {
   if (activeMode_) {
     showList_ = true;
     mainButton_->setSelected(true);
-  }
-  else {
+  } else {
     showList_ = false;
     mainButton_->setSelected(false);
   }
 
   if (showList_) {
-    for (auto &i: list_) {
+    for (auto& i : list_) {
       i->update(mousePos);
       if (i->isPressed()) {
         activeButton_ = i;
@@ -285,7 +258,7 @@ void gui::DropDownList::render(sf::RenderWindow* window) {
   mainButton_->render(window);
 
   if (showList_) {
-    for (auto &i: list_) {
+    for (auto& i : list_) {
       i->render(window);
     }
   }
