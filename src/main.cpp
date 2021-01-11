@@ -1,16 +1,15 @@
 #include "Game.h"
 
-int main()
-{
+int main() {
   sf::VideoMode videoMode(1200, 700);
-  sf::RenderWindow window(videoMode, "Path-Planning Visualizer", sf::Style::Titlebar | sf::Style::Close);
+  sf::RenderWindow window(videoMode, "Path-Planning Visualizer",
+                          sf::Style::Titlebar | sf::Style::Close);
 
   // Initialize Game
   Game game(&window);
 
   // Game Loop
-  while (game.running())
-  {
+  while (game.running()) {
     // Update
     game.update();
 

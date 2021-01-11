@@ -1,11 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <SFML/Graphics.hpp>
+#include <vector>
 
-class Node
-{
-private:
+class Node {
+ private:
   // Variables
   bool isObstacle_;
   bool isVisited_;
@@ -15,7 +14,7 @@ private:
   std::vector<Node*> vecNeighbours_;
   Node* parent_;
 
-public:
+ public:
   // Constructor
   Node();
 

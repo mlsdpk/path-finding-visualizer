@@ -1,7 +1,6 @@
 #include "Game.h"
 
-void Game::initWindow(sf::RenderWindow* window)
-{
+void Game::initWindow(sf::RenderWindow* window) {
   /*
     @return void
 
@@ -12,8 +11,7 @@ void Game::initWindow(sf::RenderWindow* window)
   window_->setFramerateLimit(100);
 }
 
-void Game::initStates()
-{
+void Game::initStates() {
   /*
     @return void
 
@@ -24,8 +22,7 @@ void Game::initStates()
 }
 
 // Constructor
-Game::Game(sf::RenderWindow* window)
-{
+Game::Game(sf::RenderWindow* window) {
   // initialize window
   initWindow(window);
 
@@ -37,8 +34,7 @@ Game::Game(sf::RenderWindow* window)
 }
 
 // Destructor
-Game::~Game()
-{
+Game::~Game() {
   while (!states_.empty()) {
     delete states_.top();
     states_.pop();
@@ -46,35 +42,26 @@ Game::~Game()
 }
 
 // Accessors
-const bool Game::running() const
-{
-  return window_->isOpen();
-}
+const bool Game::running() const { return window_->isOpen(); }
 
-void Game::pollEvents()
-{
+void Game::pollEvents() {
   // Event polling
-  while (window_->pollEvent(ev_))
-  {
+  while (window_->pollEvent(ev_)) {
     switch (ev_.type) {
       case sf::Event::Closed:
         window_->close();
         break;
       case sf::Event::KeyPressed:
-        if (ev_.key.code == sf::Keyboard::Escape)
-          window_->close();
+        if (ev_.key.code == sf::Keyboard::Escape) window_->close();
         break;
     }
   }
 }
 
 // Functions
-void Game::updateDt() {
-  dt_ = dtClock_.restart().asSeconds();
-}
+void Game::updateDt() { dt_ = dtClock_.restart().asSeconds(); }
 
-void Game::update()
-{
+void Game::update() {
   pollEvents();
   updateDt();
 
@@ -86,15 +73,13 @@ void Game::update()
       delete states_.top();
       states_.pop();
     }
-  }
-  else {
+  } else {
     // End the Application
     window_->close();
   }
 }
 
-void Game::render()
-{
+void Game::render() {
   /*
     @return void
 

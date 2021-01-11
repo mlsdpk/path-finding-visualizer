@@ -1,11 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <SFML/Graphics.hpp>
+#include <vector>
 
-class DFS_Node
-{
-private:
+class DFS_Node {
+ private:
   // Variables
   bool isObstacle_;
   bool isVisited_;
@@ -15,7 +14,7 @@ private:
   std::vector<DFS_Node*> vecNeighbours_;
   DFS_Node* parent_;
 
-public:
+ public:
   // Constructor
   DFS_Node();
 

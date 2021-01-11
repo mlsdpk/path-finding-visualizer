@@ -2,13 +2,12 @@
 
 #include <stack>
 
-#include "State.h"
 #include "Gui.h"
+#include "State.h"
 #include "States/Algorithms/DFS/DFS_Node.h"
 
-class DFS: public State
-{
-private:
+class DFS : public State {
+ private:
   // fonts
   sf::Font font1_, font2_;
 
@@ -17,10 +16,8 @@ private:
   sf::RectangleShape cellNamesBGN_;
 
   // colors
-  sf::Color BGN_COL, FONT_COL,
-            IDLE_COL, HOVER_COL, ACTIVE_COL,
-            START_COL, END_BORDER_COL,
-            VISITED_COL, FRONTIER_COL, OBST_COL, PATH_COL;
+  sf::Color BGN_COL, FONT_COL, IDLE_COL, HOVER_COL, ACTIVE_COL, START_COL,
+      END_BORDER_COL, VISITED_COL, FRONTIER_COL, OBST_COL, PATH_COL;
 
   // buttons
   std::map<std::string, gui::Button*> buttons_;
@@ -55,10 +52,10 @@ private:
   void initNodes();
   void initDFS();
 
-  void updateKeyTime(const float &dt);
+  void updateKeyTime(const float& dt);
   const bool getKeyTime();
 
-public:
+ public:
   // Constructor
   DFS(sf::RenderWindow* window, std::stack<State*>* states);
 
@@ -68,7 +65,7 @@ public:
   // Override Functions
   void endState();
   void updateKeybinds();
-  void update(const float &dt);
+  void update(const float& dt);
   void render();
 
   // New update functions

@@ -1,16 +1,14 @@
 #pragma once
 
-#include "State.h"
 #include "Gui.h"
+#include "State.h"
 
 // Algorithms headers
 #include "BFS.h"
 #include "DFS.h"
 
-class MainMenu_State: public State
-{
-private:
-
+class MainMenu_State : public State {
+ private:
   sf::Color BGN_COL, FONT_COL, IDLE_COL, HOVER_COL;
 
   sf::Font font1_, font2_;
@@ -30,7 +28,7 @@ private:
   void initAlgorithms();
   void initButtons();
 
-public:
+ public:
   MainMenu_State(sf::RenderWindow* window, std::stack<State*>* states);
 
   virtual ~MainMenu_State();
@@ -38,10 +36,10 @@ public:
   // Functions
   void endState();
   void updateKeybinds();
-  void update(const float &dt);
+  void update(const float& dt);
   void render();
 
   void renderBackground();
-  void updateButtons(const float &dt);
+  void updateButtons(const float& dt);
   void renderButtons();
 };

@@ -2,9 +2,8 @@
 
 #include "MainMenu_State.h"
 
-class Game
-{
-private:
+class Game {
+ private:
   // Variables
   sf::RenderWindow* window_;
   sf::Event ev_;
@@ -19,7 +18,7 @@ private:
   void initWindow(sf::RenderWindow* window);
   void initStates();
 
-public:
+ public:
   // Constructors
   Game(sf::RenderWindow* window);
 
