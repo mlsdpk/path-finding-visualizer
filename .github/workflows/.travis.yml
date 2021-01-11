@@ -2,25 +2,32 @@ name: Ubuntu Focal Fossa 20.04
 
 on:
   # Trigger the workflow on push or pull request,
-  # but only for the main branch
+  # but only for the main and dev branch
   push:
     branches:
       - main
+      - dev
   pull_request:
     branches:
       - main
+      - dev
 
 jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-      
+    - uses: DoozyX/clang-format-lint-action@v0.11
+      with:
+        source: 'src include'
+        extensions: 'h,cpp'
+        clangFormatVersion: 11
+
     - name: Install Dependencies
       run: |
         sudo apt-get update
         sudo apt-get -y install libsfml-dev
-    
+
     - name: Building
       run: |
         mkdir build
