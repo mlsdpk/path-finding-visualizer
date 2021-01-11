@@ -33,7 +33,7 @@ void DFS::initVariables() {
   mapWidth_   = 900;
   mapHeight_  = 640;
 
-  nodes_ = new Node[(mapWidth_/gridSize_)*(mapHeight_/gridSize_)];
+  nodes_ = new DFS_Node[(mapWidth_/gridSize_)*(mapHeight_/gridSize_)];
 
   DFS_running_ = false;
   DFS_initialized_ = false;
@@ -393,7 +393,7 @@ void DFS::renderNodes() {
 
   // visualizing path
   if (nodeEnd_ != nullptr) {
-    Node* current = nodeEnd_;
+    DFS_Node* current = nodeEnd_;
 
     while (current->getParentNode() != nullptr && current != nodeStart_) {
       current->setPath(true);
@@ -410,7 +410,7 @@ void DFS::solve_DFS() {
   */
 
   if (!frontier_.empty()) {
-    Node* nodeCurrent = frontier_.top();
+    DFS_Node* nodeCurrent = frontier_.top();
     nodeCurrent->setFrontier(false);
     frontier_.pop();
 

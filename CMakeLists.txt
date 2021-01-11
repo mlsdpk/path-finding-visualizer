@@ -30,7 +30,7 @@ add_library(bfs
 
 add_library(dfs
   src/States/Algorithms/DFS/DFS.cpp
-  #src/States/Algorithms/DFS/Node.cpp
+  src/States/Algorithms/DFS/DFS_Node.cpp
 )
 
 # Find any version 2.X of SFML

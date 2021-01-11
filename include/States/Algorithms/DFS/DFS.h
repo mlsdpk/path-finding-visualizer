@@ -1,12 +1,10 @@
 #pragma once
 
-#include <queue>
 #include <stack>
-
 
 #include "State.h"
 #include "Gui.h"
-#include "States/Algorithms/BFS/Node.h"
+#include "States/Algorithms/DFS/DFS_Node.h"
 
 class DFS: public State
 {
@@ -36,11 +34,11 @@ private:
   unsigned int mapWidth_;
   unsigned int mapHeight_;
 
-  // BFS related
-  Node* nodes_;
-  Node* nodeStart_;
-  Node* nodeEnd_;
-  std::stack<Node*> frontier_;
+  // DFS related
+  DFS_Node* nodes_;
+  DFS_Node* nodeStart_;
+  DFS_Node* nodeEnd_;
+  std::stack<DFS_Node*> frontier_;
 
   // logic flags
   bool DFS_running_;
