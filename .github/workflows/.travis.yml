@@ -1,0 +1,29 @@
+name: Ubuntu Focal Fossa 20.04
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install libsfml-dev
+    
+    - name: Building
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
