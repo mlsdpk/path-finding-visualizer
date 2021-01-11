@@ -5,16 +5,11 @@ Node::Node():
   isObstacle_{false},
   isVisited_{false},
   isFrontier_{false},
-  parent_{nullptr}
-{
-
-}
+  isPath_{false},
+  parent_{nullptr} {}
 
 // Destructor
-Node::~Node()
-{
-
-}
+Node::~Node() {}
 
 // Functions
 const bool Node::isObstacle() const
@@ -30,6 +25,11 @@ const bool Node::isVisited() const
 const bool Node::isFrontier() const
 {
   return isFrontier_;
+}
+
+const bool Node::isPath() const
+{
+  return isPath_;
 }
 
 // Accessors
@@ -62,6 +62,11 @@ void Node::setVisited(bool b)
 void Node::setFrontier(bool b)
 {
   isFrontier_ = b;
+}
+
+void Node::setPath(bool b)
+{
+  isPath_ = b;
 }
 
 void Node::setPosition(sf::Vector2i pos)

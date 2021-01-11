@@ -1,12 +1,12 @@
 #pragma once
 
-#include <queue>
+#include <stack>
 
 #include "State.h"
 #include "Gui.h"
-#include "Node.h"
+#include "States/Algorithms/DFS/DFS_Node.h"
 
-class BFS: public State
+class DFS: public State
 {
 private:
   // fonts
@@ -34,17 +34,17 @@ private:
   unsigned int mapWidth_;
   unsigned int mapHeight_;
 
-  // BFS related
-  Node* nodes_;
-  Node* nodeStart_;
-  Node* nodeEnd_;
-  std::queue<Node*> frontier_;
+  // DFS related
+  DFS_Node* nodes_;
+  DFS_Node* nodeStart_;
+  DFS_Node* nodeEnd_;
+  std::stack<DFS_Node*> frontier_;
 
   // logic flags
-  bool BFS_running_;
-  bool BFS_initialized_;
-  bool BFS_reset_;
-  bool BFS_solved_;
+  bool DFS_running_;
+  bool DFS_initialized_;
+  bool DFS_reset_;
+  bool DFS_solved_;
 
   // initialization Functions
   void initFonts();
@@ -53,17 +53,17 @@ private:
   void initButtons();
   void initVariables();
   void initNodes();
-  void initBFS();
+  void initDFS();
 
   void updateKeyTime(const float &dt);
   const bool getKeyTime();
 
 public:
   // Constructor
-  BFS(sf::RenderWindow* window, std::stack<State*>* states);
+  DFS(sf::RenderWindow* window, std::stack<State*>* states);
 
   // Destructor
-  virtual ~BFS();
+  virtual ~DFS();
 
   // Override Functions
   void endState();
@@ -81,5 +81,5 @@ public:
   void renderNodes();
 
   // BFS algorithm function
-  void solve_BFS();
+  void solve_DFS();
 };

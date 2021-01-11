@@ -1,7 +1,7 @@
-#include "BFS.h"
+#include "DFS.h"
 
 // Constructor
-BFS::BFS(sf::RenderWindow* window, std::stack<State*>* states)
+DFS::DFS(sf::RenderWindow* window, std::stack<State*>* states)
     : State(window, states),
       keyTimeMax_{1.f},
       keyTime_{0.f} {
@@ -11,16 +11,16 @@ BFS::BFS(sf::RenderWindow* window, std::stack<State*>* states)
   initBackground();
   initButtons();
   initNodes();
-  initBFS();
+  initDFS();
 }
 
 // Destructor
-BFS::~BFS()
+DFS::~DFS()
 {
   delete[] nodes_;
 }
 
-void BFS::initVariables() {
+void DFS::initVariables() {
   /*
     @return void
 
@@ -33,15 +33,15 @@ void BFS::initVariables() {
   mapWidth_   = 900;
   mapHeight_  = 640;
 
-  nodes_ = new Node[(mapWidth_/gridSize_)*(mapHeight_/gridSize_)];
+  nodes_ = new DFS_Node[(mapWidth_/gridSize_)*(mapHeight_/gridSize_)];
 
-  BFS_running_ = false;
-  BFS_initialized_ = false;
-  BFS_reset_ = false;
-  BFS_solved_ = false;
+  DFS_running_ = false;
+  DFS_initialized_ = false;
+  DFS_reset_ = false;
+  DFS_solved_ = false;
 }
 
-void BFS::initFonts() {
+void DFS::initFonts() {
   /*
     @return void
 
@@ -56,7 +56,7 @@ void BFS::initFonts() {
   }
 }
 
-void BFS::initColors() {
+void DFS::initColors() {
   BGN_COL = sf::Color(246, 229, 245, 255);
   FONT_COL = sf::Color(78, 95, 131, 255);
   IDLE_COL = sf::Color(251, 244, 249, 255);
@@ -70,7 +70,7 @@ void BFS::initColors() {
   PATH_COL = sf::Color(190, 242, 227, 255);
 }
 
-void BFS::initBackground() {
+void DFS::initBackground() {
   // Main title
   titleText_.setFont(font1_);
   titleText_.setString("BREADTH FIRST SEARCH");
@@ -89,7 +89,7 @@ void BFS::initBackground() {
   cellNamesBGN_.setFillColor(IDLE_COL);
 }
 
-void BFS::initButtons() {
+void DFS::initButtons() {
   /*
     @return void
 
@@ -111,7 +111,7 @@ void BFS::initButtons() {
   );
 }
 
-void BFS::initNodes() {
+void DFS::initNodes() {
   /*
     @return void
 
@@ -154,7 +154,7 @@ void BFS::initNodes() {
   nodeEnd_   = &nodes_[(mapWidth_/gridSize_) * (mapHeight_/gridSize_ - 1) + (mapWidth_/gridSize_ - 1)];
 }
 
-void BFS::initBFS() {
+void DFS::initDFS() {
   /*
     @return void
 
@@ -169,17 +169,17 @@ void BFS::initBFS() {
   frontier_.push(nodeStart_);
 }
 
-void BFS::endState() {
+void DFS::endState() {
   /*
     @return void
 
     - ending state function
   */
 
-  std::cout << "Ending BFS State" << '\n';
+  std::cout << "Ending DFS State" << '\n';
 }
 
-void BFS::updateKeybinds() {
+void DFS::updateKeybinds() {
   /*
     @return void
 
@@ -189,7 +189,7 @@ void BFS::updateKeybinds() {
   checkForQuit();
 }
 
-void BFS::updateButtons() {
+void DFS::updateButtons() {
   /*
     @return void
 
@@ -201,17 +201,17 @@ void BFS::updateButtons() {
   }
 
   // START the algorithm
-  if (buttons_["RUN"]->isPressed() && getKeyTime() && !BFS_solved_) {
-    BFS_running_ = true;
+  if (buttons_["RUN"]->isPressed() && getKeyTime() && !DFS_solved_) {
+    DFS_running_ = true;
   }
 
   // RESET the nodes
   if (buttons_["RESET"]->isPressed() && getKeyTime()) {
-    BFS_reset_ = true;
+    DFS_reset_ = true;
   }
 }
 
-void BFS::update(const float &dt) {
+void DFS::update(const float &dt) {
   /*
     @return void
 
@@ -223,25 +223,25 @@ void BFS::update(const float &dt) {
   updateKeybinds();
   updateButtons();
 
-  if (BFS_reset_) {
+  if (DFS_reset_) {
     initNodes();
-    BFS_running_ = false;
-    BFS_initialized_ = false;
-    BFS_reset_ = false;
-    BFS_solved_ = false;
+    DFS_running_ = false;
+    DFS_initialized_ = false;
+    DFS_reset_ = false;
+    DFS_solved_ = false;
   }
 
-  if (BFS_running_) {
-    BFS_reset_ = false;
+  if (DFS_running_) {
+    DFS_reset_ = false;
 
     // initialize BFS from starting node
-    if (!BFS_initialized_) {
-      initBFS();
-      BFS_initialized_ = true;
+    if (!DFS_initialized_) {
+      initDFS();
+      DFS_initialized_ = true;
     }
 
     // run the main algorithm
-    solve_BFS();
+    solve_DFS();
   }
   else {
     // only allow mouse and key inputs
@@ -250,7 +250,7 @@ void BFS::update(const float &dt) {
   }
 }
 
-void BFS::render() {
+void DFS::render() {
   /*
     @return void
 
@@ -262,7 +262,7 @@ void BFS::render() {
   renderNodes();
 }
 
-void BFS::renderBackground() {
+void DFS::renderBackground() {
   window_->clear(BGN_COL);
 
   window_->draw(titleText_);
@@ -275,7 +275,7 @@ void BFS::renderBackground() {
  * @param none.
  * @return true if keytime > keytime_max else false.
  */
-const bool BFS::getKeyTime() {
+const bool DFS::getKeyTime() {
   if (keyTime_ >= keyTimeMax_) {
     keyTime_ = 0.f;
     return true;
@@ -289,13 +289,13 @@ const bool BFS::getKeyTime() {
  * @param dt delta time.
  * @return void.
  */
-void BFS::updateKeyTime(const float &dt) {
+void DFS::updateKeyTime(const float &dt) {
   if (keyTime_ < keyTimeMax_) {
     keyTime_ += 5.f * dt;
   }
 }
 
-void BFS::updateNodes() {
+void DFS::updateNodes() {
   /*
     @return void
 
@@ -309,7 +309,7 @@ void BFS::updateNodes() {
     if (localX >= 0 && localX < mapHeight_/gridSize_) {
       if (localY >= 0 && localY < mapWidth_/gridSize_) {
 
-        if (!BFS_solved_) {
+        if (!DFS_solved_) {
           if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))) {
             nodeStart_ = &nodes_[(mapWidth_/gridSize_) * localX + localY];
           }
@@ -330,7 +330,7 @@ void BFS::updateNodes() {
   }
 }
 
-void BFS::renderButtons() {
+void DFS::renderButtons() {
   /*
     @return
 
@@ -342,7 +342,7 @@ void BFS::renderButtons() {
   }
 }
 
-void BFS::renderNodes() {
+void DFS::renderNodes() {
   /*
     @return void
 
@@ -393,7 +393,7 @@ void BFS::renderNodes() {
 
   // visualizing path
   if (nodeEnd_ != nullptr) {
-    Node* current = nodeEnd_;
+    DFS_Node* current = nodeEnd_;
 
     while (current->getParentNode() != nullptr && current != nodeStart_) {
       current->setPath(true);
@@ -402,21 +402,21 @@ void BFS::renderNodes() {
   }
 }
 
-void BFS::solve_BFS() {
+void DFS::solve_DFS() {
   /*
     @return void
 
-    - BFS algorithm
+    - DFS algorithm
   */
 
   if (!frontier_.empty()) {
-    Node* nodeCurrent = frontier_.front();
+    DFS_Node* nodeCurrent = frontier_.top();
     nodeCurrent->setFrontier(false);
     frontier_.pop();
 
     if (nodeCurrent == nodeEnd_) {
-      BFS_running_ = false;
-      BFS_solved_ = true;
+      DFS_running_ = false;
+      DFS_solved_ = true;
     }
 
     for (auto nodeNeighbour : *nodeCurrent->getNeighbours()) {

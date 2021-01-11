@@ -3,7 +3,7 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
-class Node
+class DFS_Node
 {
 private:
   // Variables
@@ -12,15 +12,15 @@ private:
   bool isFrontier_;
   bool isPath_;
   sf::Vector2i pos_;
-  std::vector<Node*> vecNeighbours_;
-  Node* parent_;
+  std::vector<DFS_Node*> vecNeighbours_;
+  DFS_Node* parent_;
 
 public:
   // Constructor
-  Node();
+  DFS_Node();
 
   // Destructor
-  ~Node();
+  ~DFS_Node();
 
   // Functions
   const bool isObstacle() const;
@@ -30,8 +30,8 @@ public:
 
   // Accessors
   sf::Vector2i getPos();
-  Node* getParentNode();
-  std::vector<Node*>* getNeighbours();
+  DFS_Node* getParentNode();
+  std::vector<DFS_Node*>* getNeighbours();
 
   // Mutators
   void setObstacle(bool b);
@@ -39,6 +39,6 @@ public:
   void setFrontier(bool b);
   void setPath(bool b);
   void setPosition(sf::Vector2i pos);
-  void setNeighbours(Node* node);
-  void setParentNode(Node* node);
+  void setNeighbours(DFS_Node* node);
+  void setParentNode(DFS_Node* node);
 };
