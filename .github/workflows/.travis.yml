@@ -1,0 +1,31 @@
+notifications:
+  email: false
+
+language: cpp
+
+branches:
+  only:
+    - master
+
+matrix:
+  include:
+  - name: "Ubuntu Focal Fossa 20.04 GCC"
+    os: linux
+    dist: focal
+    compiler: gcc
+  - name: "Ubuntu Focal Fossa 20.04 Clang"
+    os: linux
+    dist: focal
+    compiler: clang
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install libsfml-dev
+
+install: skip
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
