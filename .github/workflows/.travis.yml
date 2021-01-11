@@ -1,7 +1,4 @@
-notifications:
-  email: false
-
-language: cpp
+name: Ubuntu Focal Fossa 20.04
 
 on:
   # Trigger the workflow on push or pull request,
@@ -13,25 +10,20 @@ on:
     branches:
       - main
 
-matrix:
-  include:
-  - name: "Ubuntu Focal Fossa 20.04 GCC"
-    os: linux
-    dist: focal
-    compiler: gcc
-  - name: "Ubuntu Focal Fossa 20.04 Clang"
-    os: linux
-    dist: focal
-    compiler: clang
-
-before_install:
-  - sudo apt-get update
-  - sudo apt-get -y install libsfml-dev
-
-install: skip
-
-script:
-  - mkdir build
-  - cd build
-  - cmake ..
-  - make
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install libsfml-dev
+    
+    - name: Building
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
