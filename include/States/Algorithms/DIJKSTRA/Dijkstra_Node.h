@@ -1,8 +1,8 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
 #include <climits>
 #include <vector>
-#include <SFML/Graphics.hpp>
 
 class Dijkstra_Node {
  private:
