@@ -1,7 +1,8 @@
 #pragma once
 
+#include <math.h>
+
 #include <SFML/Graphics.hpp>
-#include <climits>
 #include <vector>
 
 class Dijkstra_Node {
@@ -14,7 +15,7 @@ class Dijkstra_Node {
   sf::Vector2i pos_;
   std::vector<Dijkstra_Node*> vecNeighbours_;
   Dijkstra_Node* parent_;
-  float dist_;
+  double dist_;
 
  public:
   // Constructor
@@ -33,7 +34,7 @@ class Dijkstra_Node {
   sf::Vector2i getPos();
   Dijkstra_Node* getParentNode();
   std::vector<Dijkstra_Node*>* getNeighbours();
-  float getDistance() const;
+  double getDistance() const;
 
   // Mutators
   void setObstacle(bool b);
@@ -43,5 +44,5 @@ class Dijkstra_Node {
   void setPosition(sf::Vector2i pos);
   void setNeighbours(Dijkstra_Node* Dijkstra_Node);
   void setParentNode(Dijkstra_Node* Dijkstra_Node);
-  void setDistance(float dist);
+  void setDistance(double dist);
 };

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <math.h>
-
 #include <queue>
 
 #include "Dijkstra_Node.h"
@@ -91,7 +89,7 @@ class Dijkstra : public State {
   void renderNodes();
 
   // Utility function
-  float L1_Distance(Dijkstra_Node* n1, Dijkstra_Node* n2);
+  double L1_Distance(Dijkstra_Node* n1, Dijkstra_Node* n2);
 
   // Dijkstra algorithm function
   void solve_Dijkstra();

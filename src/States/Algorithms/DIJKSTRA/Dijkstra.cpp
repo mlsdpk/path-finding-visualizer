@@ -116,7 +116,7 @@ void Dijkstra::initNodes() {
       nodes_[nodeIndex].setFrontier(false);
       nodes_[nodeIndex].setPath(false);
       nodes_[nodeIndex].setParentNode(nullptr);
-      nodes_[nodeIndex].setDistance(INT_MAX);
+      nodes_[nodeIndex].setDistance(INFINITY);
     }
   }
 
@@ -389,7 +389,7 @@ void Dijkstra::renderNodes() {
   }
 }
 
-float Dijkstra::L1_Distance(Dijkstra_Node* n1, Dijkstra_Node* n2) {
+double Dijkstra::L1_Distance(Dijkstra_Node* n1, Dijkstra_Node* n2) {
   return fabs(n1->getPos().x - n2->getPos().x) +
          fabs(n1->getPos().y - n2->getPos().y);
 }
@@ -412,7 +412,7 @@ void Dijkstra::solve_Dijkstra() {
         continue;
       }
 
-      float dist =
+      double dist =
           nodeCurrent->getDistance() + L1_Distance(nodeCurrent, nodeNeighbour);
 
       if (dist < nodeNeighbour->getDistance()) {

@@ -7,7 +7,7 @@ Dijkstra_Node::Dijkstra_Node()
       isFrontier_{false},
       isPath_{false},
       parent_{nullptr},
-      dist_{INT_MAX} {}
+      dist_{INFINITY} {}
 
 // Destructor
 Dijkstra_Node::~Dijkstra_Node() {}
@@ -30,7 +30,7 @@ std::vector<Dijkstra_Node*>* Dijkstra_Node::getNeighbours() {
   return &vecNeighbours_;
 }
 
-float Dijkstra_Node::getDistance() const { return dist_; }
+double Dijkstra_Node::getDistance() const { return dist_; }
 
 // Mutators
 void Dijkstra_Node::setObstacle(bool b) { isObstacle_ = b; }
@@ -51,4 +51,4 @@ void Dijkstra_Node::setParentNode(Dijkstra_Node* Dijkstra_Node) {
   parent_ = Dijkstra_Node;
 }
 
-void Dijkstra_Node::setDistance(float dist) { dist_ = dist; }
+void Dijkstra_Node::setDistance(double dist) { dist_ = dist; }
