@@ -9,6 +9,7 @@ include_directories(include)
 include_directories(include/States)
 include_directories(include/States/Algorithms/BFS)
 include_directories(include/States/Algorithms/DFS)
+include_directories(include/States/Algorithms/DIJKSTRA)
 
 set(EXECUTABLE_NAME "main")
 
@@ -33,6 +34,11 @@ add_library(dfs
   src/States/Algorithms/DFS/DFS_Node.cpp
 )
 
+add_library(dijkstra
+  src/States/Algorithms/DIJKSTRA/Dijkstra.cpp
+  src/States/Algorithms/DIJKSTRA/Dijkstra_Node.cpp
+)
+
 # Find any version 2.X of SFML
 find_package(SFML 2.5.1 COMPONENTS system window graphics network audio)
 
@@ -45,4 +51,5 @@ target_link_libraries(${EXECUTABLE_NAME}
   main_menu
   bfs
   dfs
+  dijkstra
 )

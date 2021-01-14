@@ -120,6 +120,7 @@ void MainMenu_State::updateButtons(const float &dt) {
         break;
       case 3:
         // Dijkstra
+        states_->push(new Dijkstra(window_, states_));
         break;
       default:
         break;

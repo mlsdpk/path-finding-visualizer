@@ -6,6 +6,7 @@
 // Algorithms headers
 #include "BFS.h"
 #include "DFS.h"
+#include "Dijkstra.h"
 
 class MainMenu_State : public State {
  private:
