@@ -30,6 +30,12 @@ A tool for visualizing numerous pathfinding algorithms. The project extensively 
 3. Compile: `cmake .. && make`
 4. Run it: `./main`.
 
-### SFML Build Failed Issues
+### SFML Installation on Linux
 
-- Follow this [thread](https://en.sfml-dev.org/forums/index.php?topic=20638.0) to build SFML from source on Ubuntu.
+There are different approaches to the installation of SFML on Linux. For example, on Debian you would do:
+
+`sudo apt-get install libsfml-dev`
+
+>Please note that the minimum version of SFML required in this project is 2.5.1. and at the time of writing you can only install sfml-v2.5.1 directly from debain distribution's package repository for Ubuntu 20.04, otherwise please install it from source.
+
+- Follow this [thread](https://en.sfml-dev.org/forums/index.php?topic=20638.0) to build SFML from source on Ubuntu versions less than 20.04.
