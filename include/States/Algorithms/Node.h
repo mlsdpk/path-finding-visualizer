@@ -1,8 +1,8 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <vector>
 #include <memory>
+#include <vector>
 
 class Node {
  private:
