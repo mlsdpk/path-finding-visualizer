@@ -1,24 +1,25 @@
-#include "BFS.h"
+#include "DIJKSTRA.h"
 
 // Constructor
-BFS::BFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states)
-    : Algorithm(window, states, "BREADTH FIRST SEARCH") {}
+DIJKSTRA::DIJKSTRA(sf::RenderWindow *window,
+                   std::stack<std::unique_ptr<State>> &states)
+    : Algorithm(window, states, "DIJKSTRA") {}
 
 // Destructor
-BFS::~BFS() {}
+DIJKSTRA::~DIJKSTRA() {}
 
 // override initAlgorithm() function
-void BFS::initAlgorithm() {
-  // initialize BFS by clearing frontier and add start node
+void DIJKSTRA::initAlgorithm() {
+  // initialize DIJKSTRA by clearing frontier and add start node
   while (!frontier_.empty()) {
     frontier_.pop();
   }
-
+  nodeStart_->setGDistance(0.0);
   frontier_.push(nodeStart_);
 }
 
 // override updateNodes() function
-void BFS::updateNodes() {
+void DIJKSTRA::updateNodes() {
   if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && getKeyTime()) {
     int localY = ((mousePositionWindow_.x - 300) / gridSize_);
     int localX = ((mousePositionWindow_.y - 60) / gridSize_);
@@ -46,7 +47,7 @@ void BFS::updateNodes() {
 }
 
 // override renderNodes() function
-void BFS::renderNodes() {
+void DIJKSTRA::renderNodes() {
   for (int x = 0; x < mapHeight_ / gridSize_; x++) {
     for (int y = 0; y < mapWidth_ / gridSize_; y++) {
       float size = static_cast<float>(gridSize_);
@@ -97,9 +98,15 @@ void BFS::renderNodes() {
   }
 }
 
-void BFS::solveConcurrently(std::shared_ptr<Node> nodeStart,
-                            std::shared_ptr<Node> nodeEnd,
-                            std::shared_ptr<MessageQueue<bool>> message_queue) {
+double DIJKSTRA::L1_Distance(const std::shared_ptr<Node> &n1,
+                             const std::shared_ptr<Node> &n2) {
+  return fabs(n1->getPos().x - n2->getPos().x) +
+         fabs(n1->getPos().y - n2->getPos().y);
+}
+
+void DIJKSTRA::solveConcurrently(
+    std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
+    std::shared_ptr<MessageQueue<bool>> message_queue) {
   // copy assignment
   // thread-safe due to shared_ptrs
   std::shared_ptr<Node> s_nodeStart = nodeStart;
@@ -124,8 +131,9 @@ void BFS::solveConcurrently(std::shared_ptr<Node> nodeStart,
       // run the main algorithm //
       ////////////////////////////
       if (!frontier_.empty()) {
-        std::shared_ptr<Node> nodeCurrent = frontier_.front();
+        std::shared_ptr<Node> nodeCurrent = frontier_.top();
         nodeCurrent->setFrontier(false);
+        nodeCurrent->setVisited(true);
         frontier_.pop();
 
         if (nodeCurrent == s_nodeEnd) {
@@ -133,9 +141,17 @@ void BFS::solveConcurrently(std::shared_ptr<Node> nodeStart,
         }
 
         for (auto nodeNeighbour : *nodeCurrent->getNeighbours()) {
-          if (!nodeNeighbour->isVisited() && nodeNeighbour->isObstacle() == 0) {
+          if (nodeNeighbour->isVisited() || nodeNeighbour->isObstacle()) {
+            continue;
+          }
+
+          double dist = nodeCurrent->getGDistance() +
+                        L1_Distance(nodeCurrent, nodeNeighbour);
+
+          if (dist < nodeNeighbour->getGDistance()) {
             nodeNeighbour->setParentNode(nodeCurrent);
-            nodeNeighbour->setVisited(true);
+            nodeNeighbour->setGDistance(dist);
+
             nodeNeighbour->setFrontier(true);
             frontier_.push(nodeNeighbour);
           }

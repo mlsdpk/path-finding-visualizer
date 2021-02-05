@@ -6,7 +6,9 @@ Node::Node()
       isVisited_{false},
       isFrontier_{false},
       isPath_{false},
-      parent_{nullptr} {}
+      parent_{nullptr},
+      gDist_{INFINITY},
+      fDist_{INFINITY} {}
 
 // Destructor
 Node::~Node() {}
@@ -29,6 +31,10 @@ const std::vector<std::shared_ptr<Node>>* Node::getNeighbours() const {
   return &vecNeighbours_;
 }
 
+const double Node::getGDistance() const { return gDist_; }
+
+const double Node::getFDistance() const { return fDist_; }
+
 // Mutators
 void Node::setObstacle(bool b) { isObstacle_ = b; }
 
@@ -45,3 +51,7 @@ void Node::setNeighbours(std::shared_ptr<Node> node) {
 }
 
 void Node::setParentNode(std::shared_ptr<Node> node) { parent_ = node; }
+
+void Node::setGDistance(double dist) { gDist_ = dist; }
+
+void Node::setFDistance(double dist) { fDist_ = dist; }

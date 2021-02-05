@@ -1,5 +1,7 @@
 #pragma once
 
+#include <math.h>
+
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
@@ -14,6 +16,8 @@ class Node {
   sf::Vector2i pos_;
   std::vector<std::shared_ptr<Node>> vecNeighbours_;
   std::shared_ptr<Node> parent_;
+  double gDist_;
+  double fDist_;
 
  public:
   // Constructor
@@ -32,6 +36,8 @@ class Node {
   sf::Vector2i getPos();
   std::shared_ptr<Node> getParentNode();
   const std::vector<std::shared_ptr<Node>>* getNeighbours() const;
+  const double getGDistance() const;
+  const double getFDistance() const;
 
   // Mutators
   void setObstacle(bool b);
@@ -41,4 +47,6 @@ class Node {
   void setPosition(sf::Vector2i pos);
   void setNeighbours(std::shared_ptr<Node> node);
   void setParentNode(std::shared_ptr<Node> node);
+  void setGDistance(double dist);
+  void setFDistance(double dist);
 };

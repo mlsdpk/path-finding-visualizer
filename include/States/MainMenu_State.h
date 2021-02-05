@@ -4,8 +4,10 @@
 #include "State.h"
 
 // Algorithms headers
+#include "ASTAR.h"
 #include "BFS.h"
 #include "DFS.h"
+#include "DIJKSTRA.h"
 
 class MainMenu_State : public State {
  private:

@@ -58,7 +58,7 @@ class Algorithm : public State {
   // initialization Functions
   void initFonts();
   void initColors();
-  void initBackground();
+  void initBackground(const std::string& algo_name);
   void initButtons();
   void initVariables();
   void initNodes();
@@ -69,7 +69,7 @@ class Algorithm : public State {
  public:
   // Constructor
   Algorithm(sf::RenderWindow* window,
-            std::stack<std::unique_ptr<State>>& states);
+            std::stack<std::unique_ptr<State>>& states, std::string algo_name);
 
   // Destructor
   virtual ~Algorithm();

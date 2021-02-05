@@ -2,12 +2,13 @@
 
 // Constructor
 Algorithm::Algorithm(sf::RenderWindow* window,
-                     std::stack<std::unique_ptr<State>>& states)
+                     std::stack<std::unique_ptr<State>>& states,
+                     std::string algo_name)
     : State(window, states), keyTimeMax_{1.f}, keyTime_{0.f} {
   initVariables();
   initFonts();
   initColors();
-  initBackground();
+  initBackground(algo_name);
   initButtons();
   initNodes();
 }
@@ -63,10 +64,10 @@ void Algorithm::initColors() {
   PATH_COL = sf::Color(190, 242, 227, 255);
 }
 
-void Algorithm::initBackground() {
+void Algorithm::initBackground(const std::string& algo_name) {
   // Main title
   titleText_.setFont(font1_);
-  titleText_.setString("BREADTH FIRST SEARCH");
+  titleText_.setString(algo_name);
   titleText_.setFillColor(FONT_COL);
   titleText_.setCharacterSize(20);
   sf::FloatRect textRect = titleText_.getLocalBounds();
@@ -99,6 +100,8 @@ void Algorithm::initNodes() {
       nodes_[nodeIndex]->setFrontier(false);
       nodes_[nodeIndex]->setPath(false);
       nodes_[nodeIndex]->setParentNode(nullptr);
+      nodes_[nodeIndex]->setGDistance(INFINITY);
+      nodes_[nodeIndex]->setFDistance(INFINITY);
     }
   }
 

@@ -111,9 +111,11 @@ void MainMenu_State::updateButtons(const float &dt) {
         break;
       case 2:
         // A-Star
+        states_.push(std::make_unique<ASTAR>(window_, states_));
         break;
       case 3:
         // Dijkstra
+        states_.push(std::make_unique<DIJKSTRA>(window_, states_));
         break;
       default:
         break;
