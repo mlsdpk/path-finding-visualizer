@@ -11,8 +11,8 @@ class Node {
   bool isFrontier_;
   bool isPath_;
   sf::Vector2i pos_;
-  std::vector<Node*> vecNeighbours_;
-  Node* parent_;
+  std::vector<std::shared_ptr<Node>> vecNeighbours_;
+  std::shared_ptr<Node> parent_;
 
  public:
   // Constructor
@@ -29,8 +29,8 @@ class Node {
 
   // Accessors
   sf::Vector2i getPos();
-  Node* getParentNode();
-  std::vector<Node*>* getNeighbours();
+  std::shared_ptr<Node> getParentNode();
+  const std::vector<std::shared_ptr<Node>>* getNeighbours() const;
 
   // Mutators
   void setObstacle(bool b);
@@ -38,6 +38,6 @@ class Node {
   void setFrontier(bool b);
   void setPath(bool b);
   void setPosition(sf::Vector2i pos);
-  void setNeighbours(Node* node);
-  void setParentNode(Node* node);
+  void setNeighbours(std::shared_ptr<Node> node);
+  void setParentNode(std::shared_ptr<Node> node);
 };

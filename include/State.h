@@ -17,21 +17,21 @@
 class State {
  private:
  protected:
-  std::stack<State*>* states_;
+  std::stack<std::unique_ptr<State>> &states_;
 
-  sf::RenderWindow* window_;
+  sf::RenderWindow *window_;
   sf::Vector2i mousePositionWindow_;
   bool quit_;
 
  public:
   // Constructor
-  State(sf::RenderWindow* window, std::stack<State*>* states);
+  State(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
 
   // Destructor
   virtual ~State();
 
   // Accessors
-  const bool& getQuit() const;
+  const bool getQuit() const;
 
   // Functions
   virtual void checkForQuit();
@@ -40,6 +40,6 @@ class State {
   // virtual functions
   virtual void endState() = 0;
   virtual void updateKeybinds() = 0;
-  virtual void update(const float& dt) = 0;
+  virtual void update(const float &dt) = 0;
   virtual void render() = 0;
 };

@@ -1,49 +1,22 @@
 #include "Game.h"
 
-void Game::initWindow(sf::RenderWindow* window) {
-  /*
-    @return void
-
-    - initialize window and set FPS limit to 100
-  */
-
-  window_ = window;
-  window_->setFramerateLimit(100);
-}
-
-void Game::initStates() {
-  /*
-    @return void
-
-    - initialization of state (BFS)
-  */
-
-  states_.push(new MainMenu_State(window_, &states_));
-}
-
 // Constructor
-Game::Game(sf::RenderWindow* window) {
-  // initialize window
-  initWindow(window);
+Game::Game(sf::RenderWindow* window, unsigned int frameLimit)
+    : window_{window} {
+  // setting frame limit
+  window_->setFramerateLimit(frameLimit);
 
-  // initialize all variables
-  // initVariables();
-
-  // initialize states
-  initStates();
+  // initial MainMenu State
+  states_.push(std::make_unique<MainMenu_State>(window_, states_));
 }
 
 // Destructor
-Game::~Game() {
-  while (!states_.empty()) {
-    delete states_.top();
-    states_.pop();
-  }
-}
+Game::~Game() {}
 
 // Accessors
 const bool Game::running() const { return window_->isOpen(); }
 
+// Functions
 void Game::pollEvents() {
   // Event polling
   while (window_->pollEvent(ev_)) {
@@ -58,7 +31,6 @@ void Game::pollEvents() {
   }
 }
 
-// Functions
 void Game::updateDt() { dt_ = dtClock_.restart().asSeconds(); }
 
 void Game::update() {
@@ -70,7 +42,6 @@ void Game::update() {
 
     if (states_.top()->getQuit()) {
       states_.top()->endState();
-      delete states_.top();
       states_.pop();
     }
   } else {
@@ -80,12 +51,6 @@ void Game::update() {
 }
 
 void Game::render() {
-  /*
-    @return void
-
-    Render the game objects
-  */
-
   window_->clear(sf::Color::White);
 
   if (!states_.empty()) {

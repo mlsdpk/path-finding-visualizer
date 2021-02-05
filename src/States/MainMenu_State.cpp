@@ -2,7 +2,7 @@
 
 // Constructor
 MainMenu_State::MainMenu_State(sf::RenderWindow *window,
-                               std::stack<State *> *states)
+                               std::stack<std::unique_ptr<State>> &states)
     : State(window, states) {
   initColors();
   initFonts();
@@ -12,13 +12,7 @@ MainMenu_State::MainMenu_State(sf::RenderWindow *window,
 }
 
 // Destructor
-MainMenu_State::~MainMenu_State() {
-  for (auto it = buttons_.begin(); it != buttons_.end(); ++it) {
-    delete it->second;
-  }
-
-  delete testDDL_;
-}
+MainMenu_State::~MainMenu_State() {}
 
 void MainMenu_State::initColors() {
   BGN_COL = sf::Color(246, 229, 245, 255);
@@ -80,12 +74,12 @@ void MainMenu_State::initButtons() {
   int x = window_->getSize().x / 2;
   int y = window_->getSize().y / 2 - 150;
 
-  testDDL_ = new gui::DropDownList(x, y, 250, 50, &font2_, "SELECT ALGORITHM",
-                                   algo_vec_, 4);
+  testDDL_ = std::make_unique<gui::DropDownList>(
+      x, y, 250, 50, &font2_, "SELECT ALGORITHM", algo_vec_, 4);
 
-  buttons_["EXIT"] =
-      new gui::Button(x, y + 410, 150, 50, &font2_, "EXIT", 20, IDLE_COL,
-                      HOVER_COL, sf::Color(240, 240, 240, 200));
+  buttons_["EXIT"] = std::make_unique<gui::Button>(
+      x, y + 410, 150, 50, &font2_, "EXIT", 20, IDLE_COL, HOVER_COL,
+      sf::Color(240, 240, 240, 200));
 }
 
 void MainMenu_State::updateButtons(const float &dt) {
@@ -99,7 +93,7 @@ void MainMenu_State::updateButtons(const float &dt) {
     std::string algo = testDDL_->getActiveButton()->getText();
 
     int index = -1;
-    for (size_t i = 0; i < algo_vec_.size(); i++) {
+    for (auto i = 0; i < algo_vec_.size(); i++) {
       if (algo == algo_vec_[i]) {
         index = i;
         break;
@@ -109,11 +103,11 @@ void MainMenu_State::updateButtons(const float &dt) {
     switch (index) {
       case 0:
         // BFS
-        states_->push(new BFS(window_, states_));
+        states_.push(std::make_unique<BFS>(window_, states_));
         break;
       case 1:
         // DFS
-        states_->push(new DFS(window_, states_));
+        states_.push(std::make_unique<DFS>(window_, states_));
         break;
       case 2:
         // A-Star

@@ -23,9 +23,11 @@ const bool Node::isPath() const { return isPath_; }
 // Accessors
 sf::Vector2i Node::getPos() { return pos_; }
 
-Node* Node::getParentNode() { return parent_; }
+std::shared_ptr<Node> Node::getParentNode() { return parent_; }
 
-std::vector<Node*>* Node::getNeighbours() { return &vecNeighbours_; }
+const std::vector<std::shared_ptr<Node>>* Node::getNeighbours() const {
+  return &vecNeighbours_;
+}
 
 // Mutators
 void Node::setObstacle(bool b) { isObstacle_ = b; }
@@ -38,6 +40,8 @@ void Node::setPath(bool b) { isPath_ = b; }
 
 void Node::setPosition(sf::Vector2i pos) { pos_ = pos; }
 
-void Node::setNeighbours(Node* node) { vecNeighbours_.push_back(node); }
+void Node::setNeighbours(std::shared_ptr<Node> node) {
+  vecNeighbours_.push_back(node);
+}
 
-void Node::setParentNode(Node* node) { parent_ = node; }
+void Node::setParentNode(std::shared_ptr<Node> node) { parent_ = node; }

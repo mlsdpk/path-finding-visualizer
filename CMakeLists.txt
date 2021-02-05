@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 project(path_finding_visualizer)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread")
 
 include_directories(/usr/local/include)
 include_directories(include)
 include_directories(include/States)
+include_directories(include/States/Algorithms)
 include_directories(include/States/Algorithms/BFS)
 include_directories(include/States/Algorithms/DFS)
 
@@ -17,6 +17,8 @@ add_executable(${EXECUTABLE_NAME}
   src/Game.cpp
   src/State.cpp
   src/Gui.cpp
+  src/States/Algorithms/Algorithm.cpp
+  src/States/Algorithms/Node.cpp
 )
 
 add_library(main_menu
@@ -25,12 +27,10 @@ add_library(main_menu
 
 add_library(bfs
   src/States/Algorithms/BFS/BFS.cpp
-  src/States/Algorithms/BFS/Node.cpp
 )
 
 add_library(dfs
   src/States/Algorithms/DFS/DFS.cpp
-  src/States/Algorithms/DFS/DFS_Node.cpp
 )
 
 # Find any version 2.X of SFML

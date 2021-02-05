@@ -18,8 +18,8 @@ class MainMenu_State : public State {
 
   std::vector<std::string> algo_vec_;
 
-  std::map<std::string, gui::Button*> buttons_;
-  gui::DropDownList* testDDL_;
+  std::map<std::string, std::unique_ptr<gui::Button>> buttons_;
+  std::unique_ptr<gui::DropDownList> testDDL_;
 
   // Functions
   void initFonts();
@@ -29,17 +29,18 @@ class MainMenu_State : public State {
   void initButtons();
 
  public:
-  MainMenu_State(sf::RenderWindow* window, std::stack<State*>* states);
+  MainMenu_State(sf::RenderWindow *window,
+                 std::stack<std::unique_ptr<State>> &states);
 
   virtual ~MainMenu_State();
 
   // Functions
   void endState();
   void updateKeybinds();
-  void update(const float& dt);
+  void update(const float &dt);
   void render();
 
   void renderBackground();
-  void updateButtons(const float& dt);
+  void updateButtons(const float &dt);
   void renderButtons();
 };

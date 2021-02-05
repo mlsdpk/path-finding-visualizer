@@ -6,7 +6,7 @@ int main() {
                           sf::Style::Titlebar | sf::Style::Close);
 
   // Initialize Game
-  Game game(&window);
+  Game game(&window, 100);
 
   // Game Loop
   while (game.running()) {
