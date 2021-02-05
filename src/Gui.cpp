@@ -144,11 +144,12 @@ gui::DropDownList::DropDownList(float x, float y, float width, float height,
       keyTime_{0.f},
       activeButton_{nullptr},
       activeMode_{false} {
-  mainButton_ = new gui::Button(
+  mainButton_ = std::make_unique<gui::Button>(
       x, y, width, height, font_, text, 20, sf::Color(251, 244, 249, 255),
       sf::Color(245, 238, 243, 255), sf::Color(214, 214, 215, 200));
+
   for (size_t i = 0; i < numOfElements; i++) {
-    list_.push_back(new gui::Button(
+    list_.emplace_back(std::make_unique<gui::Button>(
         x, y + ((i + 1) * height), width, height, font_, algo_vec[i], 20,
         sf::Color(251, 244, 249, 255), sf::Color(245, 238, 243, 255),
         sf::Color(240, 240, 240, 200)));
@@ -156,12 +157,7 @@ gui::DropDownList::DropDownList(float x, float y, float width, float height,
 }
 
 // Destructor
-gui::DropDownList::~DropDownList() {
-  delete mainButton_;
-  for (auto i : list_) {
-    delete i;
-  }
-}
+gui::DropDownList::~DropDownList() {}
 
 /**
  * Getter function for DropDownList ACTIVE state.
@@ -183,6 +179,8 @@ const bool gui::DropDownList::hasActiveButton() const {
  * @return current active button ptr.
  */
 gui::Button* gui::DropDownList::getActiveButton() { return activeButton_; }
+
+void gui::DropDownList::makeButtonInActive() { activeButton_ = nullptr; }
 
 /**
  * Getter function for DropDownList key timer.
@@ -238,7 +236,7 @@ void gui::DropDownList::update(const sf::Vector2f mousePos, const float& dt) {
     for (auto& i : list_) {
       i->update(mousePos);
       if (i->isPressed()) {
-        activeButton_ = i;
+        activeButton_ = i.get();
       }
     }
 

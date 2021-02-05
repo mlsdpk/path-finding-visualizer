@@ -21,7 +21,7 @@ class MainMenu_State : public State {
   std::vector<std::string> algo_vec_;
 
   std::map<std::string, std::unique_ptr<gui::Button>> buttons_;
-  std::unique_ptr<gui::DropDownList> testDDL_;
+  std::unique_ptr<gui::DropDownList> ddl_;
 
   // Functions
   void initFonts();

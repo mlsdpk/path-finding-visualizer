@@ -15,7 +15,10 @@ Algorithm::Algorithm(sf::RenderWindow* window,
 
 // Destructor
 Algorithm::~Algorithm() {
-  if (!thread_joined_) t_.join();
+  if (!thread_joined_) {
+    // std::cout << "thread joined" << '\n';
+    t_.join();
+  }
 }
 
 void Algorithm::initVariables() {
@@ -25,11 +28,8 @@ void Algorithm::initVariables() {
   mapWidth_ = 900;
   mapHeight_ = 640;
 
-  // old array initialization
-  // nodes_ = std::make_unique<Node[]>((mapWidth_ / gridSize_) * (mapHeight_ /
-  // gridSize_));
   for (int i = 0; i < (mapWidth_ / gridSize_) * (mapHeight_ / gridSize_); i++) {
-    nodes_.push_back(std::make_shared<Node>());
+    nodes_.emplace_back(std::make_shared<Node>());
   }
 
   message_queue_ = std::make_shared<MessageQueue<bool>>();
@@ -87,6 +87,9 @@ void Algorithm::initButtons() {
 
   buttons_["RESET"] = std::make_unique<gui::Button>(
       150, 210, 150, 40, &font2_, "RESET", 18, IDLE_COL, HOVER_COL, ACTIVE_COL);
+
+  buttons_["MENU"] = std::make_unique<gui::Button>(
+      150, 570, 150, 40, &font2_, "MENU", 18, IDLE_COL, HOVER_COL, ACTIVE_COL);
 }
 
 void Algorithm::initNodes() {
@@ -131,7 +134,9 @@ void Algorithm::initNodes() {
                     (mapWidth_ / gridSize_ - 1)];
 }
 
-void Algorithm::endState() { std::cout << "Ending Algorithm State" << '\n'; }
+void Algorithm::endState() {
+  // std::cout << "Ending Algorithm State" << '\n';
+}
 
 void Algorithm::updateKeybinds() { checkForQuit(); }
 
@@ -148,6 +153,11 @@ void Algorithm::updateButtons() {
   // RESET the nodes
   if (buttons_["RESET"]->isPressed() && getKeyTime()) {
     Algorithm_reset_ = true;
+  }
+
+  // Back to MainMenu
+  if (buttons_["MENU"]->isPressed() && getKeyTime()) {
+    quit_ = true;
   }
 }
 

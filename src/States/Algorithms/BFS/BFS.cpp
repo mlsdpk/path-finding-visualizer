@@ -5,7 +5,7 @@ BFS::BFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states)
     : Algorithm(window, states, "BREADTH FIRST SEARCH") {}
 
 // Destructor
-BFS::~BFS() {}
+BFS::~BFS() { std::cout << "BFS Destructor called" << '\n'; }
 
 // override initAlgorithm() function
 void BFS::initAlgorithm() {

@@ -49,9 +49,10 @@ class Button {
 class DropDownList {
  private:
   sf::Font* font_;
-  gui::Button* mainButton_;
+  std::unique_ptr<gui::Button> mainButton_;
   gui::Button* activeButton_;
-  std::vector<gui::Button*> list_;
+  // std::vector<gui::Button*> list_;
+  std::vector<std::unique_ptr<gui::Button>> list_;
   bool showList_;
   bool activeMode_;
 
@@ -71,6 +72,9 @@ class DropDownList {
   const bool getKeyTime();
   gui::Button* getActiveButton();
   const bool hasActiveButton() const;
+
+  // Mutators
+  void makeButtonInActive();
 
   // Functions
   void updateKeyTime(const float& dt);

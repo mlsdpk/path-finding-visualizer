@@ -12,7 +12,9 @@ MainMenu_State::MainMenu_State(sf::RenderWindow *window,
 }
 
 // Destructor
-MainMenu_State::~MainMenu_State() {}
+MainMenu_State::~MainMenu_State() {
+  // std::cout << "MainMenu Destructor called" << '\n';
+}
 
 void MainMenu_State::initColors() {
   BGN_COL = sf::Color(246, 229, 245, 255);
@@ -74,8 +76,8 @@ void MainMenu_State::initButtons() {
   int x = window_->getSize().x / 2;
   int y = window_->getSize().y / 2 - 150;
 
-  testDDL_ = std::make_unique<gui::DropDownList>(
-      x, y, 250, 50, &font2_, "SELECT ALGORITHM", algo_vec_, 4);
+  ddl_ = std::make_unique<gui::DropDownList>(x, y, 250, 50, &font2_,
+                                             "SELECT ALGORITHM", algo_vec_, 4);
 
   buttons_["EXIT"] = std::make_unique<gui::Button>(
       x, y + 410, 150, 50, &font2_, "EXIT", 20, IDLE_COL, HOVER_COL,
@@ -87,10 +89,10 @@ void MainMenu_State::updateButtons(const float &dt) {
     it.second->update(sf::Vector2f(mousePositionWindow_));
   }
 
-  testDDL_->update(sf::Vector2f(mousePositionWindow_), dt);
+  ddl_->update(sf::Vector2f(mousePositionWindow_), dt);
 
-  if (testDDL_->hasActiveButton()) {
-    std::string algo = testDDL_->getActiveButton()->getText();
+  if (ddl_->hasActiveButton()) {
+    std::string algo = ddl_->getActiveButton()->getText();
 
     int index = -1;
     for (auto i = 0; i < algo_vec_.size(); i++) {
@@ -120,6 +122,8 @@ void MainMenu_State::updateButtons(const float &dt) {
       default:
         break;
     }
+
+    ddl_->makeButtonInActive();
   }
 
   // Quit the game
@@ -133,7 +137,7 @@ void MainMenu_State::renderButtons() {
     it.second->render(window_);
   }
 
-  testDDL_->render(window_);
+  ddl_->render(window_);
 }
 
 void MainMenu_State::renderBackground() {
@@ -147,7 +151,7 @@ void MainMenu_State::renderBackground() {
 }
 
 void MainMenu_State::endState() {
-  std::cout << "Ending MainMenu State" << '\n';
+  // std::cout << "Ending MainMenu State" << '\n';
 }
 
 void MainMenu_State::updateKeybinds() { checkForQuit(); }
