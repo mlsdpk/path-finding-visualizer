@@ -19,11 +19,13 @@ class Algorithm : public State {
 
   // background related
   sf::Text titleText_;
+  std::vector<sf::Text> cellNamesTexts_;
+  std::vector<sf::RectangleShape> cellNamesShapes_;
   sf::RectangleShape cellNamesBGN_;
 
   // colors
   sf::Color BGN_COL, FONT_COL, IDLE_COL, HOVER_COL, ACTIVE_COL, START_COL,
-      END_BORDER_COL, VISITED_COL, FRONTIER_COL, OBST_COL, PATH_COL;
+      END_COL, VISITED_COL, FRONTIER_COL, OBST_COL, PATH_COL;
 
   // buttons
   std::map<std::string, std::unique_ptr<gui::Button>> buttons_;

@@ -56,8 +56,8 @@ void Algorithm::initColors() {
   IDLE_COL = sf::Color(251, 244, 249, 255);
   HOVER_COL = sf::Color(245, 238, 243, 255);
   ACTIVE_COL = sf::Color(232, 232, 232);
-  START_COL = sf::Color(190, 242, 227, 255);
-  END_BORDER_COL = sf::Color(67, 246, 130);
+  START_COL = sf::Color(67, 246, 130, 255);
+  END_COL = sf::Color(242, 103, 101);
   VISITED_COL = sf::Color(198, 202, 229, 255);
   FRONTIER_COL = sf::Color(242, 204, 209, 255);
   OBST_COL = sf::Color(186, 186, 186, 255);
@@ -75,10 +75,42 @@ void Algorithm::initBackground(const std::string& algo_name) {
                        textRect.top + textRect.height / 2.0f);
   titleText_.setPosition(sf::Vector2f(mapWidth_ / 6.0f, 50.0f));
 
-  // Cell names description
+  // Cell Names Background
   cellNamesBGN_.setPosition(sf::Vector2f(mapWidth_ / 3.0f, 0.f));
   cellNamesBGN_.setSize(sf::Vector2f(mapWidth_, 60));
   cellNamesBGN_.setFillColor(IDLE_COL);
+
+  // Cell Names Shapes and Texts
+  std::vector<sf::Color> shapeColors{OBST_COL, IDLE_COL, VISITED_COL,
+                                     FRONTIER_COL};
+  std::vector<std::string> shapeTexts{"Obstacle cell", "Empty cell",
+                                      "Visited cell", "Frontier cell"};
+
+  float initialX = 50.0;
+  float xOffset = 200.0;
+  for (int i = 0; i < shapeColors.size(); i++) {
+    // shape
+    sf::RectangleShape rectangle(sf::Vector2f(20.f, 20.f));
+    rectangle.setPosition(
+        sf::Vector2f(mapWidth_ / 3.0f + initialX + xOffset * i, 20.f));
+    rectangle.setFillColor(shapeColors[i]);
+    if (shapeColors[i] == IDLE_COL) {
+      rectangle.setOutlineThickness(2.f);
+      rectangle.setOutlineColor(BGN_COL);
+    }
+
+    // text
+    sf::Text text;
+    text.setFont(font2_);
+    text.setString(shapeTexts[i]);
+    text.setFillColor(FONT_COL);
+    text.setCharacterSize(20);
+    text.setPosition(
+        sf::Vector2f(mapWidth_ / 3.0f + initialX + 40.f + xOffset * i, 18.f));
+
+    cellNamesShapes_.push_back(rectangle);
+    cellNamesTexts_.push_back(text);
+  }
 }
 
 void Algorithm::initButtons() {
@@ -134,9 +166,7 @@ void Algorithm::initNodes() {
                     (mapWidth_ / gridSize_ - 1)];
 }
 
-void Algorithm::endState() {
-  // std::cout << "Ending Algorithm State" << '\n';
-}
+void Algorithm::endState() {}
 
 void Algorithm::updateKeybinds() { checkForQuit(); }
 
@@ -151,7 +181,7 @@ void Algorithm::updateButtons() {
   }
 
   // RESET the nodes
-  if (buttons_["RESET"]->isPressed() && getKeyTime()) {
+  if (buttons_["RESET"]->isPressed() && getKeyTime() && !Algorithm_running_) {
     Algorithm_reset_ = true;
   }
 
@@ -246,6 +276,14 @@ void Algorithm::renderBackground() {
   window_->clear(BGN_COL);
   window_->draw(titleText_);
   window_->draw(cellNamesBGN_);
+
+  for (auto& shape : cellNamesShapes_) {
+    window_->draw(shape);
+  }
+
+  for (auto& text : cellNamesTexts_) {
+    window_->draw(text);
+  }
 }
 
 void Algorithm::renderButtons() {

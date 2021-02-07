@@ -1,12 +1,18 @@
 
-![](figures/cover0.png)
+![](figures/img0.png)
 # Pathfinding Visualizer
 
 ## Overview
 
 A tool for visualizing numerous pathfinding algorithms. Current implementation of the project involves four pathfinding algorithms: BFS, DFS, DIJKSTRA and A-Star. The project extensively uses SFML and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
 
-![](figures/cover1.png)
+![](figures/img1.gif)
+
+## How to use
+
+- to place/remove obstacle cells (`left-CLICKED`)
+- to change starting cell (`left-SHIFT + left-CLICKED`)
+- to change end cell (`left-CTRL + left-CLICKED`)
 
 ## Dependencies
 

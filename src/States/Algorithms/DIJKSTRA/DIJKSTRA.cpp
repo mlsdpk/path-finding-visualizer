@@ -26,19 +26,33 @@ void DIJKSTRA::updateNodes() {
 
     if (localX >= 0 && localX < mapHeight_ / gridSize_) {
       if (localY >= 0 && localY < mapWidth_ / gridSize_) {
+        // get the selected node
+        std::shared_ptr<Node> selectedNode =
+            nodes_[(mapWidth_ / gridSize_) * localX + localY];
+
+        // check the position is Obstacle free or not
+        bool isObstacle = false;
+        if (selectedNode->isObstacle()) {
+          isObstacle = true;
+        }
+
         if (!Algorithm_solved_) {
-          if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))) {
-            nodeStart_ = nodes_[(mapWidth_ / gridSize_) * localX + localY];
-          } else if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {
-            nodeEnd_ = nodes_[(mapWidth_ / gridSize_) * localX + localY];
+          if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+            if (!isObstacle) {
+              if (selectedNode != nodeEnd_) nodeStart_ = selectedNode;
+            }
+          } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
+            if (!isObstacle) {
+              if (selectedNode != nodeStart_) nodeEnd_ = selectedNode;
+            }
           } else {
-            nodes_[(mapWidth_ / gridSize_) * localX + localY]->setObstacle(
-                !nodes_[(mapWidth_ / gridSize_) * localX + localY]
-                     ->isObstacle());
+            selectedNode->setObstacle(!isObstacle);
           }
         } else {
-          if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {
-            nodeEnd_ = nodes_[(mapWidth_ / gridSize_) * localX + localY];
+          if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
+            if (!isObstacle) {
+              if (selectedNode != nodeStart_) nodeEnd_ = selectedNode;
+            }
           }
         }
       }
@@ -56,33 +70,26 @@ void DIJKSTRA::renderNodes() {
       rectangle.setOutlineColor(BGN_COL);
       rectangle.setPosition(300 + y * size, 60 + x * size);
 
-      if (nodes_[(mapWidth_ / gridSize_) * x + y]->isObstacle()) {
+      int nodeIndex = (mapWidth_ / gridSize_) * x + y;
+
+      if (nodes_[nodeIndex]->isObstacle()) {
         rectangle.setFillColor(OBST_COL);
+      } else if (nodes_[nodeIndex]->isPath()) {
+        rectangle.setFillColor(PATH_COL);
+        nodes_[nodeIndex]->setPath(false);
+      } else if (nodes_[nodeIndex]->isFrontier()) {
+        rectangle.setFillColor(FRONTIER_COL);
+      } else if (nodes_[nodeIndex]->isVisited()) {
+        rectangle.setFillColor(VISITED_COL);
       } else {
         rectangle.setFillColor(IDLE_COL);
       }
 
-      if (nodes_[(mapWidth_ / gridSize_) * x + y]->isVisited()) {
-        rectangle.setFillColor(VISITED_COL);
-      }
-
-      if (nodes_[(mapWidth_ / gridSize_) * x + y]->isFrontier()) {
-        rectangle.setFillColor(FRONTIER_COL);
-      }
-
-      if (nodes_[(mapWidth_ / gridSize_) * x + y]->isPath()) {
+      if (nodes_[nodeIndex] == nodeStart_) {
         rectangle.setFillColor(START_COL);
-        nodes_[(mapWidth_ / gridSize_) * x + y]->setPath(false);
+      } else if (nodes_[nodeIndex] == nodeEnd_) {
+        rectangle.setFillColor(END_COL);
       }
-
-      if (nodes_[(mapWidth_ / gridSize_) * x + y] == nodeStart_) {
-        rectangle.setFillColor(START_COL);
-      }
-
-      if (nodes_[(mapWidth_ / gridSize_) * x + y] == nodeEnd_) {
-        rectangle.setFillColor(END_BORDER_COL);
-      }
-
       window_->draw(rectangle);
     }
   }
@@ -90,7 +97,6 @@ void DIJKSTRA::renderNodes() {
   // visualizing path
   if (nodeEnd_ != nullptr) {
     std::shared_ptr<Node> current = nodeEnd_;
-
     while (current->getParentNode() != nullptr && current != nodeStart_) {
       current->setPath(true);
       current = current->getParentNode();
