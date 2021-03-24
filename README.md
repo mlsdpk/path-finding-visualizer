@@ -4,7 +4,7 @@
 
 ## Overview
 
-A tool for visualizing numerous pathfinding algorithms. Current implementation of the project involves four pathfinding algorithms: BFS, DFS, DIJKSTRA and A-Star. The project extensively uses SFML and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
+A tool for visualizing numerous pathfinding algorithms. Current implementation of the project involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star. The project extensively uses SFML and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
 
 ![](figures/img1.gif)
 
@@ -94,3 +94,10 @@ On Linux however, nothing is provided. SFML relies on you to install all of its 
 - pthread
 
 The exact name of the packages may vary from distribution to distribution. Once those packages are installed, don't forget to install their development headers as well.
+
+## TODO
+
+### Sampling-based planners
+- [ ] RRT
+- [ ] RRT-Connect
+- [ ] RRT*
