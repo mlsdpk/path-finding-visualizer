@@ -97,7 +97,25 @@ The exact name of the packages may vary from distribution to distribution. Once 
 
 ## TODO
 
+### Search-based planners
+- [x] BFS
+- [x] DFS
+- [x] DIJKSTRA
+- [x] A*
+- [ ] Bidirectional-A*
+- [ ] D*
+- [ ] LPA*
+
 ### Sampling-based planners
-- [ ] RRT
+- [x] RRT
 - [ ] RRT-Connect
-- [ ] RRT*
+- [x] RRT*
+- [ ] Informed-RRT*
+- [ ] FMT*
+- [ ] BIT*
+- [ ] ABIT*
+- [ ] AIT*
+
+## Related Publications
+- [RRT](https://www.cs.csustan.edu/~xliang/Courses/CS4710-21S/Papers/06%20RRT.pdf): Rapidly-exploring random trees: A new tool for path planning
+- [RRT*](https://journals.sagepub.com/doi/abs/10.1177/0278364911406761): Sampling-based algorithms for optimal motion planning
