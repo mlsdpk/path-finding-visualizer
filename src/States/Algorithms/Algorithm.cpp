@@ -6,11 +6,11 @@ Algorithm::Algorithm(sf::RenderWindow* window,
                      std::string algo_name)
     : State(window, states), keyTimeMax_{1.f}, keyTime_{0.f} {
   initVariables();
+  initNodes();
   initFonts();
   initColors();
   initBackground(algo_name);
   initButtons();
-  initNodes();
 }
 
 // Destructor
@@ -272,19 +272,19 @@ void Algorithm::update(const float& dt) {
   Rendering Stuffs
 */
 
-void Algorithm::renderBackground() {
-  window_->clear(BGN_COL);
-  window_->draw(titleText_);
-  window_->draw(cellNamesBGN_);
-
-  for (auto& shape : cellNamesShapes_) {
-    window_->draw(shape);
-  }
-
-  for (auto& text : cellNamesTexts_) {
-    window_->draw(text);
-  }
-}
+// void Algorithm::renderBackground() {
+//   window_->clear(BGN_COL);
+//   window_->draw(titleText_);
+//   window_->draw(cellNamesBGN_);
+//
+//   for (auto& shape : cellNamesShapes_) {
+//     window_->draw(shape);
+//   }
+//
+//   for (auto& text : cellNamesTexts_) {
+//     window_->draw(text);
+//   }
+// }
 
 void Algorithm::renderButtons() {
   for (auto& it : buttons_) {
@@ -293,7 +293,9 @@ void Algorithm::renderButtons() {
 }
 
 void Algorithm::render() {
+  // virtual function renderBackground()
   renderBackground();
+
   renderButtons();
 
   // virtual function renderNodes()

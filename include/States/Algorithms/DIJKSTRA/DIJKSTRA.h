@@ -38,6 +38,7 @@ class DIJKSTRA : public Algorithm {
   void updateNodes() override;
 
   // override render functions
+  void renderBackground() override;
   void renderNodes() override;
 
   // DIJKSTRA algorithm function

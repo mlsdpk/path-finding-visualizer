@@ -1,7 +1,7 @@
 #include "BFS.h"
 
 // Constructor
-BFS::BFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states)
+BFS::BFS(sf::RenderWindow* window, std::stack<std::unique_ptr<State>>& states)
     : Algorithm(window, states, "BREADTH FIRST SEARCH") {}
 
 // Destructor
@@ -56,6 +56,21 @@ void BFS::updateNodes() {
         }
       }
     }
+  }
+}
+
+// override renderBackground() function
+void BFS::renderBackground() {
+  window_->clear(BGN_COL);
+  window_->draw(titleText_);
+  window_->draw(cellNamesBGN_);
+
+  for (auto& shape : cellNamesShapes_) {
+    window_->draw(shape);
+  }
+
+  for (auto& text : cellNamesTexts_) {
+    window_->draw(text);
   }
 }
 

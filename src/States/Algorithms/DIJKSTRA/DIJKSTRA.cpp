@@ -60,6 +60,21 @@ void DIJKSTRA::updateNodes() {
   }
 }
 
+// override renderBackground() function
+void DIJKSTRA::renderBackground() {
+  window_->clear(BGN_COL);
+  window_->draw(titleText_);
+  window_->draw(cellNamesBGN_);
+
+  for (auto &shape : cellNamesShapes_) {
+    window_->draw(shape);
+  }
+
+  for (auto &text : cellNamesTexts_) {
+    window_->draw(text);
+  }
+}
+
 // override renderNodes() function
 void DIJKSTRA::renderNodes() {
   for (int x = 0; x < mapHeight_ / gridSize_; x++) {

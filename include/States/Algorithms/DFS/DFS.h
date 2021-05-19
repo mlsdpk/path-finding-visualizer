@@ -25,6 +25,7 @@ class DFS : public Algorithm {
   void updateNodes() override;
 
   // override render functions
+  void renderBackground() override;
   void renderNodes() override;
 
   // DFS algorithm function
