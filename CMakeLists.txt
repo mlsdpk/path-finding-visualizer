@@ -11,6 +11,8 @@ include_directories(include/States/Algorithms/BFS)
 include_directories(include/States/Algorithms/DFS)
 include_directories(include/States/Algorithms/DIJKSTRA)
 include_directories(include/States/Algorithms/ASTAR)
+include_directories(include/States/Algorithms/RRT)
+include_directories(include/States/Algorithms/RRT_STAR)
 
 set(EXECUTABLE_NAME "main")
 
@@ -20,6 +22,7 @@ add_executable(${EXECUTABLE_NAME}
   src/State.cpp
   src/Gui.cpp
   src/States/Algorithms/Algorithm.cpp
+  src/States/Algorithms/SamplingBased.cpp
   src/States/Algorithms/Node.cpp
 )
 
@@ -43,18 +46,33 @@ add_library(astar
   src/States/Algorithms/ASTAR/ASTAR.cpp
 )
 
+add_library(rrt
+  src/States/Algorithms/RRT/RRT.cpp
+)
+
+add_library(rrt_star
+  src/States/Algorithms/RRT_STAR/RRT_STAR.cpp
+)
+
 # Find any version 2.X of SFML
 find_package(SFML 2.5.1 COMPONENTS system window graphics network audio)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
 
-include_directories(${SFML_INCLUDE_DIRS})
+include_directories(${SFML_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
 target_link_libraries(${EXECUTABLE_NAME}
+  ${Boost_LIBRARIES}
   sfml-graphics
   sfml-window
   sfml-system
+)
+
+target_link_libraries(${EXECUTABLE_NAME}
   main_menu
   bfs
   dfs
   dijkstra
   astar
+  rrt
+	rrt_star
 )

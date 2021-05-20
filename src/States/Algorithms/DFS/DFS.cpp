@@ -1,7 +1,7 @@
 #include "DFS.h"
 
 // Constructor
-DFS::DFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states)
+DFS::DFS(sf::RenderWindow* window, std::stack<std::unique_ptr<State>>& states)
     : Algorithm(window, states, "DEPTH FIRST SEARCH") {}
 
 // Destructor
@@ -56,6 +56,21 @@ void DFS::updateNodes() {
         }
       }
     }
+  }
+}
+
+// override renderBackground() function
+void DFS::renderBackground() {
+  window_->clear(BGN_COL);
+  window_->draw(titleText_);
+  window_->draw(cellNamesBGN_);
+
+  for (auto& shape : cellNamesShapes_) {
+    window_->draw(shape);
+  }
+
+  for (auto& text : cellNamesTexts_) {
+    window_->draw(text);
   }
 }
 

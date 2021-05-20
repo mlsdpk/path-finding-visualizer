@@ -12,9 +12,7 @@ MainMenu_State::MainMenu_State(sf::RenderWindow *window,
 }
 
 // Destructor
-MainMenu_State::~MainMenu_State() {
-  // std::cout << "MainMenu Destructor called" << '\n';
-}
+MainMenu_State::~MainMenu_State() {}
 
 void MainMenu_State::initColors() {
   BGN_COL = sf::Color(246, 229, 245, 255);
@@ -77,7 +75,7 @@ void MainMenu_State::initButtons() {
   int y = window_->getSize().y / 2 - 150;
 
   ddl_ = std::make_unique<gui::DropDownList>(x, y, 250, 50, &font2_,
-                                             "SELECT ALGORITHM", algo_vec_, 4);
+                                             "SELECT PLANNER", algo_vec_);
 
   buttons_["EXIT"] = std::make_unique<gui::Button>(
       x, y + 410, 150, 50, &font2_, "EXIT", 20, IDLE_COL, HOVER_COL,
@@ -119,6 +117,14 @@ void MainMenu_State::updateButtons(const float &dt) {
         // Dijkstra
         states_.push(std::make_unique<DIJKSTRA>(window_, states_));
         break;
+      case 4:
+        // RRT
+        states_.push(std::make_unique<RRT>(window_, states_));
+        break;
+      case 5:
+        // RRT-Star
+        states_.push(std::make_unique<RRT_STAR>(window_, states_));
+        break;
       default:
         break;
     }
@@ -150,9 +156,7 @@ void MainMenu_State::renderBackground() {
   window_->draw(versionText_);
 }
 
-void MainMenu_State::endState() {
-  // std::cout << "Ending MainMenu State" << '\n';
-}
+void MainMenu_State::endState() {}
 
 void MainMenu_State::updateKeybinds() { checkForQuit(); }
 

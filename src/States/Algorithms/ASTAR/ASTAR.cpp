@@ -61,6 +61,21 @@ void ASTAR::updateNodes() {
   }
 }
 
+// override renderBackground() function
+void ASTAR::renderBackground() {
+  window_->clear(BGN_COL);
+  window_->draw(titleText_);
+  window_->draw(cellNamesBGN_);
+
+  for (auto &shape : cellNamesShapes_) {
+    window_->draw(shape);
+  }
+
+  for (auto &text : cellNamesTexts_) {
+    window_->draw(text);
+  }
+}
+
 // override renderNodes() function
 void ASTAR::renderNodes() {
   for (int x = 0; x < mapHeight_ / gridSize_; x++) {
@@ -137,6 +152,7 @@ void ASTAR::solveConcurrently(
       ////////////////////////////
       // run the main algorithm //
       ////////////////////////////
+
       if (!frontier_.empty()) {
         std::shared_ptr<Node> nodeCurrent = frontier_.top();
         nodeCurrent->setFrontier(false);
@@ -170,6 +186,7 @@ void ASTAR::solveConcurrently(
       } else {
         solved = true;
       }
+
       ////////////////////////////
 
       // reset stop watch for next cycle

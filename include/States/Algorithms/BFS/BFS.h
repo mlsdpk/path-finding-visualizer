@@ -25,6 +25,7 @@ class BFS : public Algorithm {
   void updateNodes() override;
 
   // override render functions
+  void renderBackground() override;
   void renderNodes() override;
 
   // BFS algorithm function

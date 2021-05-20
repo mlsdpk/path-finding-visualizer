@@ -4,7 +4,9 @@
 
 ## Overview
 
-A tool for visualizing numerous pathfinding algorithms. Current implementation of the project involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star. The project extensively uses SFML and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
+A tool for visualizing numerous pathfinding algorithms.
+
+Current implementation of the project involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star, and two sampling-based planning algorithms: RRT and RRT*. The project extensively uses SFML and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
 
 ![](figures/img1.gif)
 
@@ -97,7 +99,25 @@ The exact name of the packages may vary from distribution to distribution. Once 
 
 ## TODO
 
+### Search-based planners
+- [x] BFS
+- [x] DFS
+- [x] DIJKSTRA
+- [x] A*
+- [ ] Bidirectional-A*
+- [ ] D*
+- [ ] LPA*
+
 ### Sampling-based planners
-- [ ] RRT
+- [x] RRT
 - [ ] RRT-Connect
-- [ ] RRT*
+- [x] RRT*
+- [ ] Informed-RRT*
+- [ ] FMT*
+- [ ] BIT*
+- [ ] ABIT*
+- [ ] AIT*
+
+## Related Publications
+- [RRT](https://www.cs.csustan.edu/~xliang/Courses/CS4710-21S/Papers/06%20RRT.pdf): Rapidly-exploring random trees: A new tool for path planning
+- [RRT*](https://journals.sagepub.com/doi/abs/10.1177/0278364911406761): Sampling-based algorithms for optimal motion planning

@@ -26,7 +26,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get -y install libsfml-dev
+        sudo apt-get -y install libsfml-dev libboost-all-dev
 
     - name: Building
       run: |

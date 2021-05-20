@@ -136,8 +136,7 @@ void gui::Button::render(sf::RenderWindow* window) {
 // Constructor
 gui::DropDownList::DropDownList(float x, float y, float width, float height,
                                 sf::Font* font, std::string text,
-                                const std::vector<std::string>& algo_vec,
-                                unsigned numOfElements, unsigned default_index)
+                                const std::vector<std::string>& algo_vec)
     : font_{font},
       showList_{false},
       keyTimeMax_{1.f},
@@ -148,7 +147,7 @@ gui::DropDownList::DropDownList(float x, float y, float width, float height,
       x, y, width, height, font_, text, 20, sf::Color(251, 244, 249, 255),
       sf::Color(245, 238, 243, 255), sf::Color(214, 214, 215, 200));
 
-  for (size_t i = 0; i < numOfElements; i++) {
+  for (size_t i = 0; i < algo_vec.size(); i++) {
     list_.emplace_back(std::make_unique<gui::Button>(
         x, y + ((i + 1) * height), width, height, font_, algo_vec[i], 20,
         sf::Color(251, 244, 249, 255), sf::Color(245, 238, 243, 255),
