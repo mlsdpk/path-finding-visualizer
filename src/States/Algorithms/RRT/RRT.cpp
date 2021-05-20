@@ -7,18 +7,42 @@ RRT::RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states)
       delta_q_{0.05},
       goal_radius_{0.1} {
   initialize();
+
+  // read from config file and update the rrt parameters
+  std::ifstream stream("../config/rrt.ini");
+  std::string line;
+  std::string key;
+  std::string value;
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> key >> value) {
+        if (key == "max_vertices")
+          max_vertices_ = std::stof(value);
+        else if (key == "delta_q")
+          delta_q_ = std::stof(value);
+        else if (key == "goal_radius")
+          goal_radius_ = std::stof(value);
+      }
+    }
+  }
+
+  stream.close();
+
+  initBackgroundText();
 }
 
 // Destructor
 RRT::~RRT() {}
 
 void RRT::initialize() {
-  start_point_->x = 0.0;
-  start_point_->y = 0.0;
+  start_point_->x = 0.5;
+  start_point_->y = 0.1;
   start_point_->parent = nullptr;
 
-  goal_point_->x = 1.0;
-  goal_point_->y = 1.0;
+  goal_point_->x = 0.5;
+  goal_point_->y = 0.9;
   goal_point_->parent = nullptr;
 
   vertices_.clear();
@@ -35,6 +59,37 @@ void RRT::initAlgorithm() {
   vertices_.emplace_back(start_point_);
 }
 
+void RRT::initBackgroundText() {
+  // Max vertices
+  maxVerticesText_.setFont(font2_);
+  maxVerticesText_.setFillColor(FONT_COL);
+  maxVerticesText_.setString("MAX VERTICES: " + std::to_string(max_vertices_));
+  maxVerticesText_.setCharacterSize(20);
+  // sf::FloatRect textRect = maxVerticesText.getLocalBounds();
+  // maxVerticesText.setOrigin(textRect.left + textRect.width / 2.0f,
+  //                      textRect.top + textRect.height / 2.0f);
+  maxVerticesText_.setPosition(sf::Vector2f(350, 17));
+
+  // Max vertices
+  noOfVerticesText_.setFont(font2_);
+  noOfVerticesText_.setFillColor(FONT_COL);
+  noOfVerticesText_.setString("NO: OF VERTICES: 0");
+  noOfVerticesText_.setCharacterSize(20);
+  // sf::FloatRect textRect = maxVerticesText.getLocalBounds();
+  // maxVerticesText.setOrigin(textRect.left + textRect.width / 2.0f,
+  //                      textRect.top + textRect.height / 2.0f);
+  noOfVerticesText_.setPosition(sf::Vector2f(650, 17));
+}
+
+void RRT::updateBackgroundText() {
+  maxVerticesText_.setString("MAX VERTICES: " + std::to_string(max_vertices_));
+
+  std::unique_lock<std::mutex> lck(mutex_);
+  noOfVerticesText_.setString("NO: OF VERTICES: " +
+                              std::to_string(vertices_.size()));
+  lck.unlock();
+}
+
 void RRT::renderBackground() {
   window_->clear(BGN_COL);
 
@@ -43,6 +98,10 @@ void RRT::renderBackground() {
   rectangle.setFillColor(IDLE_COL);
   window_->draw(rectangle);
   window_->draw(titleText_);
+
+  updateBackgroundText();
+  window_->draw(maxVerticesText_);
+  window_->draw(noOfVerticesText_);
 }
 
 void RRT::renderAlgorithm() {
@@ -164,7 +223,7 @@ void RRT::solveConcurrently(std::shared_ptr<Point> start_point,
       }
 
       std::unique_lock<std::mutex> lck(mutex_);
-      if (vertices_.size() > max_vertices_) {
+      if (vertices_.size() > max_vertices_ - 1) {
         std::cout << "Vertices reach maximum limit. Solution not found" << '\n';
         solved = true;
       }

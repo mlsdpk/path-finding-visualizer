@@ -18,6 +18,10 @@ class RRT_STAR : public SamplingBased {
   double maxDistance_;
   double r_rrt_;
 
+  // background text
+  sf::Text maxVerticesText_;
+  sf::Text noOfVerticesText_;
+
  public:
   // Constructor
   RRT_STAR(sf::RenderWindow *window,
@@ -38,6 +42,10 @@ class RRT_STAR : public SamplingBased {
   void solveConcurrently(
       std::shared_ptr<Point> start_point, std::shared_ptr<Point> goal_point,
       std::shared_ptr<MessageQueue<bool>> message_queue) override;
+
+  // new background related functionsm
+  void initBackgroundText();
+  void updateBackgroundText();
 
   // new functions
   void sample_free(Point &point);

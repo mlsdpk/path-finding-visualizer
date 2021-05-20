@@ -15,6 +15,10 @@ class RRT : public SamplingBased {
   double delta_q_;
   double goal_radius_;
 
+  // background text
+  sf::Text maxVerticesText_;
+  sf::Text noOfVerticesText_;
+
  public:
   // Constructor
   RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
@@ -34,6 +38,10 @@ class RRT : public SamplingBased {
   void solveConcurrently(
       std::shared_ptr<Point> start_point, std::shared_ptr<Point> goal_point,
       std::shared_ptr<MessageQueue<bool>> message_queue) override;
+
+  // new background related functionsm
+  void initBackgroundText();
+  void updateBackgroundText();
 
   // new functions
   void sample_free(Point &point);
