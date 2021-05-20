@@ -4,7 +4,9 @@
 
 ## Overview
 
-A tool for visualizing numerous pathfinding algorithms. Current implementation of the project involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star. The project extensively uses SFML and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
+A tool for visualizing numerous pathfinding algorithms.
+
+Current implementation of the project involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star, and two sampling-based planning algorithms: RRT and RRT*. The project extensively uses SFML and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
 
 ![](figures/img1.gif)
 
