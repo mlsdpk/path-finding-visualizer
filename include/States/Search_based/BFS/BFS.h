@@ -2,9 +2,9 @@
 
 #include <queue>
 
-#include "SearchBased.h"
 #include "Gui.h"
 #include "Node.h"
+#include "SearchBased.h"
 
 class BFS : public SearchBased {
  private:

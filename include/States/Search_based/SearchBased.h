@@ -71,7 +71,8 @@ class SearchBased : public State {
  public:
   // Constructor
   SearchBased(sf::RenderWindow* window,
-            std::stack<std::unique_ptr<State>>& states, std::string algo_name);
+              std::stack<std::unique_ptr<State>>& states,
+              std::string algo_name);
 
   // Destructor
   virtual ~SearchBased();

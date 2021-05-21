@@ -2,9 +2,9 @@
 
 #include <stack>
 
-#include "SearchBased.h"
 #include "Gui.h"
 #include "Node.h"
+#include "SearchBased.h"
 
 class DFS : public SearchBased {
  private:

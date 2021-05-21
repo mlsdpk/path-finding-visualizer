@@ -2,8 +2,8 @@
 
 // Constructor
 SearchBased::SearchBased(sf::RenderWindow* window,
-                     std::stack<std::unique_ptr<State>>& states,
-                     std::string algo_name)
+                         std::stack<std::unique_ptr<State>>& states,
+                         std::string algo_name)
     : State(window, states), keyTimeMax_{1.f}, keyTime_{0.f} {
   initVariables();
   initNodes();

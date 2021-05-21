@@ -2,9 +2,9 @@
 
 #include <queue>
 
-#include "SearchBased.h"
 #include "Gui.h"
 #include "Node.h"
+#include "SearchBased.h"
 
 // custom function for returning minimum distance node
 // to be used in priority queue
