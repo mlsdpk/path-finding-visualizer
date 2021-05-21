@@ -2,11 +2,11 @@
 
 #include <queue>
 
-#include "Algorithm.h"
 #include "Gui.h"
 #include "Node.h"
+#include "SearchBased.h"
 
-class BFS : public Algorithm {
+class BFS : public SearchBased {
  private:
   // BFS related
   std::queue<std::shared_ptr<Node>> frontier_;

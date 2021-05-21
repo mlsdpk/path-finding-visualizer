@@ -2,9 +2,9 @@
 
 #include <queue>
 
-#include "Algorithm.h"
 #include "Gui.h"
 #include "Node.h"
+#include "SearchBased.h"
 
 // custom function for returning minimum distance node
 // to be used in priority queue
@@ -16,7 +16,7 @@ struct MinimumDistanceDIJKSTRA {
   }
 };
 
-class DIJKSTRA : public Algorithm {
+class DIJKSTRA : public SearchBased {
  private:
   // DIJKSTRA related
   std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>,

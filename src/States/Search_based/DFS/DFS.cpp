@@ -2,7 +2,7 @@
 
 // Constructor
 DFS::DFS(sf::RenderWindow* window, std::stack<std::unique_ptr<State>>& states)
-    : Algorithm(window, states, "DEPTH FIRST SEARCH") {}
+    : SearchBased(window, states, "DEPTH FIRST SEARCH") {}
 
 // Destructor
 DFS::~DFS() {}

@@ -2,11 +2,11 @@
 
 #include <stack>
 
-#include "Algorithm.h"
 #include "Gui.h"
 #include "Node.h"
+#include "SearchBased.h"
 
-class DFS : public Algorithm {
+class DFS : public SearchBased {
  private:
   // DFS related
   std::stack<std::shared_ptr<Node>> frontier_;
