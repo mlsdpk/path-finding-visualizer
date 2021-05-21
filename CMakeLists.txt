@@ -6,13 +6,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread")
 include_directories(/usr/local/include)
 include_directories(include)
 include_directories(include/States)
-include_directories(include/States/Algorithms)
-include_directories(include/States/Algorithms/BFS)
-include_directories(include/States/Algorithms/DFS)
-include_directories(include/States/Algorithms/DIJKSTRA)
-include_directories(include/States/Algorithms/ASTAR)
-include_directories(include/States/Algorithms/RRT)
-include_directories(include/States/Algorithms/RRT_STAR)
+include_directories(include/States/Search_based)
+include_directories(include/States/Sampling_based)
+include_directories(include/States/Search_based/BFS)
+include_directories(include/States/Search_based/DFS)
+include_directories(include/States/Search_based/DIJKSTRA)
+include_directories(include/States/Search_based/ASTAR)
+include_directories(include/States/Sampling_based/RRT)
+include_directories(include/States/Sampling_based/RRT_STAR)
 
 set(EXECUTABLE_NAME "main")
 
@@ -21,37 +22,45 @@ add_executable(${EXECUTABLE_NAME}
   src/Game.cpp
   src/State.cpp
   src/Gui.cpp
-  src/States/Algorithms/Algorithm.cpp
-  src/States/Algorithms/SamplingBased.cpp
-  src/States/Algorithms/Node.cpp
+  src/States/Search_based/SearchBased.cpp
+  src/States/Search_based/Node.cpp
+  src/States/Sampling_based/SamplingBased.cpp
 )
 
 add_library(main_menu
   src/States/MainMenu_State.cpp
 )
 
+########################
+# Search-based Planners
+########################
+
 add_library(bfs
-  src/States/Algorithms/BFS/BFS.cpp
+  src/States/Search_based/BFS/BFS.cpp
 )
 
 add_library(dfs
-  src/States/Algorithms/DFS/DFS.cpp
+  src/States/Search_based/DFS/DFS.cpp
 )
 
 add_library(dijkstra
-  src/States/Algorithms/DIJKSTRA/DIJKSTRA.cpp
+  src/States/Search_based/DIJKSTRA/DIJKSTRA.cpp
 )
 
 add_library(astar
-  src/States/Algorithms/ASTAR/ASTAR.cpp
+  src/States/Search_based/ASTAR/ASTAR.cpp
 )
 
+##########################
+# Sampling-based Planners
+##########################
+
 add_library(rrt
-  src/States/Algorithms/RRT/RRT.cpp
+  src/States/Sampling_based/RRT/RRT.cpp
 )
 
 add_library(rrt_star
-  src/States/Algorithms/RRT_STAR/RRT_STAR.cpp
+  src/States/Sampling_based/RRT_STAR/RRT_STAR.cpp
 )
 
 # Find any version 2.X of SFML

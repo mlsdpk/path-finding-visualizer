@@ -1,25 +1,26 @@
-#include "DIJKSTRA.h"
+#include "ASTAR.h"
 
 // Constructor
-DIJKSTRA::DIJKSTRA(sf::RenderWindow *window,
-                   std::stack<std::unique_ptr<State>> &states)
-    : Algorithm(window, states, "DIJKSTRA") {}
+ASTAR::ASTAR(sf::RenderWindow *window,
+             std::stack<std::unique_ptr<State>> &states)
+    : SearchBased(window, states, "A-STAR") {}
 
 // Destructor
-DIJKSTRA::~DIJKSTRA() {}
+ASTAR::~ASTAR() {}
 
 // override initAlgorithm() function
-void DIJKSTRA::initAlgorithm() {
-  // initialize DIJKSTRA by clearing frontier and add start node
+void ASTAR::initAlgorithm() {
+  // initialize ASTAR by clearing frontier and add start node
   while (!frontier_.empty()) {
     frontier_.pop();
   }
   nodeStart_->setGDistance(0.0);
+  nodeStart_->setFDistance(L1_Distance(nodeStart_, nodeEnd_));
   frontier_.push(nodeStart_);
 }
 
 // override updateNodes() function
-void DIJKSTRA::updateNodes() {
+void ASTAR::updateNodes() {
   if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && getKeyTime()) {
     int localY = ((mousePositionWindow_.x - 300) / gridSize_);
     int localX = ((mousePositionWindow_.y - 60) / gridSize_);
@@ -61,7 +62,7 @@ void DIJKSTRA::updateNodes() {
 }
 
 // override renderBackground() function
-void DIJKSTRA::renderBackground() {
+void ASTAR::renderBackground() {
   window_->clear(BGN_COL);
   window_->draw(titleText_);
   window_->draw(cellNamesBGN_);
@@ -76,7 +77,7 @@ void DIJKSTRA::renderBackground() {
 }
 
 // override renderNodes() function
-void DIJKSTRA::renderNodes() {
+void ASTAR::renderNodes() {
   for (int x = 0; x < mapHeight_ / gridSize_; x++) {
     for (int y = 0; y < mapWidth_ / gridSize_; y++) {
       float size = static_cast<float>(gridSize_);
@@ -119,13 +120,13 @@ void DIJKSTRA::renderNodes() {
   }
 }
 
-double DIJKSTRA::L1_Distance(const std::shared_ptr<Node> &n1,
-                             const std::shared_ptr<Node> &n2) {
+double ASTAR::L1_Distance(const std::shared_ptr<Node> &n1,
+                          const std::shared_ptr<Node> &n2) {
   return fabs(n1->getPos().x - n2->getPos().x) +
          fabs(n1->getPos().y - n2->getPos().y);
 }
 
-void DIJKSTRA::solveConcurrently(
+void ASTAR::solveConcurrently(
     std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
     std::shared_ptr<MessageQueue<bool>> message_queue) {
   // copy assignment
@@ -151,6 +152,7 @@ void DIJKSTRA::solveConcurrently(
       ////////////////////////////
       // run the main algorithm //
       ////////////////////////////
+
       if (!frontier_.empty()) {
         std::shared_ptr<Node> nodeCurrent = frontier_.top();
         nodeCurrent->setFrontier(false);
@@ -173,6 +175,10 @@ void DIJKSTRA::solveConcurrently(
             nodeNeighbour->setParentNode(nodeCurrent);
             nodeNeighbour->setGDistance(dist);
 
+            // f = g + h
+            double f_dist = nodeCurrent->getGDistance() +
+                            L1_Distance(nodeNeighbour, s_nodeEnd);
+            nodeNeighbour->setFDistance(f_dist);
             nodeNeighbour->setFrontier(true);
             frontier_.push(nodeNeighbour);
           }
@@ -180,6 +186,7 @@ void DIJKSTRA::solveConcurrently(
       } else {
         solved = true;
       }
+
       ////////////////////////////
 
       // reset stop watch for next cycle

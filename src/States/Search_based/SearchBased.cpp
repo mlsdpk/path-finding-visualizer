@@ -1,7 +1,7 @@
-#include "Algorithm.h"
+#include "SearchBased.h"
 
 // Constructor
-Algorithm::Algorithm(sf::RenderWindow* window,
+SearchBased::SearchBased(sf::RenderWindow* window,
                      std::stack<std::unique_ptr<State>>& states,
                      std::string algo_name)
     : State(window, states), keyTimeMax_{1.f}, keyTime_{0.f} {
@@ -14,14 +14,14 @@ Algorithm::Algorithm(sf::RenderWindow* window,
 }
 
 // Destructor
-Algorithm::~Algorithm() {
+SearchBased::~SearchBased() {
   if (!thread_joined_) {
     // std::cout << "thread joined" << '\n';
     t_.join();
   }
 }
 
-void Algorithm::initVariables() {
+void SearchBased::initVariables() {
   // these variables depend on the visualizer
   // for now, just use these and can improve it later
   gridSize_ = 20;
@@ -41,7 +41,7 @@ void Algorithm::initVariables() {
   thread_joined_ = true;
 }
 
-void Algorithm::initFonts() {
+void SearchBased::initFonts() {
   if (!font1_.loadFromFile("../fonts/bungee-inline-regular.ttf")) {
     throw("ERROR::MainMenuSTATE::COULD NOT LOAD FONT1.");
   }
@@ -50,7 +50,7 @@ void Algorithm::initFonts() {
   }
 }
 
-void Algorithm::initColors() {
+void SearchBased::initColors() {
   BGN_COL = sf::Color(246, 229, 245, 255);
   FONT_COL = sf::Color(78, 95, 131, 255);
   IDLE_COL = sf::Color(251, 244, 249, 255);
@@ -64,7 +64,7 @@ void Algorithm::initColors() {
   PATH_COL = sf::Color(190, 242, 227, 255);
 }
 
-void Algorithm::initBackground(const std::string& algo_name) {
+void SearchBased::initBackground(const std::string& algo_name) {
   // Main title
   titleText_.setFont(font1_);
   titleText_.setString(algo_name);
@@ -113,7 +113,7 @@ void Algorithm::initBackground(const std::string& algo_name) {
   }
 }
 
-void Algorithm::initButtons() {
+void SearchBased::initButtons() {
   buttons_["RUN"] = std::make_unique<gui::Button>(
       150, 150, 150, 40, &font2_, "RUN", 18, IDLE_COL, HOVER_COL, ACTIVE_COL);
 
@@ -124,7 +124,7 @@ void Algorithm::initButtons() {
       150, 570, 150, 40, &font2_, "MENU", 18, IDLE_COL, HOVER_COL, ACTIVE_COL);
 }
 
-void Algorithm::initNodes() {
+void SearchBased::initNodes() {
   // set all nodes to free obsts and respective positions
   for (int x = 0; x < mapHeight_ / gridSize_; x++) {
     for (int y = 0; y < mapWidth_ / gridSize_; y++) {
@@ -166,11 +166,11 @@ void Algorithm::initNodes() {
                     (mapWidth_ / gridSize_ - 1)];
 }
 
-void Algorithm::endState() {}
+void SearchBased::endState() {}
 
-void Algorithm::updateKeybinds() { checkForQuit(); }
+void SearchBased::updateKeybinds() { checkForQuit(); }
 
-void Algorithm::updateButtons() {
+void SearchBased::updateButtons() {
   for (auto& it : buttons_) {
     it.second->update(sf::Vector2f(mousePositionWindow_));
   }
@@ -192,12 +192,12 @@ void Algorithm::updateButtons() {
 }
 
 /**
- * Getter function for Algorithm key timer.
+ * Getter function for SearchBased key timer.
  *
  * @param none.
  * @return true if keytime > keytime_max else false.
  */
-const bool Algorithm::getKeyTime() {
+const bool SearchBased::getKeyTime() {
   if (keyTime_ >= keyTimeMax_) {
     keyTime_ = 0.f;
     return true;
@@ -211,13 +211,13 @@ const bool Algorithm::getKeyTime() {
  * @param dt delta time.
  * @return void.
  */
-void Algorithm::updateKeyTime(const float& dt) {
+void SearchBased::updateKeyTime(const float& dt) {
   if (keyTime_ < keyTimeMax_) {
     keyTime_ += 5.f * dt;
   }
 }
 
-void Algorithm::update(const float& dt) {
+void SearchBased::update(const float& dt) {
   // from base classes
   updateKeyTime(dt);
   updateMousePosition();
@@ -237,13 +237,13 @@ void Algorithm::update(const float& dt) {
   if (Algorithm_running_) {
     Algorithm_reset_ = false;
 
-    // initialize Algorithm
+    // initialize SearchBased
     if (!Algorithm_initialized_) {
       initAlgorithm();
 
       // create thread
       // solve the algorithm concurrently
-      t_ = std::thread(&Algorithm::solveConcurrently, this, nodeStart_,
+      t_ = std::thread(&SearchBased::solveConcurrently, this, nodeStart_,
                        nodeEnd_, message_queue_);
 
       thread_joined_ = false;
@@ -272,27 +272,13 @@ void Algorithm::update(const float& dt) {
   Rendering Stuffs
 */
 
-// void Algorithm::renderBackground() {
-//   window_->clear(BGN_COL);
-//   window_->draw(titleText_);
-//   window_->draw(cellNamesBGN_);
-//
-//   for (auto& shape : cellNamesShapes_) {
-//     window_->draw(shape);
-//   }
-//
-//   for (auto& text : cellNamesTexts_) {
-//     window_->draw(text);
-//   }
-// }
-
-void Algorithm::renderButtons() {
+void SearchBased::renderButtons() {
   for (auto& it : buttons_) {
     it.second->render(window_);
   }
 }
 
-void Algorithm::render() {
+void SearchBased::render() {
   // virtual function renderBackground()
   renderBackground();
 

@@ -12,7 +12,7 @@
 #include "Node.h"
 #include "State.h"
 
-class Algorithm : public State {
+class SearchBased : public State {
  protected:
   // fonts
   sf::Font font1_, font2_;
@@ -70,11 +70,11 @@ class Algorithm : public State {
 
  public:
   // Constructor
-  Algorithm(sf::RenderWindow* window,
+  SearchBased(sf::RenderWindow* window,
             std::stack<std::unique_ptr<State>>& states, std::string algo_name);
 
   // Destructor
-  virtual ~Algorithm();
+  virtual ~SearchBased();
 
   // Override Functions
   void endState() override;

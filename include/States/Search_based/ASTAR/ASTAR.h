@@ -2,25 +2,25 @@
 
 #include <queue>
 
-#include "Algorithm.h"
+#include "SearchBased.h"
 #include "Gui.h"
 #include "Node.h"
 
 // custom function for returning minimum distance node
 // to be used in priority queue
-struct MinimumDistanceDIJKSTRA {
+struct MinimumDistanceASTAR {
   // operator overloading
   bool operator()(const std::shared_ptr<Node> &n1,
                   const std::shared_ptr<Node> &n2) const {
-    return n1->getGDistance() > n2->getGDistance();
+    return n1->getFDistance() > n2->getFDistance();
   }
 };
 
-class DIJKSTRA : public Algorithm {
+class ASTAR : public SearchBased {
  private:
-  // DIJKSTRA related
+  // ASTAR related
   std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>,
-                      MinimumDistanceDIJKSTRA>
+                      MinimumDistanceASTAR>
       frontier_;
 
   // override initialization Functions
@@ -28,11 +28,10 @@ class DIJKSTRA : public Algorithm {
 
  public:
   // Constructor
-  DIJKSTRA(sf::RenderWindow *window,
-           std::stack<std::unique_ptr<State>> &states);
+  ASTAR(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
 
   // Destructor
-  virtual ~DIJKSTRA();
+  virtual ~ASTAR();
 
   // override update functions
   void updateNodes() override;
@@ -41,7 +40,7 @@ class DIJKSTRA : public Algorithm {
   void renderBackground() override;
   void renderNodes() override;
 
-  // DIJKSTRA algorithm function
+  // ASTAR algorithm function
   void solveConcurrently(
       std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
       std::shared_ptr<MessageQueue<bool>> message_queue) override;

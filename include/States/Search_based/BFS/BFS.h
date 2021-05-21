@@ -1,25 +1,25 @@
 #pragma once
 
-#include <stack>
+#include <queue>
 
-#include "Algorithm.h"
+#include "SearchBased.h"
 #include "Gui.h"
 #include "Node.h"
 
-class DFS : public Algorithm {
+class BFS : public SearchBased {
  private:
-  // DFS related
-  std::stack<std::shared_ptr<Node>> frontier_;
+  // BFS related
+  std::queue<std::shared_ptr<Node>> frontier_;
 
   // override initialization Functions
   void initAlgorithm() override;
 
  public:
   // Constructor
-  DFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
+  BFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
 
   // Destructor
-  virtual ~DFS();
+  virtual ~BFS();
 
   // override update functions
   void updateNodes() override;
@@ -28,7 +28,7 @@ class DFS : public Algorithm {
   void renderBackground() override;
   void renderNodes() override;
 
-  // DFS algorithm function
+  // BFS algorithm function
   void solveConcurrently(
       std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
       std::shared_ptr<MessageQueue<bool>> message_queue) override;

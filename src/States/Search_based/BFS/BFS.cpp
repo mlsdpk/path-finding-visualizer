@@ -2,7 +2,7 @@
 
 // Constructor
 BFS::BFS(sf::RenderWindow* window, std::stack<std::unique_ptr<State>>& states)
-    : Algorithm(window, states, "BREADTH FIRST SEARCH") {}
+    : SearchBased(window, states, "BREADTH FIRST SEARCH") {}
 
 // Destructor
 BFS::~BFS() {}
