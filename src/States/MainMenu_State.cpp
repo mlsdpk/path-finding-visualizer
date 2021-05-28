@@ -110,18 +110,22 @@ void MainMenu_State::updateButtons(const float &dt) {
         states_.push(std::make_unique<DFS>(window_, states_));
         break;
       case 2:
-        // A-Star
-        states_.push(std::make_unique<ASTAR>(window_, states_));
-        break;
-      case 3:
         // Dijkstra
         states_.push(std::make_unique<DIJKSTRA>(window_, states_));
         break;
+      case 3:
+        // A-Star
+        states_.push(std::make_unique<ASTAR>(window_, states_));
+        break;
       case 4:
+        // LPA_STAR
+        // states_.push(std::make_unique<LPA_STAR>(window_, states_));
+        break;
+      case 5:
         // RRT
         states_.push(std::make_unique<RRT>(window_, states_));
         break;
-      case 5:
+      case 6:
         // RRT-Star
         states_.push(std::make_unique<RRT_STAR>(window_, states_));
         break;

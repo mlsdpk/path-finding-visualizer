@@ -12,6 +12,7 @@ include_directories(include/States/Search_based/BFS)
 include_directories(include/States/Search_based/DFS)
 include_directories(include/States/Search_based/DIJKSTRA)
 include_directories(include/States/Search_based/ASTAR)
+#include_directories(include/States/Search_based/LPA_STAR)
 include_directories(include/States/Sampling_based/RRT)
 include_directories(include/States/Sampling_based/RRT_STAR)
 
@@ -51,6 +52,10 @@ add_library(astar
   src/States/Search_based/ASTAR/ASTAR.cpp
 )
 
+#add_library(lpa_star
+#  src/States/Search_based/LPA_STAR/LPA_STAR.cpp
+#)
+
 ##########################
 # Sampling-based Planners
 ##########################
@@ -82,6 +87,7 @@ target_link_libraries(${EXECUTABLE_NAME}
   dfs
   dijkstra
   astar
+#  lpa_star
   rrt
 	rrt_star
 )
