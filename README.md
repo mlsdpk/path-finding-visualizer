@@ -119,5 +119,6 @@ The exact name of the packages may vary from distribution to distribution. Once 
 - [ ] AIT*
 
 ## Related Publications
+- [LPA*](https://www.cs.cmu.edu/~maxim/files/aij04.pdf): Lifelong Planning A^*
 - [RRT](https://www.cs.csustan.edu/~xliang/Courses/CS4710-21S/Papers/06%20RRT.pdf): Rapidly-exploring random trees: A new tool for path planning
 - [RRT*](https://journals.sagepub.com/doi/abs/10.1177/0278364911406761): Sampling-based algorithms for optimal motion planning
