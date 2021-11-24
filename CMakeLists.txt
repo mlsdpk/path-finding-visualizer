@@ -26,8 +26,6 @@ add_executable(${EXECUTABLE_NAME}
   src/States/Algorithms/GraphBased/ASTAR/ASTAR.cpp
 )
 
-find_package(Boost COMPONENTS system filesystem REQUIRED)
-
 target_link_libraries(
   ${EXECUTABLE_NAME} 
   PRIVATE 
