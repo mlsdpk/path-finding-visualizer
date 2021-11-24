@@ -6,6 +6,9 @@
 #include <memory>
 #include <vector>
 
+namespace path_finding_visualizer {
+namespace graph_based {
+
 class Node {
  private:
   // Variables
@@ -50,3 +53,6 @@ class Node {
   void setGDistance(double dist);
   void setFDistance(double dist);
 };
+
+}  // namespace graph_based
+}  // namespace path_finding_visualizer

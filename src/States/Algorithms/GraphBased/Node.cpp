@@ -1,5 +1,8 @@
 #include "Node.h"
 
+namespace path_finding_visualizer {
+namespace graph_based {
+
 // Constructor
 Node::Node()
     : isObstacle_{false},
@@ -55,3 +58,6 @@ void Node::setParentNode(std::shared_ptr<Node> node) { parent_ = node; }
 void Node::setGDistance(double dist) { gDist_ = dist; }
 
 void Node::setFDistance(double dist) { fDist_ = dist; }
+
+}  // namespace graph_based
+}  // namespace path_finding_visualizer
