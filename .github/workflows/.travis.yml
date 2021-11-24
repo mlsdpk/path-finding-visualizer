@@ -26,7 +26,7 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get -y install libsfml-dev libboost-all-dev
+        sudo apt-get -y install xorg-dev libboost-all-dev libudev-dev
 
     - name: Building
       run: |

@@ -1,8 +1,11 @@
-#include "BFS.h"
+#include "States/Algorithms/GraphBased/BFS/BFS.h"
+
+namespace path_finding_visualizer {
+namespace graph_based {
 
 // Constructor
 BFS::BFS(sf::RenderWindow* window, std::stack<std::unique_ptr<State>>& states)
-    : Algorithm(window, states, "BREADTH FIRST SEARCH") {}
+    : GraphBased(window, states) {}
 
 // Destructor
 BFS::~BFS() {}
@@ -20,8 +23,8 @@ void BFS::initAlgorithm() {
 // override updateNodes() function
 void BFS::updateNodes() {
   if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && getKeyTime()) {
-    int localY = ((mousePositionWindow_.x - 300) / gridSize_);
-    int localX = ((mousePositionWindow_.y - 60) / gridSize_);
+    int localY = ((mousePositionWindow_.x - 350) / gridSize_);
+    int localX = ((mousePositionWindow_.y - 18) / gridSize_);
 
     if (localX >= 0 && localX < mapHeight_ / gridSize_) {
       if (localY >= 0 && localY < mapWidth_ / gridSize_) {
@@ -59,21 +62,6 @@ void BFS::updateNodes() {
   }
 }
 
-// override renderBackground() function
-void BFS::renderBackground() {
-  window_->clear(BGN_COL);
-  window_->draw(titleText_);
-  window_->draw(cellNamesBGN_);
-
-  for (auto& shape : cellNamesShapes_) {
-    window_->draw(shape);
-  }
-
-  for (auto& text : cellNamesTexts_) {
-    window_->draw(text);
-  }
-}
-
 // override renderNodes() function
 void BFS::renderNodes() {
   for (int x = 0; x < mapHeight_ / gridSize_; x++) {
@@ -82,7 +70,7 @@ void BFS::renderNodes() {
       sf::RectangleShape rectangle(sf::Vector2f(size, size));
       rectangle.setOutlineThickness(2.f);
       rectangle.setOutlineColor(BGN_COL);
-      rectangle.setPosition(300 + y * size, 60 + x * size);
+      rectangle.setPosition(350 + y * size, 18 + x * size);
 
       int nodeIndex = (mapWidth_ / gridSize_) * x + y;
 
@@ -129,7 +117,7 @@ void BFS::solveConcurrently(std::shared_ptr<Node> nodeStart,
 
   bool solved = false;
 
-  double cycleDuration = 1;  // duration of a single simulation cycle in ms
+  double cycleDuration = 1.0;  // duration of a single simulation cycle in ms
   // init stop watch
   auto lastUpdate = std::chrono::system_clock::now();
 
@@ -181,3 +169,6 @@ void BFS::solveConcurrently(std::shared_ptr<Node> nodeStart,
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 }
+
+}  // namespace graph_based
+}  // namespace path_finding_visualizer

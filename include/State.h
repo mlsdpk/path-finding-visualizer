@@ -14,6 +14,8 @@
   State Base Class
 */
 
+namespace path_finding_visualizer {
+
 class State {
  private:
  protected:
@@ -43,3 +45,5 @@ class State {
   virtual void update(const float &dt) = 0;
   virtual void render() = 0;
 };
+
+}  // namespace path_finding_visualizer

@@ -2,9 +2,11 @@
 
 #include <queue>
 
-#include "Algorithm.h"
-#include "Gui.h"
-#include "Node.h"
+#include "States/Algorithms/GraphBased/BFS/BFS.h"
+#include "States/Algorithms/GraphBased/Utils.h"
+
+namespace path_finding_visualizer {
+namespace graph_based {
 
 // custom function for returning minimum distance node
 // to be used in priority queue
@@ -16,16 +18,7 @@ struct MinimumDistanceDIJKSTRA {
   }
 };
 
-class DIJKSTRA : public Algorithm {
- private:
-  // DIJKSTRA related
-  std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>,
-                      MinimumDistanceDIJKSTRA>
-      frontier_;
-
-  // override initialization Functions
-  void initAlgorithm() override;
-
+class DIJKSTRA : public BFS {
  public:
   // Constructor
   DIJKSTRA(sf::RenderWindow *window,
@@ -34,19 +27,18 @@ class DIJKSTRA : public Algorithm {
   // Destructor
   virtual ~DIJKSTRA();
 
-  // override update functions
-  void updateNodes() override;
-
-  // override render functions
-  void renderBackground() override;
-  void renderNodes() override;
-
-  // DIJKSTRA algorithm function
+  // Overriden functions
+  virtual void initAlgorithm() override;
   void solveConcurrently(
       std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
       std::shared_ptr<MessageQueue<bool>> message_queue) override;
 
-  // new utility function
-  double L1_Distance(const std::shared_ptr<Node> &n1,
-                     const std::shared_ptr<Node> &n2);
+ protected:
+  // DIJKSTRA related
+  std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>,
+                      MinimumDistanceDIJKSTRA>
+      frontier_;
 };
+
+}  // namespace graph_based
+}  // namespace path_finding_visualizer
