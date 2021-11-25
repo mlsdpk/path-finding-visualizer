@@ -4,7 +4,7 @@
 
 A tool for visualizing numerous pathfinding algorithms in two dimensions.
 
-This project involves minimal implementations of the popular planning algorithms, including both graph-based and sampling-based planners. We provide an easy-to-use GUI to control the animation process and explore different planner configurations. This is an ongoing work and current implementation of the project only involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star. The project extensively uses SFML, ImGui and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
+This project involves minimal implementations of the popular planning algorithms, including both graph-based and sampling-based planners. We provide an easy-to-use GUI to control the animation process and explore different planner configurations. This is an ongoing work and current implementation of the project only involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star and two sampling-based planners: RRT and RRT*. The project extensively uses SFML, ImGui and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
 
 ![](figures/img0.png)
 
@@ -35,9 +35,9 @@ The project depends on [SFML](https://github.com/SFML/SFML), [Dear ImGui](https:
 - [ ] LPA*
 
 ### Sampling-based planners
-- [ ] RRT
+- [x] RRT
 - [ ] RRT-Connect
-- [ ] RRT*
+- [x] RRT*
 - [ ] Informed-RRT*
 - [ ] FMT*
 - [ ] BIT*
@@ -48,5 +48,5 @@ The project depends on [SFML](https://github.com/SFML/SFML), [Dear ImGui](https:
 - [DIJKSTRA](https://ir.cwi.nl/pub/9256/9256D.pdf): A Note on Two Problems in Connexion with Graphs
 - [A*](https://ieeexplore.ieee.org/abstract/document/4082128?casa_token=0ltx8josfO0AAAAA:nA2z0T2qvr00C6rIhIM3Z7GhWJTQpFrYsdzpY9xc_VicZ0DZr5Q9KcclJT1215N3If6pae87MXRHHd0): A Formal Basis for the Heuristic Determination of Minimum Cost Paths
 - [LPA*](https://www.cs.cmu.edu/~maxim/files/aij04.pdf): Lifelong Planning A*
-- [RRT](https://www.cs.csustan.edu/~xliang/Courses/CS4710-21S/Papers/06%20RRT.pdf): Rapidly-exploring random trees: A new tool for path planning
+- [RRT](https://journals.sagepub.com/doi/pdf/10.1177/02783640122067453?casa_token=fgVkbBjl93wAAAAA:xatnfEy0HmRWnZyzPcPMHoWpW2ch4WIFYY1SSVT-OjyVKidKavkiE7D3QMl3cHSpof4BlXQcSVzhbvo): Randomized kinodynamic planning
 - [RRT*](https://journals.sagepub.com/doi/abs/10.1177/0278364911406761): Sampling-based algorithms for optimal motion planning
