@@ -106,6 +106,8 @@ void BFS::renderNodes() {
   }
 }
 
+void BFS::renderParametersGui() {}
+
 void BFS::solveConcurrently(std::shared_ptr<Node> nodeStart,
                             std::shared_ptr<Node> nodeEnd,
                             std::shared_ptr<MessageQueue<bool>> message_queue) {

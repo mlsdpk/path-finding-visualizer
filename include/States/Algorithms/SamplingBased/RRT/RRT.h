@@ -19,9 +19,11 @@ class RRT : public SamplingBased {
   // override initialization functions
   virtual void initialize() override;
   virtual void initPlanner() override;
+  virtual void initParameters() override;
 
   // override render functions
   virtual void renderPlannerData() override;
+  virtual void renderParametersGui() override;
 
   // override algorithm function
   virtual void solveConcurrently(
@@ -88,7 +90,7 @@ class RRT : public SamplingBased {
   /**
    * @brief Maximum distance allowed between two vertices
    */
-  double max_distance_;
+  double range_;
 
   /**
    * @brief Distance between vertex and goal

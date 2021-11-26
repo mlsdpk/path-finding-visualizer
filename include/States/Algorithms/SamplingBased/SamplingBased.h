@@ -46,6 +46,7 @@ class SamplingBased : public State {
 
   void updateUserInput();
   void renderObstacles();
+  void clearObstacles();
   void initVariables();
   void updateKeyTime(const float &dt);
   const bool getKeyTime();
@@ -58,6 +59,9 @@ class SamplingBased : public State {
   // rendering function for algorithm specific
   virtual void renderPlannerData() = 0;
 
+  // render planner specific parameters
+  virtual void renderParametersGui() = 0;
+
   // initialization function
   // this function runs at start of the program & when user presses RESET
   // buttons
@@ -66,6 +70,8 @@ class SamplingBased : public State {
   // planner related initialization
   // this function runs when user presses RUN buttons
   virtual void initPlanner() = 0;
+
+  virtual void initParameters() = 0;
 
   // main algorithm function (runs in separate thread)
   virtual void solveConcurrently(
@@ -99,7 +105,7 @@ class SamplingBased : public State {
   /**
    * @brief Maximum number of iterations to run the algorithm
    */
-  unsigned int max_iterations_;
+  int max_iterations_;
 
   // MessageQueue Object
   std::shared_ptr<MessageQueue<bool>> message_queue_;

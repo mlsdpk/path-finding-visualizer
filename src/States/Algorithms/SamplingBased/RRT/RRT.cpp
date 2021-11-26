@@ -6,19 +6,22 @@ namespace sampling_based {
 // Constructor
 RRT::RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states)
     : SamplingBased(window, states) {
+  initParameters();
   initialize();
 }
 
 // Destructor
 RRT::~RRT() {}
 
-void RRT::initialize() {
+void RRT::initParameters() {
   // initialize default planner related params
-  max_iterations_ = 1000u;
+  max_iterations_ = 1000;
   interpolation_dist_ = 0.005;
-  max_distance_ = 0.05;
+  range_ = 0.05;
   goal_radius_ = 0.1;
+}
 
+void RRT::initialize() {
   start_vertex_->x = 0.5;
   start_vertex_->y = 0.1;
   start_vertex_->parent = nullptr;
@@ -92,6 +95,16 @@ void RRT::renderPlannerData() {
   window_->draw(start_goal_circle);
 }
 
+void RRT::renderParametersGui() {
+  if (ImGui::InputDouble("range", &range_, 0.01, 1.0, "%.3f")) {
+    if (range_ < 0) range_ = 0.01;
+  }
+  ImGui::Spacing();
+  if (ImGui::InputDouble("goal_radius", &goal_radius_, 0.01, 1.0, "%.3f")) {
+    if (goal_radius_ < 0.01) goal_radius_ = 0.01;
+  }
+}
+
 void RRT::solveConcurrently(std::shared_ptr<Vertex> start_point,
                             std::shared_ptr<Vertex> goal_point,
                             std::shared_ptr<MessageQueue<bool>> message_queue) {
@@ -133,8 +146,8 @@ void RRT::solveConcurrently(std::shared_ptr<Vertex> start_point,
 
         // if this distance d > max_distance_, we need to find nearest state in
         // the direction of x_rand
-        if (d > max_distance_) {
-          interpolate(x_nearest, x_rand, max_distance_ / d, x_new);
+        if (d > range_) {
+          interpolate(x_nearest, x_rand, range_ / d, x_new);
         } else {
           x_new->x = x_rand->x;
           x_new->y = x_rand->y;

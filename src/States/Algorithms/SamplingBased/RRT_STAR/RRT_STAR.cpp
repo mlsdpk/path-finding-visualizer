@@ -7,21 +7,24 @@ namespace sampling_based {
 RRT_STAR::RRT_STAR(sf::RenderWindow *window,
                    std::stack<std::unique_ptr<State>> &states)
     : RRT(window, states) {
+  initParameters();
   initialize();
 }
 
 // Destructor
 RRT_STAR::~RRT_STAR() {}
 
-void RRT_STAR::initialize() {
+void RRT_STAR::initParameters() {
   // initialize default planner related params
-  max_iterations_ = 2500u;
+  max_iterations_ = 2500;
   interpolation_dist_ = 0.005;
-  max_distance_ = 0.05;
+  range_ = 0.05;
   goal_radius_ = 0.1;
   rewire_factor_ = 1.1;
   update_goal_every_ = 100u;
+}
 
+void RRT_STAR::initialize() {
   start_vertex_->x = 0.5;
   start_vertex_->y = 0.1;
   start_vertex_->parent = nullptr;
@@ -50,6 +53,23 @@ void RRT_STAR::initPlanner() {
   x_soln_.clear();
   // add start point to vertices
   vertices_.emplace_back(start_vertex_);
+}
+
+void RRT_STAR::renderParametersGui() {
+  if (ImGui::InputDouble("range", &range_, 0.01, 1.0, "%.3f")) {
+    if (range_ < 0.01) range_ = 0.01;
+  }
+  ImGui::Spacing();
+  if (ImGui::InputDouble("rewire_factor", &rewire_factor_, 0.01, 0.1, "%.2f")) {
+    if (rewire_factor_ < 1.0)
+      rewire_factor_ = 1.0;
+    else if (rewire_factor_ > 2.0)
+      rewire_factor_ = 2.0;
+  }
+  ImGui::Spacing();
+  if (ImGui::InputDouble("goal_radius", &goal_radius_, 0.01, 1.0, "%.3f")) {
+    if (goal_radius_ < 0.01) goal_radius_ = 0.01;
+  }
 }
 
 void RRT_STAR::solveConcurrently(
@@ -92,8 +112,8 @@ void RRT_STAR::solveConcurrently(
 
         // if this distance d > delta_q, we need to find nearest state in the
         // direction of x_rand
-        if (d > max_distance_) {
-          interpolate(x_nearest, x_rand, max_distance_ / d, x_new);
+        if (d > range_) {
+          interpolate(x_nearest, x_rand, range_ / d, x_new);
         } else {
           x_new->x = x_rand->x;
           x_new->y = x_rand->y;
@@ -197,7 +217,7 @@ void RRT_STAR::near(const std::shared_ptr<const Vertex> &x_new,
       r_rrt_ * std::pow(std::log(static_cast<double>(vertices_.size())) /
                             (static_cast<double>(vertices_.size())),
                         1.0 / 2.0),
-      max_distance_);
+      range_);
 
   for (const auto &v : vertices_) {
     if (distance(v, x_new) < r) {

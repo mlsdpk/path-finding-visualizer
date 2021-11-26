@@ -198,6 +198,8 @@ void SamplingBased::renderObstacles() {
   }
 }
 
+void SamplingBased::clearObstacles() { obstacles_.clear(); }
+
 void SamplingBased::renderGui() {
   // buttons
   {
@@ -210,6 +212,28 @@ void SamplingBased::renderGui() {
     ImGui::SameLine();
     if (ImGui::Button("RUN", ImVec2(100.f, 40.f)) && !is_solved_) {
       is_running_ = true;
+    }
+  }
+  ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
+  if (ImGui::InputInt("max_iterations", &max_iterations_, 1, 1000)) {
+    if (max_iterations_ < 1) max_iterations_ = 1;
+  }
+  ImGui::Spacing();
+  // virtual function renderParametersGui()
+  // need to be implemented by derived class
+  renderParametersGui();
+  ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
+  {
+    if (ImGui::Button("CLEAR OBSTACLES", ImVec2(154.f, 40.f))) {
+      clearObstacles();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("RESET PARAMETERS", ImVec2(154.f, 40.f))) {
+      initParameters();
     }
   }
 }

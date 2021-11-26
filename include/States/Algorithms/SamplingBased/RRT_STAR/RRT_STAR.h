@@ -16,9 +16,12 @@ class RRT_STAR : public RRT {
   // Destructor
   virtual ~RRT_STAR();
 
+  virtual void renderParametersGui() override;
+
   // override initialization functions
   virtual void initialize() override;
   virtual void initPlanner() override;
+  virtual void initParameters() override;
 
   // override algorithm function
   virtual void solveConcurrently(

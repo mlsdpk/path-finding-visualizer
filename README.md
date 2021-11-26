@@ -25,7 +25,7 @@ The project depends on [SFML](https://github.com/SFML/SFML), [Dear ImGui](https:
 
 ## TODO
 
-### Search-based planners
+### Graph-based planners
 - [x] BFS
 - [x] DFS
 - [x] DIJKSTRA
