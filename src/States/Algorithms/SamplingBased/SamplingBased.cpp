@@ -41,6 +41,8 @@ void SamplingBased::initVariables() {
   is_solved_ = false;
   is_stopped_ = false;
   thread_joined_ = true;
+  disable_gui_parameters_ = false;
+  disable_run_ = false;
 }
 
 void SamplingBased::endState() {}
@@ -203,20 +205,48 @@ void SamplingBased::clearObstacles() { obstacles_.clear(); }
 void SamplingBased::renderGui() {
   // buttons
   {
-    if (ImGui::Button("RESET", ImVec2(100.f, 40.f)) && !is_running_) {
-      is_reset_ = true;
+    // RESET button
+    {
+      if (!disable_run_ || is_running_) ImGui::BeginDisabled();
+      bool clicked = ImGui::Button("RESET", ImVec2(100.f, 40.f));
+      if (!disable_run_ || is_running_) ImGui::EndDisabled();
+      if (clicked && !is_running_) {
+        is_reset_ = true;
+        disable_gui_parameters_ = false;
+        disable_run_ = false;
+      }
     }
+
     ImGui::SameLine();
-    if (ImGui::Button("PAUSE", ImVec2(100.f, 40.f))) {
+
+    // TODO: PAUSE button
+    // always disabled (not implemented yet)
+    {
+      if (true) ImGui::BeginDisabled();
+      bool clicked = ImGui::Button("PAUSE", ImVec2(100.f, 40.f));
+      if (true) ImGui::EndDisabled();
     }
+
     ImGui::SameLine();
-    if (ImGui::Button("RUN", ImVec2(100.f, 40.f)) && !is_solved_) {
-      is_running_ = true;
+
+    // RUN button
+    {
+      if (disable_run_) ImGui::BeginDisabled();
+      bool clicked = ImGui::Button("RUN", ImVec2(100.f, 40.f));
+      if (disable_run_) ImGui::EndDisabled();
+      if (clicked && !is_solved_) {
+        is_running_ = true;
+        disable_gui_parameters_ = true;
+        disable_run_ = true;
+      }
     }
   }
   ImGui::Spacing();
   ImGui::Separator();
   ImGui::Spacing();
+
+  if (disable_gui_parameters_) ImGui::BeginDisabled();
+
   if (ImGui::InputInt("max_iterations", &max_iterations_, 1, 1000)) {
     if (max_iterations_ < 1) max_iterations_ = 1;
   }
@@ -236,6 +266,8 @@ void SamplingBased::renderGui() {
       initParameters();
     }
   }
+
+  if (disable_gui_parameters_) ImGui::EndDisabled();
 }
 
 void SamplingBased::render() {

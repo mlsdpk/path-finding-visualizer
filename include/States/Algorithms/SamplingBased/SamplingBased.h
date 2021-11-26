@@ -116,6 +116,8 @@ class SamplingBased : public State {
   bool is_reset_;
   bool is_solved_;
   bool is_stopped_;
+  bool disable_run_;
+  bool disable_gui_parameters_;
 
   // threads & mutex
   std::thread t_;

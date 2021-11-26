@@ -15,6 +15,7 @@ RRT::~RRT() {}
 
 void RRT::initParameters() {
   // initialize default planner related params
+  // TODO: default values should be read from file
   max_iterations_ = 1000;
   interpolation_dist_ = 0.005;
   range_ = 0.05;
@@ -96,6 +97,8 @@ void RRT::renderPlannerData() {
 }
 
 void RRT::renderParametersGui() {
+  // TODO: instead of manually putting like this, its good to have custom
+  // declare functions for these parameters with different types
   if (ImGui::InputDouble("range", &range_, 0.01, 1.0, "%.3f")) {
     if (range_ < 0) range_ = 0.01;
   }
@@ -105,6 +108,8 @@ void RRT::renderParametersGui() {
   }
 }
 
+// TODO: Since RRT*-like planners share the same iteration concept,
+// solveConcurrently() function can be only defined one time
 void RRT::solveConcurrently(std::shared_ptr<Vertex> start_point,
                             std::shared_ptr<Vertex> goal_point,
                             std::shared_ptr<MessageQueue<bool>> message_queue) {

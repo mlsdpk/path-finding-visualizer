@@ -29,11 +29,13 @@ void GraphBased::initVariables() {
 
   message_queue_ = std::make_shared<MessageQueue<bool>>();
 
-  Algorithm_running_ = false;
-  Algorithm_initialized_ = false;
-  Algorithm_reset_ = false;
-  Algorithm_solved_ = false;
+  is_running_ = false;
+  is_initialized_ = false;
+  is_reset_ = false;
+  is_solved_ = false;
   thread_joined_ = true;
+  disable_run_ = false;
+  disable_gui_parameters_ = false;
 }
 
 void GraphBased::initColors() {
@@ -50,19 +52,24 @@ void GraphBased::initColors() {
   PATH_COL = sf::Color(190, 242, 227, 255);
 }
 
-void GraphBased::initNodes() {
-  nodes_.clear();
+void GraphBased::initNodes(bool reset) {
+  if (reset) {
+    nodes_.clear();
 
-  for (int i = 0; i < (mapWidth_ / gridSize_) * (mapHeight_ / gridSize_); i++) {
-    nodes_.emplace_back(std::make_shared<Node>());
+    for (int i = 0; i < (mapWidth_ / gridSize_) * (mapHeight_ / gridSize_);
+         i++) {
+      nodes_.emplace_back(std::make_shared<Node>());
+    }
   }
 
   // set all nodes to free obsts and respective positions
   for (int x = 0; x < mapHeight_ / gridSize_; x++) {
     for (int y = 0; y < mapWidth_ / gridSize_; y++) {
       int nodeIndex = (mapWidth_ / gridSize_) * x + y;
-      nodes_[nodeIndex]->setPosition(sf::Vector2i(x, y));
-      nodes_[nodeIndex]->setObstacle(false);
+      if (reset) {
+        nodes_[nodeIndex]->setPosition(sf::Vector2i(x, y));
+        nodes_[nodeIndex]->setObstacle(false);
+      }
       nodes_[nodeIndex]->setVisited(false);
       nodes_[nodeIndex]->setFrontier(false);
       nodes_[nodeIndex]->setPath(false);
@@ -73,29 +80,31 @@ void GraphBased::initNodes() {
   }
 
   // add all neighbours to respective nodes
-  for (int x = 0; x < mapHeight_ / gridSize_; x++) {
-    for (int y = 0; y < mapWidth_ / gridSize_; y++) {
-      int nodeIndex = (mapWidth_ / gridSize_) * x + y;
-      if (y > 0)
-        nodes_[nodeIndex]->setNeighbours(
-            nodes_[x * (mapWidth_ / gridSize_) + (y - 1)]);
-      if (y < ((mapWidth_ / gridSize_) - 1))
-        nodes_[nodeIndex]->setNeighbours(
-            nodes_[x * (mapWidth_ / gridSize_) + (y + 1)]);
-      if (x > 0)
-        nodes_[nodeIndex]->setNeighbours(
-            nodes_[(x - 1) * (mapWidth_ / gridSize_) + y]);
-      if (x < ((mapHeight_ / gridSize_) - 1))
-        nodes_[nodeIndex]->setNeighbours(
-            nodes_[(x + 1) * (mapWidth_ / gridSize_) + y]);
+  if (reset) {
+    for (int x = 0; x < mapHeight_ / gridSize_; x++) {
+      for (int y = 0; y < mapWidth_ / gridSize_; y++) {
+        int nodeIndex = (mapWidth_ / gridSize_) * x + y;
+        if (y > 0)
+          nodes_[nodeIndex]->setNeighbours(
+              nodes_[x * (mapWidth_ / gridSize_) + (y - 1)]);
+        if (y < ((mapWidth_ / gridSize_) - 1))
+          nodes_[nodeIndex]->setNeighbours(
+              nodes_[x * (mapWidth_ / gridSize_) + (y + 1)]);
+        if (x > 0)
+          nodes_[nodeIndex]->setNeighbours(
+              nodes_[(x - 1) * (mapWidth_ / gridSize_) + y]);
+        if (x < ((mapHeight_ / gridSize_) - 1))
+          nodes_[nodeIndex]->setNeighbours(
+              nodes_[(x + 1) * (mapWidth_ / gridSize_) + y]);
+      }
     }
-  }
 
-  // initialize Start and End nodes ptrs (upper left and lower right corners)
-  nodeStart_ = nodes_[(mapWidth_ / gridSize_) * 0 + 0];
-  nodeStart_->setParentNode(nullptr);
-  nodeEnd_ = nodes_[(mapWidth_ / gridSize_) * (mapHeight_ / gridSize_ - 1) +
-                    (mapWidth_ / gridSize_ - 1)];
+    // initialize Start and End nodes ptrs (upper left and lower right corners)
+    nodeStart_ = nodes_[(mapWidth_ / gridSize_) * 0 + 0];
+    nodeStart_->setParentNode(nullptr);
+    nodeEnd_ = nodes_[(mapWidth_ / gridSize_) * (mapHeight_ / gridSize_ - 1) +
+                      (mapWidth_ / gridSize_ - 1)];
+  }
 }
 
 void GraphBased::endState() {}
@@ -135,21 +144,21 @@ void GraphBased::update(const float& dt) {
   updateKeybinds();
   // updateButtons();
 
-  if (Algorithm_reset_) {
-    initNodes();
-    Algorithm_running_ = false;
-    Algorithm_initialized_ = false;
-    Algorithm_reset_ = false;
-    Algorithm_solved_ = false;
+  if (is_reset_) {
+    initNodes(false);
+    is_running_ = false;
+    is_initialized_ = false;
+    is_reset_ = false;
+    is_solved_ = false;
 
     message_queue_ = std::make_shared<MessageQueue<bool>>();
   }
 
-  if (Algorithm_running_) {
-    Algorithm_reset_ = false;
+  if (is_running_) {
+    is_reset_ = false;
 
     // initialize Algorithm
-    if (!Algorithm_initialized_) {
+    if (!is_initialized_) {
       initAlgorithm();
 
       // create thread
@@ -158,7 +167,7 @@ void GraphBased::update(const float& dt) {
                        nodeEnd_, message_queue_);
 
       thread_joined_ = false;
-      Algorithm_initialized_ = true;
+      is_initialized_ = true;
     }
 
     // check the algorithm is solved or not
@@ -167,8 +176,8 @@ void GraphBased::update(const float& dt) {
     if (msg) {
       t_.join();
       thread_joined_ = true;
-      Algorithm_running_ = false;
-      Algorithm_solved_ = true;
+      is_running_ = false;
+      is_solved_ = true;
     }
   } else {
     // only allow mouse and key inputs
@@ -191,17 +200,40 @@ void GraphBased::clearObstacles() {
 void GraphBased::renderGui() {
   // buttons
   {
-    if (ImGui::Button("RESET", ImVec2(100.f, 40.f)) && !Algorithm_running_) {
-      Algorithm_reset_ = true;
-      std::cout << "RESET" << std::endl;
+    // RESET button
+    {
+      if (!disable_run_ || is_running_) ImGui::BeginDisabled();
+      bool clicked = ImGui::Button("RESET", ImVec2(100.f, 40.f));
+      if (!disable_run_ || is_running_) ImGui::EndDisabled();
+      if (clicked && !is_running_) {
+        is_reset_ = true;
+        disable_gui_parameters_ = false;
+        disable_run_ = false;
+      }
     }
+
     ImGui::SameLine();
-    if (ImGui::Button("PAUSE", ImVec2(100.f, 40.f)))
-      std::cout << "PAUSE" << std::endl;
+
+    // TODO: PAUSE button
+    // always disabled (not implemented yet)
+    {
+      if (true) ImGui::BeginDisabled();
+      bool clicked = ImGui::Button("PAUSE", ImVec2(100.f, 40.f));
+      if (true) ImGui::EndDisabled();
+    }
+
     ImGui::SameLine();
-    if (ImGui::Button("RUN", ImVec2(100.f, 40.f)) && !Algorithm_solved_) {
-      std::cout << "RUN" << std::endl;
-      Algorithm_running_ = true;
+
+    // RUN button
+    {
+      if (disable_run_) ImGui::BeginDisabled();
+      bool clicked = ImGui::Button("RUN", ImVec2(100.f, 40.f));
+      if (disable_run_) ImGui::EndDisabled();
+      if (clicked && !is_solved_) {
+        is_running_ = true;
+        disable_gui_parameters_ = true;
+        disable_run_ = true;
+      }
     }
   }
 
@@ -209,10 +241,12 @@ void GraphBased::renderGui() {
   ImGui::Separator();
   ImGui::Spacing();
 
+  if (disable_gui_parameters_) ImGui::BeginDisabled();
+
   // grid size slider
   if (ImGui::SliderInt("Grid Size", &slider_grid_size_, 10, 100)) {
-    Algorithm_reset_ = true;
     gridSize_ = slider_grid_size_;
+    initNodes(true);
   }
 
   // ImGui::Spacing();
@@ -230,6 +264,8 @@ void GraphBased::renderGui() {
     if (ImGui::Button("RESET PARAMETERS", ImVec2(154.f, 40.f))) {
     }
   }
+
+  if (disable_gui_parameters_) ImGui::EndDisabled();
 }
 
 void GraphBased::render() {

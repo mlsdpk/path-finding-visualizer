@@ -69,10 +69,12 @@ class GraphBased : public State {
   std::shared_ptr<MessageQueue<bool>> message_queue_;
 
   // logic flags
-  bool Algorithm_running_;
-  bool Algorithm_initialized_;
-  bool Algorithm_reset_;
-  bool Algorithm_solved_;
+  bool is_running_;
+  bool is_initialized_;
+  bool is_reset_;
+  bool is_solved_;
+  bool disable_run_;
+  bool disable_gui_parameters_;
 
   // threads
   std::thread t_;
@@ -81,7 +83,7 @@ class GraphBased : public State {
   // initialization Functions
   void initColors();
   void initVariables();
-  void initNodes();
+  void initNodes(bool reset = true);
 
   void updateKeyTime(const float& dt);
   const bool getKeyTime();

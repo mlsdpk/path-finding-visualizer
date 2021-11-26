@@ -38,7 +38,7 @@ void BFS::updateNodes() {
           isObstacle = true;
         }
 
-        if (!Algorithm_solved_) {
+        if (!is_solved_) {
           if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
             if (!isObstacle) {
               if (selectedNode != nodeEnd_) nodeStart_ = selectedNode;

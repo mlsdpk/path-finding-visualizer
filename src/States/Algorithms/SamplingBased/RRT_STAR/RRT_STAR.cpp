@@ -16,6 +16,7 @@ RRT_STAR::~RRT_STAR() {}
 
 void RRT_STAR::initParameters() {
   // initialize default planner related params
+  // TODO: default values should be read from file
   max_iterations_ = 2500;
   interpolation_dist_ = 0.005;
   range_ = 0.05;
