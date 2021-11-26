@@ -86,7 +86,7 @@ void Game::render() {
     ImGui::End();
   }
 
-  ImGui::SFML::Render(* window_);
+  ImGui::SFML::Render(*window_);
   window_->display();
 }
 
