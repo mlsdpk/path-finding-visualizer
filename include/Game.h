@@ -14,8 +14,8 @@
 namespace path_finding_visualizer {
 
 static const std::vector<std::string> PLANNER_NAMES{"BFS", "DFS", "DIJKSTRA",
-                                                    "A*"};
-enum PLANNERS_IDS { BFS, DFS, DIJKSTRA, AStar };
+                                                    "A*",  "RRT", "RRT*"};
+enum PLANNERS_IDS { BFS, DFS, DIJKSTRA, AStar, RRT, RRT_STAR };
 
 class Game {
  public:

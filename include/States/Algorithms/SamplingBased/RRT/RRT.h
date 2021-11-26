@@ -3,22 +3,12 @@
 #include <random>
 #include <set>
 
-#include "SamplingBased.h"
+#include "States/Algorithms/SamplingBased/SamplingBased.h"
+
+namespace path_finding_visualizer {
+namespace sampling_based {
 
 class RRT : public SamplingBased {
- private:
-  // vertices & edges
-  std::vector<std::shared_ptr<Point>> vertices_;
-  std::vector<std::pair<std::shared_ptr<Point>, std::shared_ptr<Point>>> edges_;
-
-  int max_vertices_;
-  double delta_q_;
-  double goal_radius_;
-
-  // background text
-  sf::Text maxVerticesText_;
-  sf::Text noOfVerticesText_;
-
  public:
   // Constructor
   RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
@@ -27,28 +17,86 @@ class RRT : public SamplingBased {
   virtual ~RRT();
 
   // override initialization functions
-  void initialize() override;
-  void initAlgorithm() override;
+  virtual void initialize() override;
+  virtual void initPlanner() override;
+  virtual void initParameters() override;
 
   // override render functions
-  void renderBackground() override;
-  void renderAlgorithm() override;
+  virtual void renderPlannerData() override;
+  virtual void renderParametersGui() override;
 
   // override algorithm function
-  void solveConcurrently(
-      std::shared_ptr<Point> start_point, std::shared_ptr<Point> goal_point,
+  virtual void solveConcurrently(
+      std::shared_ptr<Vertex> start_point, std::shared_ptr<Vertex> goal_point,
       std::shared_ptr<MessageQueue<bool>> message_queue) override;
 
-  // new background related functionsm
-  void initBackgroundText();
-  void updateBackgroundText();
+  /**
+   * @brief Randomly sample a vertex
+   * @param v Sampled vertex
+   */
+  void sample(const std::shared_ptr<Vertex> &v);
 
-  // new functions
-  void sample_free(Point &point);
-  void nearest(std::shared_ptr<Point> &x_near, const Point &x_rand);
-  void steer(std::shared_ptr<Point> &x_new,
-             const std::shared_ptr<Point> &x_near, const Point &x_rand);
-  bool isCollision(const std::shared_ptr<Point> &x_near,
-                   const std::shared_ptr<Point> &x_new);
-  std::vector<double> linspace(double start, double end, int num);
+  /**
+   * @brief Find the nearest neighbour in a tree
+   * @param v Nearest vertex
+   */
+  void nearest(const std::shared_ptr<const Vertex> &x_rand,
+               std::shared_ptr<Vertex> &x_near);
+
+  /**
+   * @brief The cost to come of a vertex (g-value)
+   */
+  double cost(std::shared_ptr<Vertex> v);
+
+  /**
+   * @brief The euclidean distance between two vertices
+   */
+  double distance(const std::shared_ptr<const Vertex> &v1,
+                  const std::shared_ptr<const Vertex> &v2);
+
+  /**
+   * @brief Check whether collision or not between two vertices
+   * This function assumes from_v vertex is collision-free
+   * @param from_v Starting vertex
+   * @param to_v Ending vertex
+   * @return true if there is a collision otherwise false
+   */
+  bool isCollision(const std::shared_ptr<const Vertex> &from_v,
+                   const std::shared_ptr<const Vertex> &to_v);
+
+  /**
+   * @brief Find the new interpolated vertex from from_v vertex to to_v
+   * vertex
+   * @param from_v Starting vertex
+   * @param to_v Ending vertex
+   * @param t Interpolation distance
+   * @param v New vertex
+   */
+  void interpolate(const std::shared_ptr<const Vertex> &from_v,
+                   const std::shared_ptr<const Vertex> &to_v, const double t,
+                   const std::shared_ptr<Vertex> &v);
+
+  /**
+   * @brief Check whether a vertex lies within goal radius or not
+   */
+  bool inGoalRegion(const std::shared_ptr<const Vertex> &v);
+
+ protected:
+  /**
+   * @brief Interpolation distance during collsion checking
+   */
+  double interpolation_dist_;
+
+  /**
+   * @brief Maximum distance allowed between two vertices
+   */
+  double range_;
+
+  /**
+   * @brief Distance between vertex and goal
+   */
+  double goal_radius_;
 };
+
+}  // namespace sampling_based
+}  // namespace path_finding_visualizer

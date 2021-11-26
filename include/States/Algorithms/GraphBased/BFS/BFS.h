@@ -24,6 +24,7 @@ class BFS : public GraphBased {
 
   // override render functions
   virtual void renderNodes() override;
+  virtual void renderParametersGui() override;
 
   // BFS algorithm function
   virtual void solveConcurrently(

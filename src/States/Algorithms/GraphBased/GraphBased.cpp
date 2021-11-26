@@ -179,6 +179,15 @@ void GraphBased::update(const float& dt) {
   }
 }
 
+void GraphBased::clearObstacles() {
+  for (int x = 0; x < mapHeight_ / gridSize_; x++) {
+    for (int y = 0; y < mapWidth_ / gridSize_; y++) {
+      int nodeIndex = (mapWidth_ / gridSize_) * x + y;
+      nodes_[nodeIndex]->setObstacle(false);
+    }
+  }
+}
+
 void GraphBased::renderGui() {
   // buttons
   {
@@ -197,12 +206,28 @@ void GraphBased::renderGui() {
   }
 
   ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
 
   // grid size slider
+  if (ImGui::SliderInt("Grid Size", &slider_grid_size_, 10, 100)) {
+    Algorithm_reset_ = true;
+    gridSize_ = slider_grid_size_;
+  }
+
+  // ImGui::Spacing();
+  // virtual function renderParametersGui()
+  // need to be implemented by derived class
+  renderParametersGui();
+  ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
   {
-    if (ImGui::SliderInt("Grid Size", &slider_grid_size_, 10, 100)) {
-      Algorithm_reset_ = true;
-      gridSize_ = slider_grid_size_;
+    if (ImGui::Button("CLEAR OBSTACLES", ImVec2(154.f, 40.f))) {
+      clearObstacles();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("RESET PARAMETERS", ImVec2(154.f, 40.f))) {
     }
   }
 }

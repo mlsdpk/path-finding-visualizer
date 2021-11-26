@@ -33,7 +33,10 @@ class GraphBased : public State {
   void render() override;
 
   // virtual functions
+  virtual void clearObstacles();
   virtual void renderGui();
+  // render planner specific parameters
+  virtual void renderParametersGui() = 0;
   virtual void renderNodes() = 0;
   virtual void updateNodes() = 0;
   virtual void initAlgorithm() = 0;
