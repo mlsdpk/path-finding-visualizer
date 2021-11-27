@@ -49,6 +49,7 @@ class Node {
   void setPath(bool b);
   void setPosition(sf::Vector2i pos);
   void setNeighbours(std::shared_ptr<Node> node);
+  void clearNeighbours();
   void setParentNode(std::shared_ptr<Node> node);
   void setGDistance(double dist);
   void setFDistance(double dist);

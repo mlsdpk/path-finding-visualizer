@@ -24,6 +24,7 @@ void GraphBased::initVariables() {
   // for now, just use these and can improve it later
   slider_grid_size_ = 20;
   gridSize_ = slider_grid_size_;
+  grid_connectivity_ = 0;
   mapWidth_ = 700;
   mapHeight_ = 700;
 
@@ -52,7 +53,7 @@ void GraphBased::initColors() {
   PATH_COL = sf::Color(190, 242, 227, 255);
 }
 
-void GraphBased::initNodes(bool reset) {
+void GraphBased::initNodes(bool reset, bool reset_neighbours_only) {
   if (reset) {
     nodes_.clear();
 
@@ -79,26 +80,23 @@ void GraphBased::initNodes(bool reset) {
     }
   }
 
-  // add all neighbours to respective nodes
-  if (reset) {
+  // add neighbours based on 4 or 8 connectivity grid
+  if (reset || reset_neighbours_only) {
     for (int x = 0; x < mapHeight_ / gridSize_; x++) {
       for (int y = 0; y < mapWidth_ / gridSize_; y++) {
         int nodeIndex = (mapWidth_ / gridSize_) * x + y;
-        if (y > 0)
-          nodes_[nodeIndex]->setNeighbours(
-              nodes_[x * (mapWidth_ / gridSize_) + (y - 1)]);
-        if (y < ((mapWidth_ / gridSize_) - 1))
-          nodes_[nodeIndex]->setNeighbours(
-              nodes_[x * (mapWidth_ / gridSize_) + (y + 1)]);
-        if (x > 0)
-          nodes_[nodeIndex]->setNeighbours(
-              nodes_[(x - 1) * (mapWidth_ / gridSize_) + y]);
-        if (x < ((mapHeight_ / gridSize_) - 1))
-          nodes_[nodeIndex]->setNeighbours(
-              nodes_[(x + 1) * (mapWidth_ / gridSize_) + y]);
+        nodes_[nodeIndex]->clearNeighbours();
+        utils::addNeighbours(nodes_, nodeIndex,
+                             static_cast<unsigned>(mapWidth_ / gridSize_),
+                             static_cast<unsigned>(mapHeight_ / gridSize_),
+                             [](int connectivity) {
+                               return (connectivity == 1) ? true : false;
+                             }(grid_connectivity_));
       }
     }
+  }
 
+  if (reset) {
     // initialize Start and End nodes ptrs (upper left and lower right corners)
     nodeStart_ = nodes_[(mapWidth_ / gridSize_) * 0 + 0];
     nodeStart_->setParentNode(nullptr);
@@ -145,7 +143,7 @@ void GraphBased::update(const float& dt) {
   // updateButtons();
 
   if (is_reset_) {
-    initNodes(false);
+    initNodes(false, false);
     is_running_ = false;
     is_initialized_ = false;
     is_reset_ = false;
@@ -246,10 +244,23 @@ void GraphBased::renderGui() {
   // grid size slider
   if (ImGui::SliderInt("Grid Size", &slider_grid_size_, 10, 100)) {
     gridSize_ = slider_grid_size_;
-    initNodes(true);
+    initNodes(true, false);
   }
 
-  // ImGui::Spacing();
+  ImGui::Spacing();
+
+  // radio buttons for choosing 4 or 8 connected grids
+  {
+    bool a, b;
+    a = ImGui::RadioButton("4-connected", &grid_connectivity_, 0);
+    ImGui::SameLine();
+    b = ImGui::RadioButton("8-connected", &grid_connectivity_, 1);
+    if (a || b) {
+      initNodes(false, true);
+    }
+  }
+
+  ImGui::Spacing();
   // virtual function renderParametersGui()
   // need to be implemented by derived class
   renderParametersGui();
