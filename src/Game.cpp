@@ -91,8 +91,14 @@ void Game::render() {
 }
 
 void Game::initGuiTheme() {
-  ImGuiStyle* style = &ImGui::GetStyle();
+  // setup imgui style
+  ImGuiIO& io = ImGui::GetIO();
+  io.Fonts->AddFontFromFileTTF("../fonts/OpenSans/OpenSans-Regular.ttf", 18.0f);
+  ImGui::SFML::UpdateFontTexture();
 
+  ImGui::StyleColorsDark();
+
+  ImGuiStyle* style = &ImGui::GetStyle();
   style->FramePadding = ImVec2(8.f, 8.f);
 
   // style->Colors[ImGuiCol_Text] = ImColor(78, 95, 131, 255);

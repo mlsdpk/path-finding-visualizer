@@ -13,7 +13,7 @@ int main() {
                           sf::Style::Titlebar | sf::Style::Close);
   // setting frame limit
   window.setFramerateLimit(100u);
-  ImGui::SFML::Init(window);
+  ImGui::SFML::Init(window, false);
 
   // Initialize Game
   path_finding_visualizer::Game game(&window);
