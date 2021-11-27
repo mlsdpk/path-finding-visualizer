@@ -91,21 +91,36 @@ void Game::render() {
 }
 
 void Game::initGuiTheme() {
-  ImGuiStyle* style = &ImGui::GetStyle();
+  // setup imgui style
+  ImGuiIO& io = ImGui::GetIO();
+  io.Fonts->AddFontFromFileTTF("../fonts/OpenSans/OpenSans-Regular.ttf", 18.0f);
+  ImGui::SFML::UpdateFontTexture();
 
+  ImGui::StyleColorsDark();
+
+  ImGuiStyle* style = &ImGui::GetStyle();
   style->FramePadding = ImVec2(8.f, 8.f);
 
-  // style->Colors[ImGuiCol_Text] = ImColor(78, 95, 131, 255);
-  // style->Colors[ImGuiCol_WindowBg] = ImColor(246, 229, 245, 255);
+  // dark theme colors
+  auto& colors = ImGui::GetStyle().Colors;
 
-  // style->Colors[ImGuiCol_FrameBg] = ImColor(251, 244, 249, 255);
-  // style->Colors[ImGuiCol_PopupBg] = ImColor(251, 244, 249, 255);
-  // style->Colors[ImGuiCol_Button] = ImColor(251, 244, 249, 255);
-  // style->Colors[ImGuiCol_ButtonHovered] =
-  //     style->Colors[ImGuiCol_FrameBgHovered];
-  // style->Colors[ImGuiCol_ButtonActive] =
-  // style->Colors[ImGuiCol_FrameBgActive]; style->Colors[ImGuiCol_SliderGrab] =
-  // ImColor(78, 95, 131, 255);
+  colors[ImGuiCol_WindowBg] = ImVec4(0.1f, 0.105f, 0.11f, 1.0f);
+
+  colors[ImGuiCol_Button] = ImVec4(0.2f, 0.205f, 0.21f, 1.0f);
+  colors[ImGuiCol_ButtonHovered] = ImVec4(0.3f, 0.305f, 0.31f, 1.0f);
+  colors[ImGuiCol_ButtonActive] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+
+  colors[ImGuiCol_HeaderHovered] = ImVec4(0.3f, 0.305f, 0.31f, 1.0f);
+  colors[ImGuiCol_Header] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+
+  colors[ImGuiCol_FrameBg] = ImVec4(0.2f, 0.205f, 0.21f, 1.0f);
+  colors[ImGuiCol_FrameBgHovered] = ImVec4(0.3f, 0.305f, 0.31f, 1.0f);
+  colors[ImGuiCol_FrameBgActive] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+
+  colors[ImGuiCol_PopupBg] = ImVec4(0.2f, 0.205f, 0.21f, 1.0f);
+
+  colors[ImGuiCol_SliderGrab] = colors[ImGuiCol_Text];
+  colors[ImGuiCol_SliderGrabActive] = colors[ImGuiCol_Text];
 }
 
 void Game::setPlanner(const int id) {

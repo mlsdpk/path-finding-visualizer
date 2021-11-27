@@ -13,6 +13,7 @@
 #include "MessageQueue.h"
 #include "State.h"
 #include "States/Algorithms/GraphBased/Node.h"
+#include "States/Algorithms/GraphBased/Utils.h"
 
 namespace path_finding_visualizer {
 namespace graph_based {
@@ -56,6 +57,8 @@ class GraphBased : public State {
   // Map Variables
   int gridSize_;
   int slider_grid_size_;
+  // 0 = 4 connected grid, 1 = 8 connected grid
+  int grid_connectivity_;
   unsigned int mapWidth_;
   unsigned int mapHeight_;
 
@@ -83,7 +86,7 @@ class GraphBased : public State {
   // initialization Functions
   void initColors();
   void initVariables();
-  void initNodes(bool reset = true);
+  void initNodes(bool reset = true, bool reset_neighbours_only = false);
 
   void updateKeyTime(const float& dt);
   const bool getKeyTime();

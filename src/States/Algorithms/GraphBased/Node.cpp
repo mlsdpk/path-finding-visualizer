@@ -34,6 +34,8 @@ const std::vector<std::shared_ptr<Node>>* Node::getNeighbours() const {
   return &vecNeighbours_;
 }
 
+void Node::clearNeighbours() { vecNeighbours_.clear(); }
+
 const double Node::getGDistance() const { return gDist_; }
 
 const double Node::getFDistance() const { return fDist_; }

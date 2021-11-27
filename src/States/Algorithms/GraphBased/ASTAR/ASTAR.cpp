@@ -17,8 +17,12 @@ void ASTAR::initAlgorithm() {
   while (!frontier_.empty()) {
     frontier_.pop();
   }
+
+  use_manhattan_heuristics_ = (grid_connectivity_ == 0) ? true : false;
+
   nodeStart_->setGDistance(0.0);
-  nodeStart_->setFDistance(utils::L1_Distance(nodeStart_, nodeEnd_));
+  nodeStart_->setFDistance(utils::costToGoHeuristics(
+      nodeStart_, nodeEnd_, use_manhattan_heuristics_));
   frontier_.push(nodeStart_);
 }
 
@@ -65,15 +69,18 @@ void ASTAR::solveConcurrently(
           }
 
           double dist = nodeCurrent->getGDistance() +
-                        utils::L1_Distance(nodeCurrent, nodeNeighbour);
+                        utils::costToGoHeuristics(nodeCurrent, nodeNeighbour,
+                                                  use_manhattan_heuristics_);
 
           if (dist < nodeNeighbour->getGDistance()) {
             nodeNeighbour->setParentNode(nodeCurrent);
             nodeNeighbour->setGDistance(dist);
 
             // f = g + h
-            double f_dist = nodeCurrent->getGDistance() +
-                            utils::L1_Distance(nodeNeighbour, s_nodeEnd);
+            double f_dist =
+                nodeCurrent->getGDistance() +
+                utils::costToGoHeuristics(nodeNeighbour, s_nodeEnd,
+                                          use_manhattan_heuristics_);
             nodeNeighbour->setFDistance(f_dist);
             nodeNeighbour->setFrontier(true);
             frontier_.push(nodeNeighbour);

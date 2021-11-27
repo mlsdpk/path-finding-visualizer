@@ -37,6 +37,8 @@ class ASTAR : public BFS {
   std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>,
                       MinimumDistanceASTAR>
       frontier_;
+
+  bool use_manhattan_heuristics_{true};
 };
 
 }  // namespace graph_based

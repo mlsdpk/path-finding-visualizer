@@ -63,7 +63,7 @@ void DIJKSTRA::solveConcurrently(
           }
 
           double dist = nodeCurrent->getGDistance() +
-                        utils::L1_Distance(nodeCurrent, nodeNeighbour);
+                        utils::distanceCost(nodeCurrent, nodeNeighbour);
 
           if (dist < nodeNeighbour->getGDistance()) {
             nodeNeighbour->setParentNode(nodeCurrent);

@@ -14,6 +14,19 @@ This project involves minimal implementations of the popular planning algorithms
 - to change starting cell (`left-SHIFT + left-CLICKED`)
 - to change end cell (`left-CTRL + left-CLICKED`)
 
+## Dependencies
+
+* cmake >= 3.14
+  * All OSes: [click here for installation instructions](https://cmake.org/install/)
+* make >= 4.1 (Linux, Mac), 3.81 (Windows)
+  * Linux: make is installed by default on most Linux distros
+  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
+  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
+* gcc/g++ >= 5.4
+  * Linux: gcc / g++ is installed by default on most Linux distros
+  * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
+  * Windows: recommend using [MinGW](http://www.mingw.org/)
+
 ## Basic Build Instructions
 
 The project depends on [SFML](https://github.com/SFML/SFML), [Dear ImGui](https://github.com/ocornut/imgui) and [ImGui-SFML](https://github.com/eliasdaler/imgui-sfml). However, you are not required to install external dependencies by yourself. The following build instructions will manage all the necessary external dependencies for you. 
