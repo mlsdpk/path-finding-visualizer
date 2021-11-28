@@ -1,7 +1,6 @@
 #pragma once
 
-#include <math.h>
-
+#include <cmath>
 #include <vector>
 
 namespace path_finding_visualizer {

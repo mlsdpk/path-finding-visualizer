@@ -3,7 +3,6 @@
 #include <imgui-SFML.h>
 #include <imgui.h>
 
-#include <boost/math/constants/constants.hpp>
 #include <condition_variable>
 #include <future>
 #include <memory>

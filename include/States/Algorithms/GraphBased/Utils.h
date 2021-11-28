@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include "States/Algorithms/GraphBased/Node.h"
 
 namespace path_finding_visualizer {

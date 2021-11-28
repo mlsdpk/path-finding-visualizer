@@ -41,9 +41,7 @@ void RRT_STAR::initialize() {
   // update rewiring lower bounds
   // r_rrt > [(2*(1+1/d))*(area/unitNBallVolume)]^(1/d)
   r_rrt_ = rewire_factor_ *
-           std::pow(2 * (1.0 + 1.0 / 2.0) *
-                        (1.0 / boost::math::constants::pi<double>()),
-                    1.0 / 2.0);
+           std::pow(2 * (1.0 + 1.0 / 2.0) * (1.0 / M_PI), 1.0 / 2.0);
 }
 
 // override initPlanner() function
