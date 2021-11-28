@@ -102,7 +102,6 @@ void RRT::renderParametersGui() {
   if (ImGui::InputDouble("range", &range_, 0.01, 1.0, "%.3f")) {
     if (range_ < 0) range_ = 0.01;
   }
-  ImGui::Spacing();
   if (ImGui::InputDouble("goal_radius", &goal_radius_, 0.01, 1.0, "%.3f")) {
     if (goal_radius_ < 0.01) goal_radius_ = 0.01;
   }

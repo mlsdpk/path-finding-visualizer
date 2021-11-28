@@ -211,7 +211,7 @@ void SamplingBased::renderGui() {
     // RESET button
     {
       if (!disable_run_ || is_running_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RESET", ImVec2(100.f, 40.f));
+      bool clicked = ImGui::Button("RESET", ImVec2(103.f, 0.f));
       if (!disable_run_ || is_running_) ImGui::EndDisabled();
       if (clicked && !is_running_) {
         is_reset_ = true;
@@ -226,7 +226,7 @@ void SamplingBased::renderGui() {
     // always disabled (not implemented yet)
     {
       if (true) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("PAUSE", ImVec2(100.f, 40.f));
+      bool clicked = ImGui::Button("PAUSE", ImVec2(103.f, 0.f));
       if (true) ImGui::EndDisabled();
     }
 
@@ -235,7 +235,7 @@ void SamplingBased::renderGui() {
     // RUN button
     {
       if (disable_run_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RUN", ImVec2(100.f, 40.f));
+      bool clicked = ImGui::Button("RUN", ImVec2(103.f, 0.f));
       if (disable_run_) ImGui::EndDisabled();
       if (clicked && !is_solved_) {
         is_running_ = true;
@@ -245,8 +245,6 @@ void SamplingBased::renderGui() {
     }
   }
 
-  ImGui::Spacing();
-
   {
     std::unique_lock<std::mutex> iter_no_lck(iter_no_mutex_);
     const float progress = static_cast<float>(
@@ -254,36 +252,32 @@ void SamplingBased::renderGui() {
                    static_cast<double>(max_iterations_), 0.0, 1.0));
     const std::string buf =
         std::to_string(curr_iter_no_) + "/" + std::to_string(max_iterations_);
-    ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), buf.c_str());
+    ImGui::ProgressBar(progress, ImVec2(317.0f, 0.0f), buf.c_str());
   }
 
-  ImGui::Spacing();
-  ImGui::Separator();
-  ImGui::Spacing();
+  if (ImGui::CollapsingHeader("Configuration",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (disable_gui_parameters_) ImGui::BeginDisabled();
 
-  if (disable_gui_parameters_) ImGui::BeginDisabled();
-
-  if (ImGui::InputInt("max_iterations", &max_iterations_, 1, 1000)) {
-    if (max_iterations_ < 1) max_iterations_ = 1;
-  }
-  ImGui::Spacing();
-  // virtual function renderParametersGui()
-  // need to be implemented by derived class
-  renderParametersGui();
-  ImGui::Spacing();
-  ImGui::Separator();
-  ImGui::Spacing();
-  {
-    if (ImGui::Button("CLEAR OBSTACLES", ImVec2(154.f, 40.f))) {
-      clearObstacles();
+    if (ImGui::InputInt("max_iterations", &max_iterations_, 1, 1000)) {
+      if (max_iterations_ < 1) max_iterations_ = 1;
     }
-    ImGui::SameLine();
-    if (ImGui::Button("RESET PARAMETERS", ImVec2(154.f, 40.f))) {
-      initParameters();
-    }
-  }
+    // virtual function renderParametersGui()
+    // need to be implemented by derived class
+    renderParametersGui();
 
-  if (disable_gui_parameters_) ImGui::EndDisabled();
+    {
+      if (ImGui::Button("CLEAR OBSTACLES", ImVec2(156.5f, 0.f))) {
+        clearObstacles();
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("RESET PARAMETERS", ImVec2(156.5f, 0.f))) {
+        initParameters();
+      }
+    }
+
+    if (disable_gui_parameters_) ImGui::EndDisabled();
+  }
 }
 
 void SamplingBased::render() {

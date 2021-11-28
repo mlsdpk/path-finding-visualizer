@@ -201,7 +201,7 @@ void GraphBased::renderGui() {
     // RESET button
     {
       if (!disable_run_ || is_running_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RESET", ImVec2(100.f, 40.f));
+      bool clicked = ImGui::Button("RESET", ImVec2(103.0f, 0.0f));
       if (!disable_run_ || is_running_) ImGui::EndDisabled();
       if (clicked && !is_running_) {
         is_reset_ = true;
@@ -216,7 +216,7 @@ void GraphBased::renderGui() {
     // always disabled (not implemented yet)
     {
       if (true) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("PAUSE", ImVec2(100.f, 40.f));
+      bool clicked = ImGui::Button("PAUSE", ImVec2(103.0f, 0.0f));
       if (true) ImGui::EndDisabled();
     }
 
@@ -225,7 +225,7 @@ void GraphBased::renderGui() {
     // RUN button
     {
       if (disable_run_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RUN", ImVec2(100.f, 40.f));
+      bool clicked = ImGui::Button("RUN", ImVec2(103.0f, 0.0f));
       if (disable_run_) ImGui::EndDisabled();
       if (clicked && !is_solved_) {
         is_running_ = true;
@@ -235,48 +235,41 @@ void GraphBased::renderGui() {
     }
   }
 
-  ImGui::Spacing();
-  ImGui::Separator();
-  ImGui::Spacing();
-
-  if (disable_gui_parameters_) ImGui::BeginDisabled();
-
-  // grid size slider
-  if (ImGui::SliderInt("Grid Size", &slider_grid_size_, 10, 100)) {
-    gridSize_ = slider_grid_size_;
-    initNodes(true, false);
-  }
-
-  ImGui::Spacing();
-
-  // radio buttons for choosing 4 or 8 connected grids
-  {
-    bool a, b;
-    a = ImGui::RadioButton("4-connected", &grid_connectivity_, 0);
-    ImGui::SameLine();
-    b = ImGui::RadioButton("8-connected", &grid_connectivity_, 1);
-    if (a || b) {
-      initNodes(false, true);
+  if (ImGui::CollapsingHeader("Configuration",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (disable_gui_parameters_) ImGui::BeginDisabled();
+    // grid size slider
+    if (ImGui::SliderInt("Grid Size", &slider_grid_size_, 10, 100)) {
+      gridSize_ = slider_grid_size_;
+      initNodes(true, false);
     }
-  }
 
-  ImGui::Spacing();
-  // virtual function renderParametersGui()
-  // need to be implemented by derived class
-  renderParametersGui();
-  ImGui::Spacing();
-  ImGui::Separator();
-  ImGui::Spacing();
-  {
-    if (ImGui::Button("CLEAR OBSTACLES", ImVec2(154.f, 40.f))) {
-      clearObstacles();
+    // radio buttons for choosing 4 or 8 connected grids
+    {
+      bool a, b;
+      a = ImGui::RadioButton("4-connected", &grid_connectivity_, 0);
+      ImGui::SameLine();
+      b = ImGui::RadioButton("8-connected", &grid_connectivity_, 1);
+      if (a || b) {
+        initNodes(false, true);
+      }
     }
-    ImGui::SameLine();
-    if (ImGui::Button("RESET PARAMETERS", ImVec2(154.f, 40.f))) {
-    }
-  }
 
-  if (disable_gui_parameters_) ImGui::EndDisabled();
+    // virtual function renderParametersGui()
+    // need to be implemented by derived class
+    renderParametersGui();
+
+    {
+      if (ImGui::Button("CLEAR OBSTACLES", ImVec2(156.5f, 0.f))) {
+        clearObstacles();
+      }
+      ImGui::SameLine();
+      if (ImGui::Button("RESET PARAMETERS", ImVec2(156.5f, 0.f))) {
+      }
+    }
+
+    if (disable_gui_parameters_) ImGui::EndDisabled();
+  }
 }
 
 void GraphBased::render() {

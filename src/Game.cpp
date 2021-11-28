@@ -72,7 +72,6 @@ void Game::render() {
   window_->clear(sf::Color::White);
 
   if (!states_.empty()) {
-    // guiTheme();
     ImGui::SetNextWindowPos(ImVec2(0.f, 0.f), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(
         ImVec2(332.f, static_cast<float>(window_->getSize().y)),
@@ -83,6 +82,39 @@ void Game::render() {
                      ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
     renderGui();
     states_.top()->render();
+
+    if (ImGui::CollapsingHeader("Help")) {
+      ImGui::Text("ABOUT THIS VISUALIZER:");
+      ImGui::Text(
+          "This project involves minimal implementations of\nthe popular "
+          "planning algorithms, including\nboth graph-based and "
+          "sampling-based planners.");
+
+      ImGui::Separator();
+
+      ImGui::Text("AVAILABLE PLANNERS:");
+
+      ImGui::BulletText("Graph-based Planners:");
+      ImGui::Indent();
+      ImGui::BulletText("Breadth-first search (BFS)");
+      ImGui::BulletText("Depth-first search (DFS)");
+      ImGui::BulletText("Dijkstra");
+      ImGui::BulletText("A*");
+
+      ImGui::Unindent();
+      ImGui::BulletText("Sampling-based Planners:");
+      ImGui::Indent();
+      ImGui::BulletText("Rapidly-exploring random trees (RRT)");
+      ImGui::BulletText("RRT*");
+      ImGui::Unindent();
+
+      ImGui::Separator();
+
+      ImGui::Text("USAGE GUIDE:");
+      ImGui::BulletText("Left-click to place/remove obstacle cells");
+      ImGui::BulletText("Left-SHIFT+left-click to change starting cell");
+      ImGui::BulletText("Left-CTRL+left-click to change end cell");
+    }
     ImGui::End();
   }
 
@@ -100,6 +132,7 @@ void Game::initGuiTheme() {
 
   ImGuiStyle* style = &ImGui::GetStyle();
   style->FramePadding = ImVec2(8.f, 8.f);
+  style->ItemSpacing = ImVec2(4.0f, 4.0f);
 
   // dark theme colors
   auto& colors = ImGui::GetStyle().Colors;
@@ -164,8 +197,9 @@ void Game::setSamplingBasedPlanner(const int id) {
 }
 
 void Game::renderGui() {
-  if (ImGui::Button("Choose Planner..")) ImGui::OpenPopup("planners_popup");
-  ImGui::SameLine();
+  if (ImGui::Button("Choose Planner", ImVec2(210.0f, 0.0f)))
+    ImGui::OpenPopup("planners_popup");
+  ImGui::SameLine(0.0f, 8.0f);
   ImGui::TextUnformatted(curr_planner_.c_str());
   if (ImGui::BeginPopup("planners_popup")) {
     if (ImGui::BeginMenu("Graph-based Planners")) {
@@ -199,28 +233,6 @@ void Game::renderGui() {
 
     ImGui::EndPopup();
   }
-
-  // if (ImGui::BeginCombo("Select Planner", curr_planner_.c_str())) {
-  //   for (int n = 0; n < PLANNER_NAMES.size(); n++) {
-  //     bool is_selected = (curr_planner_ == PLANNER_NAMES[n]);
-  //     if (ImGui::Selectable(PLANNER_NAMES[n].c_str(), is_selected)) {
-  //       if (PLANNER_NAMES[n] != curr_planner_) {
-  //         // change the planner
-  //         setPlanner(n);
-  //       }
-  //       curr_planner_ = PLANNER_NAMES[n];
-  //     }
-
-  //     if (is_selected)
-  //       ImGui::SetItemDefaultFocus();  // Set the initial focus when opening
-  //       the
-  //                                      // combo (scrolling + for keyboard
-  //                                      // navigation support in the upcoming
-  //                                      // navigation branch)
-  //   }
-  //   ImGui::EndCombo();
-  // }
-  ImGui::Spacing();
 }
 
 }  // namespace path_finding_visualizer
