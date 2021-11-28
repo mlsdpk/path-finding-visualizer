@@ -24,9 +24,8 @@ class RRT_STAR : public RRT {
   virtual void initParameters() override;
 
   // override algorithm function
-  virtual void solveConcurrently(
-      std::shared_ptr<Vertex> start_point, std::shared_ptr<Vertex> goal_point,
-      std::shared_ptr<MessageQueue<bool>> message_queue) override;
+  virtual void updatePlanner(bool& solved, Vertex& start,
+                             Vertex& goal) override;
 
   /**
    * @brief Find all the nearest neighbours inside the radius of particular

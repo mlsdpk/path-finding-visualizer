@@ -73,141 +73,103 @@ void RRT_STAR::renderParametersGui() {
   }
 }
 
-void RRT_STAR::solveConcurrently(
-    std::shared_ptr<Vertex> start_point, std::shared_ptr<Vertex> goal_point,
-    std::shared_ptr<MessageQueue<bool>> message_queue) {
-  // copy assignment
-  // thread-safe due to shared_ptrs
-  std::shared_ptr<Vertex> start_vertex = start_point;
-  std::shared_ptr<Vertex> goal_vertex = goal_point;
-  std::shared_ptr<MessageQueue<bool>> s_message_queue = message_queue;
+void RRT_STAR::updatePlanner(bool &solved, Vertex &start, Vertex &goal) {
+  std::unique_lock<std::mutex> iter_no_lck(iter_no_mutex_);
+  bool running = (curr_iter_no_ < max_iterations_);
+  iter_no_lck.unlock();
 
-  bool solved = false;
+  if (running) {
+    std::shared_ptr<Vertex> x_rand = std::make_shared<Vertex>();
+    std::shared_ptr<Vertex> x_nearest = std::make_shared<Vertex>();
+    std::shared_ptr<Vertex> x_new = std::make_shared<Vertex>();
 
-  double cycle_duration = 1;  // duration of a single simulation cycle in ms
-  // init stop watch
-  auto last_update = std::chrono::system_clock::now();
-  unsigned int iteration_number = 0u;
+    sample(x_rand);
+    nearest(x_rand, x_nearest);
 
-  while (true) {
-    // compute time difference to stop watch
-    long time_since_last_update =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - last_update)
-            .count();
+    // find the distance between x_rand and x_nearest
+    double d = distance(x_rand, x_nearest);
 
-    if (time_since_last_update >= cycle_duration) {
-      ////////////////////////////
-      // run the main algorithm //
-      ////////////////////////////
-      if (iteration_number < max_iterations_) {
-        std::shared_ptr<Vertex> x_rand = std::make_shared<Vertex>();
-        std::shared_ptr<Vertex> x_nearest = std::make_shared<Vertex>();
-        std::shared_ptr<Vertex> x_new = std::make_shared<Vertex>();
-
-        sample(x_rand);
-        nearest(x_rand, x_nearest);
-
-        // find the distance between x_rand and x_nearest
-        double d = distance(x_rand, x_nearest);
-
-        // if this distance d > delta_q, we need to find nearest state in the
-        // direction of x_rand
-        if (d > range_) {
-          interpolate(x_nearest, x_rand, range_ / d, x_new);
-        } else {
-          x_new->x = x_rand->x;
-          x_new->y = x_rand->y;
-        }
-
-        if (!isCollision(x_nearest, x_new)) {
-          // find all the nearest neighbours inside radius
-          std::vector<std::shared_ptr<Vertex>> X_near;
-          near(x_new, X_near);
-
-          std::unique_lock<std::mutex> lck(mutex_);
-          vertices_.emplace_back(x_new);
-          lck.unlock();
-
-          // choose parent
-          std::shared_ptr<Vertex> x_min = x_nearest;
-          for (const auto &x_near : X_near) {
-            double c_new = cost(x_near) + distance(x_near, x_new);
-            if (c_new < cost(x_min) + distance(x_min, x_new)) {
-              if (!isCollision(x_near, x_new)) {
-                x_min = x_near;
-              }
-            }
-          }
-          x_new->parent = x_min;
-
-          lck.lock();
-          edges_.emplace_back(x_new->parent, x_new);
-          lck.unlock();
-
-          // rewiring
-          for (const auto &x_near : X_near) {
-            double c_near = cost(x_new) + distance(x_new, x_near);
-            if (c_near < cost(x_near)) {
-              if (!isCollision(x_near, x_new)) {
-                lck.lock();
-                edges_.erase(
-                    std::remove(edges_.begin(), edges_.end(),
-                                std::make_pair(x_near->parent, x_near)),
-                    edges_.end());
-                x_near->parent = x_new;
-                edges_.emplace_back(x_new, x_near);
-                lck.unlock();
-              }
-            }
-          }
-
-          // add into x_soln if the vertex is within the goal radius
-          if (inGoalRegion(x_new)) {
-            x_soln_.emplace_back(x_new);
-          }
-        }
-
-        // update the best parent for the goal vertex every n iterations
-        if (iteration_number % update_goal_every_ == 0) {
-          if (x_soln_.size() > 0) {
-            std::shared_ptr<Vertex> best_goal_parent;
-            double min_goal_parent_cost =
-                std::numeric_limits<double>::infinity();
-
-            for (const auto &v : x_soln_) {
-              double c = cost(v);
-              if (c < min_goal_parent_cost) {
-                min_goal_parent_cost = c;
-                best_goal_parent = v;
-              }
-            }
-            goal_vertex->parent = best_goal_parent;
-          }
-        }
-        iteration_number++;
-      } else {
-        std::cout << "Iterations number reach max limit. Planning stopped."
-                  << '\n';
-        solved = true;
-      }
-      ////////////////////////////
-
-      // reset stop watch for next cycle
-      last_update = std::chrono::system_clock::now();
+    // if this distance d > delta_q, we need to find nearest state in the
+    // direction of x_rand
+    if (d > range_) {
+      interpolate(x_nearest, x_rand, range_ / d, x_new);
+    } else {
+      x_new->x = x_rand->x;
+      x_new->y = x_rand->y;
     }
 
-    // sends an update method to the message queue using move semantics
-    auto ftr = std::async(std::launch::async, &MessageQueue<bool>::send,
-                          s_message_queue, std::move(solved));
-    ftr.wait();
-    if (solved) return;
+    if (!isCollision(x_nearest, x_new)) {
+      // find all the nearest neighbours inside radius
+      std::vector<std::shared_ptr<Vertex>> X_near;
+      near(x_new, X_near);
 
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (is_stopped_) return;
+      std::unique_lock<std::mutex> lck(mutex_);
+      vertices_.emplace_back(x_new);
+      lck.unlock();
 
-    // sleep at every iteration to reduce CPU usage
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      // choose parent
+      std::shared_ptr<Vertex> x_min = x_nearest;
+      for (const auto &x_near : X_near) {
+        double c_new = cost(x_near) + distance(x_near, x_new);
+        if (c_new < cost(x_min) + distance(x_min, x_new)) {
+          if (!isCollision(x_near, x_new)) {
+            x_min = x_near;
+          }
+        }
+      }
+      x_new->parent = x_min;
+
+      lck.lock();
+      edges_.emplace_back(x_new->parent, x_new);
+      lck.unlock();
+
+      // rewiring
+      for (const auto &x_near : X_near) {
+        double c_near = cost(x_new) + distance(x_new, x_near);
+        if (c_near < cost(x_near)) {
+          if (!isCollision(x_near, x_new)) {
+            lck.lock();
+            edges_.erase(std::remove(edges_.begin(), edges_.end(),
+                                     std::make_pair(x_near->parent, x_near)),
+                         edges_.end());
+            x_near->parent = x_new;
+            edges_.emplace_back(x_new, x_near);
+            lck.unlock();
+          }
+        }
+      }
+
+      // add into x_soln if the vertex is within the goal radius
+      if (inGoalRegion(x_new)) {
+        x_soln_.emplace_back(x_new);
+      }
+    }
+
+    // update the best parent for the goal vertex every n iterations
+    iter_no_lck.lock();
+    bool update_solution_path = (curr_iter_no_ % update_goal_every_ == 0);
+    iter_no_lck.unlock();
+    if (update_solution_path) {
+      if (x_soln_.size() > 0) {
+        std::shared_ptr<Vertex> best_goal_parent;
+        double min_goal_parent_cost = std::numeric_limits<double>::infinity();
+
+        for (const auto &v : x_soln_) {
+          double c = cost(v);
+          if (c < min_goal_parent_cost) {
+            min_goal_parent_cost = c;
+            best_goal_parent = v;
+          }
+        }
+        goal.parent = best_goal_parent;
+      }
+    }
+    iter_no_lck.lock();
+    curr_iter_no_++;
+    iter_no_lck.unlock();
+  } else {
+    std::cout << "Iterations number reach max limit. Planning stopped." << '\n';
+    solved = true;
   }
 }
 

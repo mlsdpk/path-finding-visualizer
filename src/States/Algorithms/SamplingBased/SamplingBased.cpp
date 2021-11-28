@@ -99,6 +99,9 @@ void SamplingBased::update(const float& dt) {
     message_queue_ = std::make_shared<MessageQueue<bool>>();
 
     initialize();
+
+    std::unique_lock<std::mutex> iter_no_lck(iter_no_mutex_);
+    curr_iter_no_ = 0u;
   }
 
   if (is_running_) {
@@ -241,6 +244,19 @@ void SamplingBased::renderGui() {
       }
     }
   }
+
+  ImGui::Spacing();
+
+  {
+    std::unique_lock<std::mutex> iter_no_lck(iter_no_mutex_);
+    const float progress = static_cast<float>(
+        utils::map(static_cast<double>(curr_iter_no_), 0.0,
+                   static_cast<double>(max_iterations_), 0.0, 1.0));
+    const std::string buf =
+        std::to_string(curr_iter_no_) + "/" + std::to_string(max_iterations_);
+    ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), buf.c_str());
+  }
+
   ImGui::Spacing();
   ImGui::Separator();
   ImGui::Spacing();
@@ -279,6 +295,51 @@ void SamplingBased::render() {
 
   // render gui
   renderGui();
+}
+
+void SamplingBased::solveConcurrently(
+    std::shared_ptr<Vertex> start_point, std::shared_ptr<Vertex> goal_point,
+    std::shared_ptr<MessageQueue<bool>> message_queue) {
+  // copy assignment
+  // thread-safe due to shared_ptrs
+  std::shared_ptr<Vertex> start_vertex = start_point;
+  std::shared_ptr<Vertex> goal_vertex = goal_point;
+  std::shared_ptr<MessageQueue<bool>> s_message_queue = message_queue;
+
+  bool solved = false;
+
+  double cycle_duration = 1;  // duration of a single simulation cycle in ms
+  // init stop watch
+  auto last_update = std::chrono::system_clock::now();
+
+  while (true) {
+    // compute time difference to stop watch
+    long time_since_last_update =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - last_update)
+            .count();
+
+    if (time_since_last_update >= cycle_duration) {
+      // run the main algorithm
+      updatePlanner(solved, *start_vertex, *goal_vertex);
+
+      // reset stop watch for next cycle
+      last_update = std::chrono::system_clock::now();
+    }
+
+    // sends an update method to the message queue using move semantics
+    auto ftr = std::async(std::launch::async, &MessageQueue<bool>::send,
+                          s_message_queue, std::move(solved));
+    ftr.wait();
+
+    if (solved) return;
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (is_stopped_) return;
+
+    // sleep at every iteration to reduce CPU usage
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
 }
 
 }  // namespace sampling_based

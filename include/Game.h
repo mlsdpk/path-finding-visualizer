@@ -13,9 +13,11 @@
 
 namespace path_finding_visualizer {
 
-static const std::vector<std::string> PLANNER_NAMES{"BFS", "DFS", "DIJKSTRA",
-                                                    "A*",  "RRT", "RRT*"};
-enum PLANNERS_IDS { BFS, DFS, DIJKSTRA, AStar, RRT, RRT_STAR };
+static const std::vector<std::string> GRAPH_BASED_PLANNERS{"BFS", "DFS",
+                                                           "DIJKSTRA", "A*"};
+static const std::vector<std::string> SAMPLING_BASED_PLANNERS{"RRT", "RRT*"};
+enum GRAPH_BASED_PLANNERS_IDS { BFS, DFS, DIJKSTRA, AStar };
+enum SAMPLING_BASED_PLANNERS_IDS { RRT, RRT_STAR };
 
 class Game {
  public:
@@ -35,7 +37,8 @@ class Game {
   void render();
   void initGuiTheme();
   void renderGui();
-  void setPlanner(const int id);
+  void setGraphBasedPlanner(const int id);
+  void setSamplingBasedPlanner(const int id);
 
  private:
   sf::RenderWindow* window_;
