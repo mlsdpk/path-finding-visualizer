@@ -25,10 +25,9 @@ class RRT : public SamplingBased {
   virtual void renderPlannerData() override;
   virtual void renderParametersGui() override;
 
-  // override algorithm function
-  virtual void solveConcurrently(
-      std::shared_ptr<Vertex> start_point, std::shared_ptr<Vertex> goal_point,
-      std::shared_ptr<MessageQueue<bool>> message_queue) override;
+  // override main update function
+  virtual void updatePlanner(bool &solved, Vertex &start,
+                             Vertex &goal) override;
 
   /**
    * @brief Randomly sample a vertex

@@ -18,7 +18,7 @@ namespace path_finding_visualizer {
 
 // Constructor
 Game::Game(sf::RenderWindow* window) : window_{window} {
-  curr_planner_ = PLANNER_NAMES[0];
+  curr_planner_ = GRAPH_BASED_PLANNERS[0];
   // manually add BFS for now
   states_.push(std::make_unique<bfs_state_type>(window_, states_));
 
@@ -121,31 +121,40 @@ void Game::initGuiTheme() {
 
   colors[ImGuiCol_SliderGrab] = colors[ImGuiCol_Text];
   colors[ImGuiCol_SliderGrabActive] = colors[ImGuiCol_Text];
+
+  colors[ImGuiCol_PlotHistogram] = ImVec4(0.3f, 0.305f, 0.31f, 1.0f);
 }
 
-void Game::setPlanner(const int id) {
+void Game::setGraphBasedPlanner(const int id) {
   switch (id) {
-    case PLANNERS_IDS::BFS:
+    case GRAPH_BASED_PLANNERS_IDS::BFS:
       // BFS
       states_.push(std::make_unique<bfs_state_type>(window_, states_));
       break;
-    case PLANNERS_IDS::DFS:
+    case GRAPH_BASED_PLANNERS_IDS::DFS:
       // DFS
       states_.push(std::make_unique<dfs_state_type>(window_, states_));
       break;
-    case PLANNERS_IDS::DIJKSTRA:
+    case GRAPH_BASED_PLANNERS_IDS::DIJKSTRA:
       // Dijkstra
       states_.push(std::make_unique<dijkstra_state_type>(window_, states_));
       break;
-    case PLANNERS_IDS::AStar:
+    case GRAPH_BASED_PLANNERS_IDS::AStar:
       // A-Star
       states_.push(std::make_unique<astar_state_type>(window_, states_));
       break;
-    case PLANNERS_IDS::RRT:
+    default:
+      break;
+  }
+}
+
+void Game::setSamplingBasedPlanner(const int id) {
+  switch (id) {
+    case SAMPLING_BASED_PLANNERS_IDS::RRT:
       // RRT
       states_.push(std::make_unique<rrt_state_type>(window_, states_));
       break;
-    case PLANNERS_IDS::RRT_STAR:
+    case SAMPLING_BASED_PLANNERS_IDS::RRT_STAR:
       // RRTStar
       states_.push(std::make_unique<rrtstar_state_type>(window_, states_));
       break;
@@ -155,25 +164,62 @@ void Game::setPlanner(const int id) {
 }
 
 void Game::renderGui() {
-  if (ImGui::BeginCombo("Select Planner", curr_planner_.c_str())) {
-    for (int n = 0; n < PLANNER_NAMES.size(); n++) {
-      bool is_selected = (curr_planner_ == PLANNER_NAMES[n]);
-      if (ImGui::Selectable(PLANNER_NAMES[n].c_str(), is_selected)) {
-        if (PLANNER_NAMES[n] != curr_planner_) {
-          // change the planner
-          setPlanner(n);
+  if (ImGui::Button("Choose Planner..")) ImGui::OpenPopup("planners_popup");
+  ImGui::SameLine();
+  ImGui::TextUnformatted(curr_planner_.c_str());
+  if (ImGui::BeginPopup("planners_popup")) {
+    if (ImGui::BeginMenu("Graph-based Planners")) {
+      for (int n = 0; n < GRAPH_BASED_PLANNERS.size(); n++) {
+        bool selected = (GRAPH_BASED_PLANNERS[n] == curr_planner_);
+        if (ImGui::MenuItem(GRAPH_BASED_PLANNERS[n].c_str(), nullptr, selected,
+                            !selected)) {
+          if (!selected) {
+            // change the planner
+            setGraphBasedPlanner(n);
+          }
+          curr_planner_ = GRAPH_BASED_PLANNERS[n];
         }
-        curr_planner_ = PLANNER_NAMES[n];
       }
-
-      if (is_selected)
-        ImGui::SetItemDefaultFocus();  // Set the initial focus when opening the
-                                       // combo (scrolling + for keyboard
-                                       // navigation support in the upcoming
-                                       // navigation branch)
+      ImGui::EndMenu();
     }
-    ImGui::EndCombo();
+    if (ImGui::BeginMenu("Sampling-based Planners")) {
+      for (int n = 0; n < SAMPLING_BASED_PLANNERS.size(); n++) {
+        bool selected = (SAMPLING_BASED_PLANNERS[n] == curr_planner_);
+        if (ImGui::MenuItem(SAMPLING_BASED_PLANNERS[n].c_str(), nullptr,
+                            selected, !selected)) {
+          if (!selected) {
+            // change the planner
+            setSamplingBasedPlanner(n);
+          }
+          curr_planner_ = SAMPLING_BASED_PLANNERS[n];
+        }
+      }
+      ImGui::EndMenu();
+    }
+
+    ImGui::EndPopup();
   }
+
+  // if (ImGui::BeginCombo("Select Planner", curr_planner_.c_str())) {
+  //   for (int n = 0; n < PLANNER_NAMES.size(); n++) {
+  //     bool is_selected = (curr_planner_ == PLANNER_NAMES[n]);
+  //     if (ImGui::Selectable(PLANNER_NAMES[n].c_str(), is_selected)) {
+  //       if (PLANNER_NAMES[n] != curr_planner_) {
+  //         // change the planner
+  //         setPlanner(n);
+  //       }
+  //       curr_planner_ = PLANNER_NAMES[n];
+  //     }
+
+  //     if (is_selected)
+  //       ImGui::SetItemDefaultFocus();  // Set the initial focus when opening
+  //       the
+  //                                      // combo (scrolling + for keyboard
+  //                                      // navigation support in the upcoming
+  //                                      // navigation branch)
+  //   }
+  //   ImGui::EndCombo();
+  // }
   ImGui::Spacing();
 }
 

@@ -70,13 +70,16 @@ class SamplingBased : public State {
   // planner related initialization
   // this function runs when user presses RUN buttons
   virtual void initPlanner() = 0;
-
   virtual void initParameters() = 0;
 
+  // pure virtual function need to be implemented by (single-query)
+  // sampling-based planners
+  virtual void updatePlanner(bool &solved, Vertex &start, Vertex &goal) = 0;
+
   // main algorithm function (runs in separate thread)
-  virtual void solveConcurrently(
-      std::shared_ptr<Vertex> start_point, std::shared_ptr<Vertex> goal_point,
-      std::shared_ptr<MessageQueue<bool>> message_queue) = 0;
+  void solveConcurrently(std::shared_ptr<Vertex> start_point,
+                         std::shared_ptr<Vertex> goal_point,
+                         std::shared_ptr<MessageQueue<bool>> message_queue);
 
  protected:
   // key timers
@@ -106,6 +109,9 @@ class SamplingBased : public State {
    * @brief Maximum number of iterations to run the algorithm
    */
   int max_iterations_;
+
+  std::mutex iter_no_mutex_;
+  unsigned int curr_iter_no_{0u};
 
   // MessageQueue Object
   std::shared_ptr<MessageQueue<bool>> message_queue_;

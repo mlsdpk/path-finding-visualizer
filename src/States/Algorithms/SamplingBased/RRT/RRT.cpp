@@ -108,94 +108,51 @@ void RRT::renderParametersGui() {
   }
 }
 
-// TODO: Since RRT*-like planners share the same iteration concept,
-// solveConcurrently() function can be only defined one time
-void RRT::solveConcurrently(std::shared_ptr<Vertex> start_point,
-                            std::shared_ptr<Vertex> goal_point,
-                            std::shared_ptr<MessageQueue<bool>> message_queue) {
-  // copy assignment
-  // thread-safe due to shared_ptrs
-  std::shared_ptr<Vertex> start_vertex = start_point;
-  std::shared_ptr<Vertex> goal_vertex = goal_point;
-  std::shared_ptr<MessageQueue<bool>> s_message_queue = message_queue;
+void RRT::updatePlanner(bool &solved, Vertex &start, Vertex &goal) {
+  std::unique_lock<std::mutex> iter_no_lck(iter_no_mutex_);
+  bool running = (curr_iter_no_ < max_iterations_);
+  iter_no_lck.unlock();
 
-  bool solved = false;
+  if (running) {
+    std::shared_ptr<Vertex> x_rand = std::make_shared<Vertex>();
+    std::shared_ptr<Vertex> x_nearest = std::make_shared<Vertex>();
+    std::shared_ptr<Vertex> x_new = std::make_shared<Vertex>();
 
-  double cycle_duration = 1;  // duration of a single simulation cycle in ms
-  // init stop watch
-  auto last_update = std::chrono::system_clock::now();
+    sample(x_rand);
+    nearest(x_rand, x_nearest);
 
-  unsigned int iteration_number = 0u;
+    // find the distance between x_rand and x_nearest
+    double d = distance(x_rand, x_nearest);
 
-  while (true) {
-    // compute time difference to stop watch
-    long time_since_last_update =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - last_update)
-            .count();
-
-    if (time_since_last_update >= cycle_duration) {
-      ////////////////////////////
-      // run the main algorithm //
-      ////////////////////////////
-      if (iteration_number < max_iterations_) {
-        std::shared_ptr<Vertex> x_rand = std::make_shared<Vertex>();
-        std::shared_ptr<Vertex> x_nearest = std::make_shared<Vertex>();
-        std::shared_ptr<Vertex> x_new = std::make_shared<Vertex>();
-
-        sample(x_rand);
-        nearest(x_rand, x_nearest);
-
-        // find the distance between x_rand and x_nearest
-        double d = distance(x_rand, x_nearest);
-
-        // if this distance d > max_distance_, we need to find nearest state in
-        // the direction of x_rand
-        if (d > range_) {
-          interpolate(x_nearest, x_rand, range_ / d, x_new);
-        } else {
-          x_new->x = x_rand->x;
-          x_new->y = x_rand->y;
-        }
-
-        if (!isCollision(x_nearest, x_new)) {
-          x_new->parent = x_nearest;
-
-          std::unique_lock<std::mutex> lck(mutex_);
-          vertices_.emplace_back(x_new);
-          edges_.emplace_back(x_nearest, x_new);
-          lck.unlock();
-
-          if (inGoalRegion(x_new)) {
-            goal_vertex->parent = std::move(x_new);
-            solved = true;
-          }
-        }
-
-        iteration_number++;
-      } else {
-        std::cout << "Iterations number reach max limit. Planning stopped."
-                  << '\n';
-        solved = true;
-      }
-      ////////////////////////////
-
-      // reset stop watch for next cycle
-      last_update = std::chrono::system_clock::now();
+    // if this distance d > max_distance_, we need to find nearest state in
+    // the direction of x_rand
+    if (d > range_) {
+      interpolate(x_nearest, x_rand, range_ / d, x_new);
+    } else {
+      x_new->x = x_rand->x;
+      x_new->y = x_rand->y;
     }
 
-    // sends an update method to the message queue using move semantics
-    auto ftr = std::async(std::launch::async, &MessageQueue<bool>::send,
-                          s_message_queue, std::move(solved));
-    ftr.wait();
+    if (!isCollision(x_nearest, x_new)) {
+      x_new->parent = x_nearest;
 
-    if (solved) return;
+      std::unique_lock<std::mutex> lck(mutex_);
+      vertices_.emplace_back(x_new);
+      edges_.emplace_back(x_nearest, x_new);
+      lck.unlock();
 
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (is_stopped_) return;
+      if (inGoalRegion(x_new)) {
+        goal.parent = std::move(x_new);
+        solved = true;
+      }
+    }
 
-    // sleep at every iteration to reduce CPU usage
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    iter_no_lck.lock();
+    curr_iter_no_++;
+    iter_no_lck.unlock();
+  } else {
+    std::cout << "Iterations number reach max limit. Planning stopped." << '\n';
+    solved = true;
   }
 }
 
