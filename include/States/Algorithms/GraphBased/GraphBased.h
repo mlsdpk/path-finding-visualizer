@@ -10,6 +10,7 @@
 #include <queue>
 #include <vector>
 
+#include "LoggerPanel.h"
 #include "MessageQueue.h"
 #include "State.h"
 #include "States/Algorithms/GraphBased/Node.h"
@@ -22,7 +23,8 @@ class GraphBased : public State {
  public:
   // Constructor
   GraphBased(sf::RenderWindow* window,
-             std::stack<std::unique_ptr<State>>& states);
+             std::stack<std::unique_ptr<State>>& states,
+             std::shared_ptr<LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~GraphBased();
@@ -72,9 +74,7 @@ class GraphBased : public State {
   std::shared_ptr<MessageQueue<bool>> message_queue_;
 
   // logic flags
-  bool is_running_;
   bool is_initialized_;
-  bool is_reset_;
   bool is_solved_;
   bool disable_run_;
   bool disable_gui_parameters_;

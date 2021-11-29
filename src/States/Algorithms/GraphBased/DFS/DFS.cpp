@@ -4,8 +4,9 @@ namespace path_finding_visualizer {
 namespace graph_based {
 
 // Constructor
-DFS::DFS(sf::RenderWindow* window, std::stack<std::unique_ptr<State>>& states)
-    : BFS(window, states) {}
+DFS::DFS(sf::RenderWindow* window, std::stack<std::unique_ptr<State>>& states,
+         std::shared_ptr<LoggerPanel> logger_panel)
+    : BFS(window, states, logger_panel) {}
 
 // Destructor
 DFS::~DFS() {}

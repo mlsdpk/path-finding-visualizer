@@ -5,8 +5,10 @@ namespace sampling_based {
 
 // Constructor
 RRT_STAR::RRT_STAR(sf::RenderWindow *window,
-                   std::stack<std::unique_ptr<State>> &states)
-    : RRT(window, states) {
+                   std::stack<std::unique_ptr<State>> &states,
+                   std::shared_ptr<LoggerPanel> logger_panel,
+                   const std::string &name)
+    : RRT(window, states, logger_panel, name) {
   initParameters();
   initialize();
 }

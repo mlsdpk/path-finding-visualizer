@@ -5,8 +5,9 @@ namespace graph_based {
 
 // Constructor
 GraphBased::GraphBased(sf::RenderWindow* window,
-                       std::stack<std::unique_ptr<State>>& states)
-    : State(window, states), keyTimeMax_{1.f}, keyTime_{0.f} {
+                       std::stack<std::unique_ptr<State>>& states,
+                       std::shared_ptr<LoggerPanel> logger_panel)
+    : State(window, states, logger_panel), keyTimeMax_{1.f}, keyTime_{0.f} {
   initVariables();
   initNodes();
   initColors();
@@ -148,6 +149,7 @@ void GraphBased::update(const float& dt) {
     is_initialized_ = false;
     is_reset_ = false;
     is_solved_ = false;
+    disable_gui_parameters_ = false;
 
     message_queue_ = std::make_shared<MessageQueue<bool>>();
   }
@@ -166,6 +168,7 @@ void GraphBased::update(const float& dt) {
 
       thread_joined_ = false;
       is_initialized_ = true;
+      disable_gui_parameters_ = true;
     }
 
     // check the algorithm is solved or not
@@ -196,45 +199,6 @@ void GraphBased::clearObstacles() {
 }
 
 void GraphBased::renderGui() {
-  // buttons
-  {
-    // RESET button
-    {
-      if (!disable_run_ || is_running_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RESET", ImVec2(103.0f, 0.0f));
-      if (!disable_run_ || is_running_) ImGui::EndDisabled();
-      if (clicked && !is_running_) {
-        is_reset_ = true;
-        disable_gui_parameters_ = false;
-        disable_run_ = false;
-      }
-    }
-
-    ImGui::SameLine();
-
-    // TODO: PAUSE button
-    // always disabled (not implemented yet)
-    {
-      if (true) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("PAUSE", ImVec2(103.0f, 0.0f));
-      if (true) ImGui::EndDisabled();
-    }
-
-    ImGui::SameLine();
-
-    // RUN button
-    {
-      if (disable_run_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RUN", ImVec2(103.0f, 0.0f));
-      if (disable_run_) ImGui::EndDisabled();
-      if (clicked && !is_solved_) {
-        is_running_ = true;
-        disable_gui_parameters_ = true;
-        disable_run_ = true;
-      }
-    }
-  }
-
   if (ImGui::CollapsingHeader("Configuration",
                               ImGuiTreeNodeFlags_DefaultOpen)) {
     if (disable_gui_parameters_) ImGui::BeginDisabled();

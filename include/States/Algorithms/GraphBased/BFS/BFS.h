@@ -11,7 +11,8 @@ namespace graph_based {
 class BFS : public GraphBased {
  public:
   // Constructor
-  BFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
+  BFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
+      std::shared_ptr<LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~BFS();

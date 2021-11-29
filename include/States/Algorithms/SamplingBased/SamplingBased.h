@@ -32,7 +32,9 @@ class SamplingBased : public State {
  public:
   // Constructor
   SamplingBased(sf::RenderWindow *window,
-                std::stack<std::unique_ptr<State>> &states);
+                std::stack<std::unique_ptr<State>> &states,
+                std::shared_ptr<LoggerPanel> logger_panel,
+                const std::string &name);
 
   // Destructor
   virtual ~SamplingBased();
@@ -116,9 +118,7 @@ class SamplingBased : public State {
   std::shared_ptr<MessageQueue<bool>> message_queue_;
 
   // logic flags
-  bool is_running_;
   bool is_initialized_;
-  bool is_reset_;
   bool is_solved_;
   bool is_stopped_;
   bool disable_run_;

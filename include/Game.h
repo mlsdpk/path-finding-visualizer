@@ -36,9 +36,11 @@ class Game {
   void update();
   void render();
   void initGuiTheme();
-  void renderGui();
+  void renderMenuBar(ImGuiIO& io);
   void setGraphBasedPlanner(const int id);
   void setSamplingBasedPlanner(const int id);
+  void showHowToUseWindow();
+  void showAboutWindow();
 
  private:
   sf::RenderWindow* window_;
@@ -47,6 +49,10 @@ class Game {
   float dt_;
   std::stack<std::unique_ptr<State>> states_;
   std::string curr_planner_;
+  std::shared_ptr<LoggerPanel> logger_panel_;
+  bool disable_run_;
+  bool show_how_to_use_window_{false};
+  bool show_about_window_{false};
 };
 
 }  // namespace path_finding_visualizer

@@ -6,9 +6,12 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <stack>
 #include <string>
 #include <vector>
+
+#include "LoggerPanel.h"
 
 /*
   State Base Class
@@ -20,20 +23,26 @@ class State {
  private:
  protected:
   std::stack<std::unique_ptr<State>> &states_;
-
   sf::RenderWindow *window_;
+  std::shared_ptr<LoggerPanel> logger_panel_;
   sf::Vector2i mousePositionWindow_;
   bool quit_;
+  bool is_reset_;
+  bool is_running_;
 
  public:
   // Constructor
-  State(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
+  State(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
+        std::shared_ptr<LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~State();
 
   // Accessors
   const bool getQuit() const;
+
+  void setReset(bool is_reset) { is_reset_ = is_reset; }
+  void setRunning(bool is_running) { is_running_ = is_running; }
 
   // Functions
   virtual void checkForQuit();

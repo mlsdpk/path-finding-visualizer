@@ -21,8 +21,8 @@ struct MinimumDistanceDIJKSTRA {
 class DIJKSTRA : public BFS {
  public:
   // Constructor
-  DIJKSTRA(sf::RenderWindow *window,
-           std::stack<std::unique_ptr<State>> &states);
+  DIJKSTRA(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
+           std::shared_ptr<LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~DIJKSTRA();

@@ -3,8 +3,12 @@
 namespace path_finding_visualizer {
 
 State::State(sf::RenderWindow *window,
-             std::stack<std::unique_ptr<State>> &states)
-    : window_{window}, states_{states}, quit_{false} {}
+             std::stack<std::unique_ptr<State>> &states,
+             std::shared_ptr<LoggerPanel> logger_panel)
+    : window_{window},
+      states_{states},
+      logger_panel_{logger_panel},
+      quit_{false} {}
 
 State::~State() {}
 

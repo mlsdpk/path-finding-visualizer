@@ -4,8 +4,9 @@ namespace path_finding_visualizer {
 namespace sampling_based {
 
 // Constructor
-RRT::RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states)
-    : SamplingBased(window, states) {
+RRT::RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
+         std::shared_ptr<LoggerPanel> logger_panel, const std::string &name)
+    : SamplingBased(window, states, logger_panel, name) {
   initParameters();
   initialize();
 }

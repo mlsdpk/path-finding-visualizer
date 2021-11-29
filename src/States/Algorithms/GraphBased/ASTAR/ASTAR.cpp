@@ -5,8 +5,9 @@ namespace graph_based {
 
 // Constructor
 ASTAR::ASTAR(sf::RenderWindow *window,
-             std::stack<std::unique_ptr<State>> &states)
-    : BFS(window, states) {}
+             std::stack<std::unique_ptr<State>> &states,
+             std::shared_ptr<LoggerPanel> logger_panel)
+    : BFS(window, states, logger_panel) {}
 
 // Destructor
 ASTAR::~ASTAR() {}

@@ -10,7 +10,8 @@ namespace graph_based {
 class DFS : public BFS {
  public:
   // Constructor
-  DFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
+  DFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
+      std::shared_ptr<LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~DFS();

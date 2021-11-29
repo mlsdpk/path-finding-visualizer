@@ -5,8 +5,11 @@ namespace sampling_based {
 
 // Constructor
 SamplingBased::SamplingBased(sf::RenderWindow* window,
-                             std::stack<std::unique_ptr<State>>& states)
-    : State(window, states), key_time_max_{1.f}, key_time_{0.f} {
+                             std::stack<std::unique_ptr<State>>& states,
+                             std::shared_ptr<LoggerPanel> logger_panel,
+                             const std::string& name)
+    : State(window, states, logger_panel), key_time_max_{1.f}, key_time_{0.f} {
+  logger_panel_->info("Initialize " + name + " planner");
   initVariables();
 
   start_vertex_ = std::make_shared<Vertex>();
@@ -86,6 +89,7 @@ void SamplingBased::update(const float& dt) {
     is_initialized_ = false;
     is_reset_ = false;
     is_solved_ = false;
+    disable_gui_parameters_ = false;
 
     std::unique_lock<std::mutex> lck(mutex_);
     is_stopped_ = true;
@@ -115,6 +119,9 @@ void SamplingBased::update(const float& dt) {
       is_stopped_ = false;
       lck.unlock();
 
+      logger_panel_->info("Planning started with " +
+                          std::to_string(max_iterations_) + " iterations.");
+
       // create thread
       // solve the algorithm concurrently
       t_ = std::thread(&SamplingBased::solveConcurrently, this, start_vertex_,
@@ -122,6 +129,7 @@ void SamplingBased::update(const float& dt) {
 
       thread_joined_ = false;
       is_initialized_ = true;
+      disable_gui_parameters_ = true;
     }
 
     // check the algorithm is solved or not
@@ -132,6 +140,8 @@ void SamplingBased::update(const float& dt) {
       thread_joined_ = true;
       is_running_ = false;
       is_solved_ = true;
+      logger_panel_->info(
+          "Iterations number reach max limit. Planning stopped.");
     }
   } else {
     // only allow mouse and key inputs
@@ -206,45 +216,6 @@ void SamplingBased::renderObstacles() {
 void SamplingBased::clearObstacles() { obstacles_.clear(); }
 
 void SamplingBased::renderGui() {
-  // buttons
-  {
-    // RESET button
-    {
-      if (!disable_run_ || is_running_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RESET", ImVec2(103.f, 0.f));
-      if (!disable_run_ || is_running_) ImGui::EndDisabled();
-      if (clicked && !is_running_) {
-        is_reset_ = true;
-        disable_gui_parameters_ = false;
-        disable_run_ = false;
-      }
-    }
-
-    ImGui::SameLine();
-
-    // TODO: PAUSE button
-    // always disabled (not implemented yet)
-    {
-      if (true) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("PAUSE", ImVec2(103.f, 0.f));
-      if (true) ImGui::EndDisabled();
-    }
-
-    ImGui::SameLine();
-
-    // RUN button
-    {
-      if (disable_run_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RUN", ImVec2(103.f, 0.f));
-      if (disable_run_) ImGui::EndDisabled();
-      if (clicked && !is_solved_) {
-        is_running_ = true;
-        disable_gui_parameters_ = true;
-        disable_run_ = true;
-      }
-    }
-  }
-
   {
     std::unique_lock<std::mutex> iter_no_lck(iter_no_mutex_);
     const float progress = static_cast<float>(
@@ -269,10 +240,13 @@ void SamplingBased::renderGui() {
     {
       if (ImGui::Button("CLEAR OBSTACLES", ImVec2(156.5f, 0.f))) {
         clearObstacles();
+        logger_panel_->info("Successfully removed all the obstacles.");
       }
       ImGui::SameLine();
       if (ImGui::Button("RESET PARAMETERS", ImVec2(156.5f, 0.f))) {
         initParameters();
+        logger_panel_->info(
+            "Planner related parameters resetted to default ones.");
       }
     }
 

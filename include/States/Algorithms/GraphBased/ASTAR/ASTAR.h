@@ -21,7 +21,8 @@ struct MinimumDistanceASTAR {
 class ASTAR : public BFS {
  public:
   // Constructor
-  ASTAR(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
+  ASTAR(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
+        std::shared_ptr<LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~ASTAR();

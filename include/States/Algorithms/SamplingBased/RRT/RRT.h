@@ -11,7 +11,8 @@ namespace sampling_based {
 class RRT : public SamplingBased {
  public:
   // Constructor
-  RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
+  RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
+      std::shared_ptr<LoggerPanel> logger_panel, const std::string &name);
 
   // Destructor
   virtual ~RRT();
