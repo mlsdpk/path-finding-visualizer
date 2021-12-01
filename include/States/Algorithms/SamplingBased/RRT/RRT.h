@@ -11,8 +11,7 @@ namespace sampling_based {
 class RRT : public SamplingBased {
  public:
   // Constructor
-  RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
-      std::shared_ptr<LoggerPanel> logger_panel, const std::string &name);
+  RRT(std::shared_ptr<LoggerPanel> logger_panel, const std::string &name);
 
   // Destructor
   virtual ~RRT();
@@ -23,7 +22,7 @@ class RRT : public SamplingBased {
   virtual void initParameters() override;
 
   // override render functions
-  virtual void renderPlannerData() override;
+  virtual void renderPlannerData(sf::RenderTexture &render_texture) override;
   virtual void renderParametersGui() override;
 
   // override main update function

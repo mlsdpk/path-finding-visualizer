@@ -4,11 +4,9 @@ namespace path_finding_visualizer {
 namespace sampling_based {
 
 // Constructor
-SamplingBased::SamplingBased(sf::RenderWindow* window,
-                             std::stack<std::unique_ptr<State>>& states,
-                             std::shared_ptr<LoggerPanel> logger_panel,
+SamplingBased::SamplingBased(std::shared_ptr<LoggerPanel> logger_panel,
                              const std::string& name)
-    : State(window, states, logger_panel), key_time_max_{1.f}, key_time_{0.f} {
+    : State(logger_panel), key_time_max_{1.f}, key_time_{0.f} {
   logger_panel_->info("Initialize " + name + " planner");
   initVariables();
 
@@ -50,8 +48,6 @@ void SamplingBased::initVariables() {
 
 void SamplingBased::endState() {}
 
-void SamplingBased::updateKeybinds() { checkForQuit(); }
-
 /**
  * Getter function for Algorithm key timer.
  *
@@ -78,11 +74,10 @@ void SamplingBased::updateKeyTime(const float& dt) {
   }
 }
 
-void SamplingBased::update(const float& dt) {
+void SamplingBased::update(const float& dt, const ImVec2& mousePos) {
   // from base classes
   updateKeyTime(dt);
-  updateMousePosition();
-  updateKeybinds();
+  updateMousePosition(mousePos);
 
   if (is_reset_) {
     is_running_ = false;
@@ -152,13 +147,18 @@ void SamplingBased::update(const float& dt) {
 
 void SamplingBased::updateUserInput() {
   if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && getKeyTime()) {
-    if (mousePositionWindow_.x > 350 && mousePositionWindow_.x < 1050 &&
-        mousePositionWindow_.y > 18 && mousePositionWindow_.y < 718) {
-      sf::Vector2f mousePos = sf::Vector2f(mousePositionWindow_);
-
+    if (mousePositionWindow_.x > init_grid_xy_.x &&
+        mousePositionWindow_.x < init_grid_xy_.x + 700 &&
+        mousePositionWindow_.y > init_grid_xy_.y &&
+        mousePositionWindow_.y < init_grid_xy_.y + 700) {
       bool setObstacle = true;
+      sf::Vector2f relative_mouse_pos =
+          sf::Vector2f(mousePositionWindow_.x - init_grid_xy_.x,
+                       mousePositionWindow_.y - init_grid_xy_.y);
+      std::cout << relative_mouse_pos.x << " " << relative_mouse_pos.y
+                << std::endl;
       for (std::size_t i = 0, e = obstacles_.size(); i != e; ++i) {
-        if (obstacles_[i]->getGlobalBounds().contains(mousePos)) {
+        if (obstacles_[i]->getGlobalBounds().contains(relative_mouse_pos)) {
           obstacles_.erase(obstacles_.begin() + i);
           setObstacle = false;
           break;
@@ -169,16 +169,20 @@ void SamplingBased::updateUserInput() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
           if (setObstacle) {
             start_vertex_->y =
-                utils::map(mousePositionWindow_.x - 350, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.x, init_grid_xy_.x,
+                           init_grid_xy_.x + 700.0, 0.0, 1.0);
             start_vertex_->x =
-                utils::map(mousePositionWindow_.y - 18, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.y, init_grid_xy_.y,
+                           init_grid_xy_.y + 700.0, 0.0, 1.0);
           }
         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
           if (setObstacle) {
             goal_vertex_->y =
-                utils::map(mousePositionWindow_.x - 350, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.x, init_grid_xy_.x,
+                           init_grid_xy_.x + 700.0, 0.0, 1.0);
             goal_vertex_->x =
-                utils::map(mousePositionWindow_.y - 18, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.y, init_grid_xy_.y,
+                           init_grid_xy_.y + 700.0, 0.0, 1.0);
           }
         } else {
           // add new obstacle
@@ -186,7 +190,7 @@ void SamplingBased::updateUserInput() {
             std::shared_ptr<sf::RectangleShape> obstShape =
                 std::make_shared<sf::RectangleShape>(
                     sf::Vector2f(obst_size_, obst_size_));
-            obstShape->setPosition(mousePos);
+            obstShape->setPosition(relative_mouse_pos);
             obstShape->setFillColor(OBST_COL);
             obstacles_.emplace_back(std::move(obstShape));
           }
@@ -195,9 +199,9 @@ void SamplingBased::updateUserInput() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
           if (setObstacle) {
             goal_vertex_->y =
-                utils::map(mousePositionWindow_.x - 350, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.x, 0.0, 700.0, 0.0, 1.0);
             goal_vertex_->x =
-                utils::map(mousePositionWindow_.y - 18, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.y, 0.0, 700.0, 0.0, 1.0);
 
             // TODO: Find nearest node from goal point and set it as parent
           }
@@ -207,9 +211,13 @@ void SamplingBased::updateUserInput() {
   }
 }
 
-void SamplingBased::renderObstacles() {
+void SamplingBased::renderObstacles(sf::RenderTexture& render_texture) {
   for (auto& shape : obstacles_) {
-    window_->draw(*shape);
+    sf::RectangleShape obst(sf::Vector2f(obst_size_, obst_size_));
+    obst.setPosition(sf::Vector2f(init_grid_xy_.x + shape->getPosition().x,
+                                  init_grid_xy_.y + shape->getPosition().y));
+    obst.setFillColor(OBST_COL);
+    render_texture.draw(obst);
   }
 }
 
@@ -223,7 +231,7 @@ void SamplingBased::renderGui() {
                    static_cast<double>(max_iterations_), 0.0, 1.0));
     const std::string buf =
         std::to_string(curr_iter_no_) + "/" + std::to_string(max_iterations_);
-    ImGui::ProgressBar(progress, ImVec2(317.0f, 0.0f), buf.c_str());
+    ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), buf.c_str());
   }
 
   if (ImGui::CollapsingHeader("Configuration",
@@ -254,15 +262,23 @@ void SamplingBased::renderGui() {
   }
 }
 
-void SamplingBased::render() {
-  renderObstacles();
-
-  // virtual function renderPlannerData()
-  // need to be implemented by derived class
-  renderPlannerData();
-
+void SamplingBased::renderConfig() {
   // render gui
   renderGui();
+}
+
+void SamplingBased::renderScene(sf::RenderTexture& render_texture) {
+  const auto texture_size = render_texture.getSize();
+
+  init_grid_xy_.x = (texture_size.x / 2.) - (map_width_ / 2.);
+  init_grid_xy_.y = (texture_size.y / 2.) - (map_height_ / 2.);
+  // std::cout << init_grid_xy_.x << " " << init_grid_xy_.y << std::endl;
+  // std::cout << "Mouse: " << mousePositionWindow_.x << " "
+  //           << mousePositionWindow_.y << std::endl;
+  renderObstacles(render_texture);
+  // virtual function renderPlannerData()
+  // need to be implemented by derived class
+  renderPlannerData(render_texture);
 }
 
 void SamplingBased::solveConcurrently(

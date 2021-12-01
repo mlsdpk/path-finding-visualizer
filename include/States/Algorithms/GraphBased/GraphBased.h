@@ -22,32 +22,41 @@ namespace graph_based {
 class GraphBased : public State {
  public:
   // Constructor
-  GraphBased(sf::RenderWindow* window,
-             std::stack<std::unique_ptr<State>>& states,
-             std::shared_ptr<LoggerPanel> logger_panel);
+  GraphBased(std::shared_ptr<LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~GraphBased();
 
   // Override Functions
   void endState() override;
-  void updateKeybinds() override;
-  void update(const float& dt) override;
-  void render() override;
+  void update(const float& dt, const ImVec2& mousePos) override;
+  void renderConfig() override;
+  void renderScene(sf::RenderTexture& render_texture) override;
 
   // virtual functions
   virtual void clearObstacles();
   virtual void renderGui();
   // render planner specific parameters
   virtual void renderParametersGui() = 0;
-  virtual void renderNodes() = 0;
+  virtual void renderNodes(sf::RenderTexture& render_texture) = 0;
   virtual void updateNodes() = 0;
   virtual void initAlgorithm() = 0;
-  virtual void solveConcurrently(
-      std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
-      std::shared_ptr<MessageQueue<bool>> message_queue) = 0;
+  // pure virtual function need to be implemented by graph-based planners
+  virtual void updatePlanner(bool& solved, Node& node_start,
+                             Node& node_end) = 0;
+
+  void solveConcurrently(std::shared_ptr<Node> nodeStart,
+                         std::shared_ptr<Node> nodeEnd,
+                         std::shared_ptr<MessageQueue<bool>> message_queue);
+  void updateKeyTime(const float& dt);
+  const bool getKeyTime();
 
  protected:
+  // initialization Functions
+  void initColors();
+  void initVariables();
+  void initNodes(bool reset = true, bool reset_neighbours_only = false);
+
   // colors
   sf::Color BGN_COL, FONT_COL, IDLE_COL, HOVER_COL, ACTIVE_COL, START_COL,
       END_COL, VISITED_COL, FRONTIER_COL, OBST_COL, PATH_COL;
@@ -57,8 +66,11 @@ class GraphBased : public State {
   float keyTimeMax_;
 
   // Map Variables
+  int no_of_grid_rows_;
+  int no_of_grid_cols_;
   int gridSize_;
   int slider_grid_size_;
+  sf::Vector2f init_grid_xy_;
   // 0 = 4 connected grid, 1 = 8 connected grid
   int grid_connectivity_;
   unsigned int mapWidth_;
@@ -82,14 +94,6 @@ class GraphBased : public State {
   // threads
   std::thread t_;
   bool thread_joined_;
-
-  // initialization Functions
-  void initColors();
-  void initVariables();
-  void initNodes(bool reset = true, bool reset_neighbours_only = false);
-
-  void updateKeyTime(const float& dt);
-  const bool getKeyTime();
 };
 
 }  // namespace graph_based

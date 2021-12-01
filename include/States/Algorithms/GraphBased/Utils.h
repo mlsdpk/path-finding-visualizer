@@ -8,23 +8,21 @@ namespace path_finding_visualizer {
 namespace graph_based {
 namespace utils {
 
-inline double distanceCost(const std::shared_ptr<Node> &n1,
-                           const std::shared_ptr<Node> &n2) {
+inline double distanceCost(const Node &n1, const Node &n2) {
   return std::sqrt(
-      (n1->getPos().x - n2->getPos().x) * (n1->getPos().x - n2->getPos().x) +
-      (n1->getPos().y - n2->getPos().y) * (n1->getPos().y - n2->getPos().y));
+      (n1.getPos().x - n2.getPos().x) * (n1.getPos().x - n2.getPos().x) +
+      (n1.getPos().y - n2.getPos().y) * (n1.getPos().y - n2.getPos().y));
 }
 
-inline double costToGoHeuristics(const std::shared_ptr<Node> &n1,
-                                 const std::shared_ptr<Node> &n2,
+inline double costToGoHeuristics(const Node &n1, const Node &n2,
                                  bool use_manhattan = false) {
   if (use_manhattan)
-    return fabs(n1->getPos().x - n2->getPos().x) +
-           fabs(n1->getPos().y - n2->getPos().y);
+    return fabs(n1.getPos().x - n2.getPos().x) +
+           fabs(n1.getPos().y - n2.getPos().y);
 
   return std::sqrt(
-      (n1->getPos().x - n2->getPos().x) * (n1->getPos().x - n2->getPos().x) +
-      (n1->getPos().y - n2->getPos().y) * (n1->getPos().y - n2->getPos().y));
+      (n1.getPos().x - n2.getPos().x) * (n1.getPos().x - n2.getPos().x) +
+      (n1.getPos().y - n2.getPos().y) * (n1.getPos().y - n2.getPos().y));
 }
 
 inline void addNeighbours(std::vector<std::shared_ptr<Node>> &nodes,

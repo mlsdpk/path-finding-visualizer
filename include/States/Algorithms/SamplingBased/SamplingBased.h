@@ -31,9 +31,7 @@ struct Vertex {
 class SamplingBased : public State {
  public:
   // Constructor
-  SamplingBased(sf::RenderWindow *window,
-                std::stack<std::unique_ptr<State>> &states,
-                std::shared_ptr<LoggerPanel> logger_panel,
+  SamplingBased(std::shared_ptr<LoggerPanel> logger_panel,
                 const std::string &name);
 
   // Destructor
@@ -41,12 +39,12 @@ class SamplingBased : public State {
 
   // Override Functions
   void endState() override;
-  void updateKeybinds() override;
-  void update(const float &dt) override;
-  void render() override;
+  void update(const float &dt, const ImVec2 &mousePos) override;
+  void renderConfig() override;
+  void renderScene(sf::RenderTexture &render_texture) override;
 
   void updateUserInput();
-  void renderObstacles();
+  void renderObstacles(sf::RenderTexture &render_texture);
   void clearObstacles();
   void initVariables();
   void updateKeyTime(const float &dt);
@@ -58,7 +56,7 @@ class SamplingBased : public State {
   // all the sampling-based planners need to override this functions
 
   // rendering function for algorithm specific
-  virtual void renderPlannerData() = 0;
+  virtual void renderPlannerData(sf::RenderTexture &render_texture) = 0;
 
   // render planner specific parameters
   virtual void renderParametersGui() = 0;
@@ -88,6 +86,7 @@ class SamplingBased : public State {
   float key_time_max_;
 
   // Map related
+  sf::Vector2f init_grid_xy_;
   unsigned int obst_size_;
   unsigned int map_width_;
   unsigned int map_height_;

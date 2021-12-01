@@ -21,17 +21,17 @@ struct MinimumDistanceDIJKSTRA {
 class DIJKSTRA : public BFS {
  public:
   // Constructor
-  DIJKSTRA(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
-           std::shared_ptr<LoggerPanel> logger_panel);
+  DIJKSTRA(std::shared_ptr<LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~DIJKSTRA();
 
   // Overriden functions
   virtual void initAlgorithm() override;
-  void solveConcurrently(
-      std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
-      std::shared_ptr<MessageQueue<bool>> message_queue) override;
+
+  // override main update function
+  virtual void updatePlanner(bool &solved, Node &start_node,
+                             Node &end_node) override;
 
  protected:
   // DIJKSTRA related

@@ -17,14 +17,13 @@ using rrtstar_state_type = path_finding_visualizer::sampling_based::RRT_STAR;
 namespace path_finding_visualizer {
 
 // Constructor
-Game::Game(sf::RenderWindow* window) : window_{window} {
-  disable_run_ = false;
+Game::Game(sf::RenderWindow* window, sf::RenderTexture* render_texture)
+    : window_{window}, render_texture_{render_texture}, disable_run_{false} {
   logger_panel_ = std::make_shared<LoggerPanel>();
   curr_planner_ = GRAPH_BASED_PLANNERS[0];
   // manually add BFS for now
-  states_.push(
-      std::make_unique<bfs_state_type>(window_, states_, logger_panel_));
-
+  states_.push(std::make_unique<bfs_state_type>(logger_panel_));
+  view_move_xy_.x = view_move_xy_.y = 0.f;
   initGuiTheme();
 }
 
@@ -38,6 +37,7 @@ const bool Game::running() const { return window_->isOpen(); }
 void Game::pollEvents() {
   // Event polling
   while (window_->pollEvent(ev_)) {
+    // ImGui::SFML::ProcessEvent(ev_);
     ImGui::SFML::ProcessEvent(ev_);
     switch (ev_.type) {
       case sf::Event::Closed:
@@ -57,12 +57,7 @@ void Game::update() {
   updateDt();
 
   if (!states_.empty()) {
-    states_.top()->update(dt_);
-
-    if (states_.top()->getQuit()) {
-      states_.top()->endState();
-      states_.pop();
-    }
+    states_.top()->update(dt_, mouse_pos_in_canvas_);
   } else {
     // End the Application
     window_->close();
@@ -149,25 +144,77 @@ void Game::renderMenuBar(ImGuiIO& io) {
 }
 
 void Game::render() {
-  window_->clear(sf::Color::White);
+  window_->clear();
+  render_texture_->clear(sf::Color::White);
 
   if (!states_.empty()) {
-    ImGui::SetNextWindowPos(ImVec2(0.f, 0.f), ImGuiCond_Once);
-    ImGui::SetNextWindowSize(ImVec2(332.f, 536.f), ImGuiCond_None);
+    // DOCKING STUFFS
+    static bool opt_dockspace = true;
+    static bool opt_padding = false;
+    static bool opt_fullscreen = true;
+    static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
-    ImGui::Begin("path_finding_visualizer", nullptr,
-                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar |
-                     ImGuiWindowFlags_MenuBar);
+    // We are using the ImGuiWindowFlags_NoDocking flag to make the parent
+    // window not dockable into, because it would be confusing to have two
+    // docking targets within each others.
+    ImGuiWindowFlags window_flags =
+        ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    if (opt_fullscreen) {
+      const ImGuiViewport* viewport = ImGui::GetMainViewport();
+      ImGui::SetNextWindowPos(viewport->WorkPos);
+      ImGui::SetNextWindowSize(viewport->WorkSize);
+      ImGui::SetNextWindowViewport(viewport->ID);
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+      window_flags |= ImGuiWindowFlags_NoTitleBar |
+                      ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+                      ImGuiWindowFlags_NoMove;
+      window_flags |=
+          ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    } else {
+      dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
+    }
 
+    if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+      window_flags |= ImGuiWindowFlags_NoBackground;
+
+    if (!opt_padding)
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("DockSpace Demo", &opt_dockspace, window_flags);
+    if (!opt_padding) ImGui::PopStyleVar();
+    if (opt_fullscreen) ImGui::PopStyleVar(2);
+
+    // Submit the DockSpace
     ImGuiIO& io = ImGui::GetIO();
+    ImGuiStyle& style = ImGui::GetStyle();
+    float min_window_size_x = style.WindowMinSize.x;
+    style.WindowMinSize.x = 332.f;
+    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+      ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+      ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+    }
+    style.WindowMinSize.x = min_window_size_x;
+
+    if (ImGui::BeginMenuBar()) {
+      if (ImGui::BeginMenu("File")) {
+        if (ImGui::MenuItem("Close", NULL, false)) window_->close();
+        ImGui::EndMenu();
+      }
+      ImGui::EndMenuBar();
+    }
+
+    ////////////////////////////////
+    // Configurations
+    ////////////////////////////////
+    ImGui::Begin("Configurations", nullptr, ImGuiWindowFlags_MenuBar);
     renderMenuBar(io);
 
     ImGui::Text("Current Planner: %s", curr_planner_.c_str());
     ImGui::Spacing();
     ImGui::Spacing();
 
-    states_.top()->render();
+    // render planner specific configurations
+    states_.top()->renderConfig();
 
     if (show_how_to_use_window_) {
       if (ImGui::CollapsingHeader("How To Use")) {
@@ -210,25 +257,66 @@ void Game::render() {
       }
     }
 
+    ImGui::End();  // end Configurations
+    ////////////////////////////////
+
+    //////////////////////////
+    //   Console Panel
+    //////////////////////////
+    ImGui::Begin("Console");
     ImGui::End();
+    //////////////////////////
 
-    ImGui::SetNextWindowPos(ImVec2(0.f, 536.f), ImGuiCond_Once);
-    ImGui::SetNextWindowSize(
-        ImVec2(332.f, static_cast<float>(window_->getSize().y) - 536.f),
-        ImGuiCond_None);
+    //////////////////////////////////////////////////////////////////////
+    //   Planning Scene Panel
+    //////////////////////////////////////////////////////////////////////
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0.f, 0.f});
+    ImGui::Begin("Planning Scene");
 
-    ImGui::Begin("Console", nullptr,
-                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-                     ImGuiWindowFlags_NoCollapse);
+    const ImVec2 planning_scene_panel_size = ImGui::GetContentRegionAvail();
+    render_texture_->create(static_cast<unsigned>(planning_scene_panel_size.x),
+                            static_cast<unsigned>(planning_scene_panel_size.y));
+    render_texture_->clear(sf::Color::White);
+
+    sf::View view;
+    view.setSize(
+        sf::Vector2f(planning_scene_panel_size.x, planning_scene_panel_size.y));
+    view.setCenter(
+        sf::Vector2f((planning_scene_panel_size.x / 2.f) + view_move_xy_.x,
+                     (planning_scene_panel_size.y / 2.f) + view_move_xy_.y));
+    render_texture_->setView(view);
+    states_.top()->renderScene(*render_texture_);
+
+    ImGui::ImageButton(*render_texture_, 0);
+
+    const bool is_hovered = ImGui::IsItemHovered();  // Hovered
+    const bool is_active = ImGui::IsItemActive();    // Held
+
+    // move the planning scene around by dragging mouse Right-click
+    if (is_hovered && ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
+      view_move_xy_.x -= io.MouseDelta.x;
+      view_move_xy_.y -= io.MouseDelta.y;
+    }
+
+    // Update the current mouse position in planning scene panel
+    ImVec2 canvas_p0 = ImGui::GetCursorScreenPos();
+    const ImVec2 origin(canvas_p0.x - view_move_xy_.x,
+                        canvas_p0.y - view_move_xy_.y);
+    mouse_pos_in_canvas_.x = io.MousePos.x - origin.x;
+    mouse_pos_in_canvas_.y =
+        io.MousePos.y - origin.y + planning_scene_panel_size.y;
+
     ImGui::End();
+    ImGui::PopStyleVar();
+    //////////////////////////////////////////////////////////////////////
 
-    // Actually call in the regular Log helper (which will Begin() into the same
-    // window as we just did)
     logger_panel_->render("Console");
-  }
+    ImGui::End();  // dockspace end
 
-  ImGui::SFML::Render(*window_);
-  window_->display();
+    ImGui::SFML::Render(*window_);
+    window_->display();
+    render_texture_->display();
+  }
 }
 
 void Game::initGuiTheme() {
@@ -237,57 +325,67 @@ void Game::initGuiTheme() {
   io.Fonts->AddFontFromFileTTF("../fonts/OpenSans/OpenSans-Regular.ttf", 18.0f);
   ImGui::SFML::UpdateFontTexture();
 
-  ImGui::StyleColorsDark();
+  // enable docking
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   ImGuiStyle* style = &ImGui::GetStyle();
-  style->FramePadding = ImVec2(8.f, 8.f);
-  style->ItemSpacing = ImVec2(8.0f, 4.0f);
 
   // dark theme colors
   auto& colors = ImGui::GetStyle().Colors;
-
   colors[ImGuiCol_WindowBg] = ImVec4(0.1f, 0.105f, 0.11f, 1.0f);
 
+  // headers
+  colors[ImGuiCol_Header] = ImVec4(0.2f, 0.205f, 0.21f, 1.0f);
+  colors[ImGuiCol_HeaderHovered] = ImVec4(0.3f, 0.305f, 0.31f, 1.0f);
+  colors[ImGuiCol_HeaderActive] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+
+  // buttons
   colors[ImGuiCol_Button] = ImVec4(0.2f, 0.205f, 0.21f, 1.0f);
   colors[ImGuiCol_ButtonHovered] = ImVec4(0.3f, 0.305f, 0.31f, 1.0f);
   colors[ImGuiCol_ButtonActive] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 
-  colors[ImGuiCol_HeaderHovered] = ImVec4(0.3f, 0.305f, 0.31f, 1.0f);
-  colors[ImGuiCol_Header] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+  // tabs
+  colors[ImGuiCol_Tab] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+  colors[ImGuiCol_TabHovered] = ImVec4(0.38, 0.3805f, 0.381f, 1.0f);
+  colors[ImGuiCol_TabActive] = ImVec4(0.28, 0.2805f, 0.281f, 1.0f);
+  colors[ImGuiCol_TabUnfocused] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+  colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.2f, 0.205f, 0.21f, 1.0f);
 
+  // frame background
   colors[ImGuiCol_FrameBg] = ImVec4(0.2f, 0.205f, 0.21f, 1.0f);
   colors[ImGuiCol_FrameBgHovered] = ImVec4(0.3f, 0.305f, 0.31f, 1.0f);
   colors[ImGuiCol_FrameBgActive] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 
-  colors[ImGuiCol_PopupBg] = ImVec4(0.2f, 0.205f, 0.21f, 1.0f);
-
+  // sider
   colors[ImGuiCol_SliderGrab] = colors[ImGuiCol_Text];
   colors[ImGuiCol_SliderGrabActive] = colors[ImGuiCol_Text];
 
+  // progress bar
   colors[ImGuiCol_PlotHistogram] = ImVec4(0.3f, 0.305f, 0.31f, 1.0f);
+
+  // title
+  colors[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+  colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
+  colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.15f, 0.1505f, 0.151f, 1.0f);
 }
 
 void Game::setGraphBasedPlanner(const int id) {
   switch (id) {
     case GRAPH_BASED_PLANNERS_IDS::BFS:
       // BFS
-      states_.push(
-          std::make_unique<bfs_state_type>(window_, states_, logger_panel_));
+      states_.push(std::make_unique<bfs_state_type>(logger_panel_));
       break;
     case GRAPH_BASED_PLANNERS_IDS::DFS:
       // DFS
-      states_.push(
-          std::make_unique<dfs_state_type>(window_, states_, logger_panel_));
+      states_.push(std::make_unique<dfs_state_type>(logger_panel_));
       break;
     case GRAPH_BASED_PLANNERS_IDS::DIJKSTRA:
       // Dijkstra
-      states_.push(std::make_unique<dijkstra_state_type>(window_, states_,
-                                                         logger_panel_));
+      states_.push(std::make_unique<dijkstra_state_type>(logger_panel_));
       break;
     case GRAPH_BASED_PLANNERS_IDS::AStar:
       // A-Star
-      states_.push(
-          std::make_unique<astar_state_type>(window_, states_, logger_panel_));
+      states_.push(std::make_unique<astar_state_type>(logger_panel_));
       break;
     default:
       break;
@@ -299,12 +397,12 @@ void Game::setSamplingBasedPlanner(const int id) {
     case SAMPLING_BASED_PLANNERS_IDS::RRT:
       // RRT
       states_.push(std::make_unique<rrt_state_type>(
-          window_, states_, logger_panel_, SAMPLING_BASED_PLANNERS[id]));
+          logger_panel_, SAMPLING_BASED_PLANNERS[id]));
       break;
     case SAMPLING_BASED_PLANNERS_IDS::RRT_STAR:
       // RRTStar
       states_.push(std::make_unique<rrtstar_state_type>(
-          window_, states_, logger_panel_, SAMPLING_BASED_PLANNERS[id]));
+          logger_panel_, SAMPLING_BASED_PLANNERS[id]));
       break;
     default:
       break;

@@ -4,10 +4,8 @@ namespace path_finding_visualizer {
 namespace graph_based {
 
 // Constructor
-GraphBased::GraphBased(sf::RenderWindow* window,
-                       std::stack<std::unique_ptr<State>>& states,
-                       std::shared_ptr<LoggerPanel> logger_panel)
-    : State(window, states, logger_panel), keyTimeMax_{1.f}, keyTime_{0.f} {
+GraphBased::GraphBased(std::shared_ptr<LoggerPanel> logger_panel)
+    : State(logger_panel), keyTimeMax_{1.f}, keyTime_{0.f} {
   initVariables();
   initNodes();
   initColors();
@@ -26,8 +24,10 @@ void GraphBased::initVariables() {
   slider_grid_size_ = 20;
   gridSize_ = slider_grid_size_;
   grid_connectivity_ = 0;
-  mapWidth_ = 700;
-  mapHeight_ = 700;
+
+  no_of_grid_rows_ = no_of_grid_cols_ = 10;
+  mapWidth_ = no_of_grid_cols_ * gridSize_;
+  mapHeight_ = no_of_grid_rows_ * gridSize_;
 
   message_queue_ = std::make_shared<MessageQueue<bool>>();
 
@@ -71,6 +71,8 @@ void GraphBased::initNodes(bool reset, bool reset_neighbours_only) {
       if (reset) {
         nodes_[nodeIndex]->setPosition(sf::Vector2i(x, y));
         nodes_[nodeIndex]->setObstacle(false);
+        nodes_[nodeIndex]->setStart(false);
+        nodes_[nodeIndex]->setGoal(false);
       }
       nodes_[nodeIndex]->setVisited(false);
       nodes_[nodeIndex]->setFrontier(false);
@@ -101,14 +103,14 @@ void GraphBased::initNodes(bool reset, bool reset_neighbours_only) {
     // initialize Start and End nodes ptrs (upper left and lower right corners)
     nodeStart_ = nodes_[(mapWidth_ / gridSize_) * 0 + 0];
     nodeStart_->setParentNode(nullptr);
+    nodeStart_->setStart(true);
     nodeEnd_ = nodes_[(mapWidth_ / gridSize_) * (mapHeight_ / gridSize_ - 1) +
                       (mapWidth_ / gridSize_ - 1)];
+    nodeEnd_->setGoal(true);
   }
 }
 
 void GraphBased::endState() {}
-
-void GraphBased::updateKeybinds() { checkForQuit(); }
 
 /**
  * Getter function for Algorithm key timer.
@@ -136,12 +138,10 @@ void GraphBased::updateKeyTime(const float& dt) {
   }
 }
 
-void GraphBased::update(const float& dt) {
+void GraphBased::update(const float& dt, const ImVec2& mousePos) {
   // from base classes
   updateKeyTime(dt);
-  updateMousePosition();
-  updateKeybinds();
-  // updateButtons();
+  updateMousePosition(mousePos);
 
   if (is_reset_) {
     initNodes(false, false);
@@ -236,13 +236,53 @@ void GraphBased::renderGui() {
   }
 }
 
-void GraphBased::render() {
+void GraphBased::renderConfig() { renderGui(); }
+
+void GraphBased::renderScene(sf::RenderTexture& render_texture) {
   // virtual function renderNodes()
   // need to be implemented by derived class
-  renderNodes();
+  renderNodes(render_texture);
+}
 
-  // render gui
-  renderGui();
+void GraphBased::solveConcurrently(
+    std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
+    std::shared_ptr<MessageQueue<bool>> message_queue) {
+  // copy assignment
+  // thread-safe due to shared_ptrs
+  std::shared_ptr<Node> s_nodeStart = nodeStart;
+  std::shared_ptr<Node> s_nodeEnd = nodeEnd;
+  std::shared_ptr<MessageQueue<bool>> s_message_queue = message_queue;
+
+  bool solved = false;
+
+  double cycleDuration = 1.0;  // duration of a single simulation cycle in ms
+  // init stop watch
+  auto lastUpdate = std::chrono::system_clock::now();
+
+  while (true) {
+    // compute time difference to stop watch
+    long timeSinceLastUpdate =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - lastUpdate)
+            .count();
+
+    if (timeSinceLastUpdate >= cycleDuration) {
+      updatePlanner(solved, *s_nodeStart, *s_nodeEnd);
+
+      // reset stop watch for next cycle
+      lastUpdate = std::chrono::system_clock::now();
+    }
+
+    // sends an update method to the message queue using move semantics
+    auto ftr = std::async(std::launch::async, &MessageQueue<bool>::send,
+                          s_message_queue, std::move(solved));
+    ftr.wait();
+
+    if (solved) return;
+
+    // sleep at every iteration to reduce CPU usage
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
 }
 
 }  // namespace graph_based

@@ -22,7 +22,7 @@ enum SAMPLING_BASED_PLANNERS_IDS { RRT, RRT_STAR };
 class Game {
  public:
   // Constructors
-  Game(sf::RenderWindow* window);
+  Game(sf::RenderWindow* window, sf::RenderTexture* render_texture);
 
   // Destructors
   virtual ~Game();
@@ -44,6 +44,9 @@ class Game {
 
  private:
   sf::RenderWindow* window_;
+  sf::RenderTexture* render_texture_;
+  sf::Vector2f view_move_xy_;
+  ImVec2 mouse_pos_in_canvas_;
   sf::Event ev_;
   sf::Clock dtClock_;
   float dt_;

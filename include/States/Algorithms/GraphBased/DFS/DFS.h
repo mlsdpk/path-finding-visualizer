@@ -10,8 +10,7 @@ namespace graph_based {
 class DFS : public BFS {
  public:
   // Constructor
-  DFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
-      std::shared_ptr<LoggerPanel> logger_panel);
+  DFS(std::shared_ptr<LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~DFS();
@@ -19,10 +18,9 @@ class DFS : public BFS {
   // override initialization Functions
   void initAlgorithm() override;
 
-  // DFS algorithm function
-  void solveConcurrently(
-      std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
-      std::shared_ptr<MessageQueue<bool>> message_queue) override;
+  // override main update function
+  virtual void updatePlanner(bool &solved, Node &start_node,
+                             Node &end_node) override;
 
  private:
   // DFS related

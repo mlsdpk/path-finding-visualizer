@@ -4,9 +4,8 @@ namespace path_finding_visualizer {
 namespace sampling_based {
 
 // Constructor
-RRT::RRT(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states,
-         std::shared_ptr<LoggerPanel> logger_panel, const std::string &name)
-    : SamplingBased(window, states, logger_panel, name) {
+RRT::RRT(std::shared_ptr<LoggerPanel> logger_panel, const std::string &name)
+    : SamplingBased(logger_panel, name) {
   initParameters();
   initialize();
 }
@@ -46,20 +45,23 @@ void RRT::initPlanner() {
   vertices_.emplace_back(start_vertex_);
 }
 
-void RRT::renderPlannerData() {
+void RRT::renderPlannerData(sf::RenderTexture &render_texture) {
   // render edges
   std::unique_lock<std::mutex> lck(mutex_);
   for (const auto &edge : edges_) {
-    double p1_y = utils::map(edge.first->y, 0.0, 1.0, 0.0, 700.0);
-    double p1_x = utils::map(edge.first->x, 0.0, 1.0, 0.0, 700.0);
-    double p2_y = utils::map(edge.second->y, 0.0, 1.0, 0.0, 700.0);
-    double p2_x = utils::map(edge.second->x, 0.0, 1.0, 0.0, 700.0);
+    double p1_y = utils::map(edge.first->y, 0.0, 1.0, init_grid_xy_.x,
+                             init_grid_xy_.x + 700.0);
+    double p1_x = utils::map(edge.first->x, 0.0, 1.0, init_grid_xy_.y,
+                             init_grid_xy_.y + 700.0);
+    double p2_y = utils::map(edge.second->y, 0.0, 1.0, init_grid_xy_.x,
+                             init_grid_xy_.x + 700.0);
+    double p2_x = utils::map(edge.second->x, 0.0, 1.0, init_grid_xy_.y,
+                             init_grid_xy_.y + 700.0);
 
-    sf::Vertex line[] = {
-        sf::Vertex(sf::Vector2f(350 + p1_y, 18 + p1_x), EDGE_COL),
-        sf::Vertex(sf::Vector2f(350 + p2_y, 18 + p2_x), EDGE_COL)};
+    sf::Vertex line[] = {sf::Vertex(sf::Vector2f(p1_y, p1_x), EDGE_COL),
+                         sf::Vertex(sf::Vector2f(p2_y, p2_x), EDGE_COL)};
 
-    window_->draw(line, 2, sf::Lines);
+    render_texture.draw(line, 2, sf::Lines);
   }
   lck.unlock();
 
@@ -67,14 +69,18 @@ void RRT::renderPlannerData() {
   if (goal_vertex_->parent) {
     std::shared_ptr<Vertex> current = goal_vertex_;
     while (current->parent && current != start_vertex_) {
-      double p1_y = utils::map(current->y, 0.0, 1.0, 0.0, 700.0);
-      double p1_x = utils::map(current->x, 0.0, 1.0, 0.0, 700.0);
-      double p2_y = utils::map(current->parent->y, 0.0, 1.0, 0.0, 700.0);
-      double p2_x = utils::map(current->parent->x, 0.0, 1.0, 0.0, 700.0);
+      double p1_y = utils::map(current->y, 0.0, 1.0, init_grid_xy_.x,
+                               init_grid_xy_.x + 700.0);
+      double p1_x = utils::map(current->x, 0.0, 1.0, init_grid_xy_.y,
+                               init_grid_xy_.y + 700.0);
+      double p2_y = utils::map(current->parent->y, 0.0, 1.0, init_grid_xy_.x,
+                               init_grid_xy_.x + 700.0);
+      double p2_x = utils::map(current->parent->x, 0.0, 1.0, init_grid_xy_.y,
+                               init_grid_xy_.y + 700.0);
 
-      utils::sfPath path(sf::Vector2f(350 + p1_y, 18 + p1_x),
-                         sf::Vector2f(350 + p2_y, 18 + p2_x), 4.f, PATH_COL);
-      window_->draw(path);
+      utils::sfPath path(sf::Vector2f(p1_y, p1_x), sf::Vector2f(p2_y, p2_x),
+                         4.f, PATH_COL);
+      render_texture.draw(path);
       current = current->parent;
     }
   }
@@ -83,18 +89,22 @@ void RRT::renderPlannerData() {
   sf::CircleShape start_goal_circle(obst_size_ / 2.0);
   start_goal_circle.setOrigin(start_goal_circle.getRadius(),
                               start_goal_circle.getRadius());
-  double start_y = utils::map(start_vertex_->y, 0.0, 1.0, 0.0, 700.0);
-  double start_x = utils::map(start_vertex_->x, 0.0, 1.0, 0.0, 700.0);
-  double goal_y = utils::map(goal_vertex_->y, 0.0, 1.0, 0.0, 700.0);
-  double goal_x = utils::map(goal_vertex_->x, 0.0, 1.0, 0.0, 700.0);
+  double start_y = utils::map(start_vertex_->y, 0.0, 1.0, init_grid_xy_.x,
+                              init_grid_xy_.x + 700.0);
+  double start_x = utils::map(start_vertex_->x, 0.0, 1.0, init_grid_xy_.y,
+                              init_grid_xy_.y + 700.0);
+  double goal_y = utils::map(goal_vertex_->y, 0.0, 1.0, init_grid_xy_.x,
+                             init_grid_xy_.x + 700.0);
+  double goal_x = utils::map(goal_vertex_->x, 0.0, 1.0, init_grid_xy_.y,
+                             init_grid_xy_.y + 700.0);
 
-  start_goal_circle.setPosition(350 + start_y, 18 + start_x);
+  start_goal_circle.setPosition(start_y, start_x);
   start_goal_circle.setFillColor(START_COL);
-  window_->draw(start_goal_circle);
+  render_texture.draw(start_goal_circle);
 
-  start_goal_circle.setPosition(350 + goal_y, 18 + goal_x);
+  start_goal_circle.setPosition(goal_y, goal_x);
   start_goal_circle.setFillColor(GOAL_COL);
-  window_->draw(start_goal_circle);
+  render_texture.draw(start_goal_circle);
 }
 
 void RRT::renderParametersGui() {
@@ -178,8 +188,7 @@ bool RRT::isCollision(const std::shared_ptr<const Vertex> &from_v,
     double pixel_y = utils::map(temp_v->y, 0.0, 1.0, 0.0, 700.0);
     double pixel_x = utils::map(temp_v->x, 0.0, 1.0, 0.0, 700.0);
     for (const auto &obst : obstacles_) {
-      if (obst->getGlobalBounds().contains(
-              sf::Vector2f(pixel_y + 350, pixel_x + 18))) {
+      if (obst->getGlobalBounds().contains(sf::Vector2f(pixel_y, pixel_x))) {
         return true;
       }
     }
@@ -190,8 +199,7 @@ bool RRT::isCollision(const std::shared_ptr<const Vertex> &from_v,
   double pixel_y = utils::map(to_v->y, 0.0, 1.0, 0.0, 700.0);
   double pixel_x = utils::map(to_v->x, 0.0, 1.0, 0.0, 700.0);
   for (const auto &obst : obstacles_) {
-    if (obst->getGlobalBounds().contains(
-            sf::Vector2f(pixel_y + 350, pixel_x + 18))) {
+    if (obst->getGlobalBounds().contains(sf::Vector2f(pixel_y, pixel_x))) {
       return true;
     }
   }

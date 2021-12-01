@@ -9,6 +9,8 @@ Node::Node()
       isVisited_{false},
       isFrontier_{false},
       isPath_{false},
+      isStart_{false},
+      isGoal_{false},
       parent_{nullptr},
       gDist_{INFINITY},
       fDist_{INFINITY} {}
@@ -25,8 +27,12 @@ const bool Node::isFrontier() const { return isFrontier_; }
 
 const bool Node::isPath() const { return isPath_; }
 
+const bool Node::isStart() const { return isStart_; }
+
+const bool Node::isGoal() const { return isGoal_; }
+
 // Accessors
-sf::Vector2i Node::getPos() { return pos_; }
+sf::Vector2i Node::getPos() const { return pos_; }
 
 std::shared_ptr<Node> Node::getParentNode() { return parent_; }
 
@@ -48,6 +54,10 @@ void Node::setVisited(bool b) { isVisited_ = b; }
 void Node::setFrontier(bool b) { isFrontier_ = b; }
 
 void Node::setPath(bool b) { isPath_ = b; }
+
+void Node::setStart(bool b) { isStart_ = b; }
+
+void Node::setGoal(bool b) { isGoal_ = b; }
 
 void Node::setPosition(sf::Vector2i pos) { pos_ = pos; }
 
