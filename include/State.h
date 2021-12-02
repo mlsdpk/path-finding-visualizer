@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "LoggerPanel.h"
+#include "Gui.h"
 
 /*
   State Base Class
@@ -22,14 +22,14 @@ namespace path_finding_visualizer {
 class State {
  private:
  protected:
-  std::shared_ptr<LoggerPanel> logger_panel_;
+  std::shared_ptr<gui::LoggerPanel> logger_panel_;
   sf::Vector2f mousePositionWindow_;
   bool is_reset_;
   bool is_running_;
 
  public:
   // Constructor
-  State(std::shared_ptr<LoggerPanel> logger_panel);
+  State(std::shared_ptr<gui::LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~State();

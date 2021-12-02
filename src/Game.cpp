@@ -19,7 +19,7 @@ namespace path_finding_visualizer {
 // Constructor
 Game::Game(sf::RenderWindow* window, sf::RenderTexture* render_texture)
     : window_{window}, render_texture_{render_texture}, disable_run_{false} {
-  logger_panel_ = std::make_shared<LoggerPanel>();
+  logger_panel_ = std::make_shared<gui::LoggerPanel>();
   curr_planner_ = GRAPH_BASED_PLANNERS[0];
   // manually add BFS for now
   states_.push(std::make_unique<bfs_state_type>(logger_panel_));
@@ -50,7 +50,7 @@ void Game::pollEvents() {
   }
 }
 
-void Game::updateDt() { dt_ = dtClock_.restart().asSeconds(); }
+void Game::updateDt() { dt_ = dtClock_.getElapsedTime().asSeconds(); }
 
 void Game::update() {
   pollEvents();
@@ -62,84 +62,76 @@ void Game::update() {
     // End the Application
     window_->close();
   }
-
   ImGui::SFML::Update(*window_, dtClock_.restart());
 }
 
-void Game::renderMenuBar(ImGuiIO& io) {
-  if (ImGui::BeginMenuBar()) {
-    if (ImGui::BeginMenu("Planners")) {
-      if (ImGui::BeginMenu("Graph-based Planners")) {
-        for (int n = 0; n < GRAPH_BASED_PLANNERS.size(); n++) {
-          bool selected = (GRAPH_BASED_PLANNERS[n] == curr_planner_);
-          if (ImGui::MenuItem(GRAPH_BASED_PLANNERS[n].c_str(), nullptr,
-                              selected, !selected)) {
-            if (!selected) {
-              // change the planner
-              logger_panel_->clear();
-              disable_run_ = false;
-              setGraphBasedPlanner(n);
-            }
-            curr_planner_ = GRAPH_BASED_PLANNERS[n];
+void Game::renderNewPlannerMenu() {
+  if (ImGui::BeginMenu("New Planner")) {
+    if (ImGui::BeginMenu("Graph-based Planners")) {
+      for (int n = 0; n < GRAPH_BASED_PLANNERS.size(); n++) {
+        bool selected = (GRAPH_BASED_PLANNERS[n] == curr_planner_);
+        if (ImGui::MenuItem(GRAPH_BASED_PLANNERS[n].c_str(), nullptr, selected,
+                            !selected)) {
+          if (!selected) {
+            // change the planner
+            logger_panel_->clear();
+            disable_run_ = false;
+            setGraphBasedPlanner(n);
           }
-        }
-        ImGui::EndMenu();
-      }
-
-      if (ImGui::BeginMenu("Sampling-based Planners")) {
-        for (int n = 0; n < SAMPLING_BASED_PLANNERS.size(); n++) {
-          bool selected = (SAMPLING_BASED_PLANNERS[n] == curr_planner_);
-          if (ImGui::MenuItem(SAMPLING_BASED_PLANNERS[n].c_str(), nullptr,
-                              selected, !selected)) {
-            if (!selected) {
-              // change the planner
-              logger_panel_->clear();
-              disable_run_ = false;
-              setSamplingBasedPlanner(n);
-            }
-            curr_planner_ = SAMPLING_BASED_PLANNERS[n];
-          }
-        }
-        ImGui::EndMenu();
-      }
-
-      ImGui::EndMenu();
-    }
-
-    if (ImGui::BeginMenu("Run")) {
-      {
-        if (disable_run_) ImGui::BeginDisabled();
-        bool clicked = ImGui::MenuItem("Start Planning");
-        if (disable_run_) ImGui::EndDisabled();
-        if (clicked) {
-          logger_panel_->info("RUN button pressed. Planning started.");
-          disable_run_ = true;
-          if (!states_.empty()) {
-            states_.top()->setRunning(true);
-          }
-        }
-      }
-      {
-        if (!disable_run_) ImGui::BeginDisabled();
-        bool clicked = ImGui::MenuItem("Reset Planner Data");
-        if (!disable_run_) ImGui::EndDisabled();
-        if (clicked) {
-          logger_panel_->info("RESET button pressed. Planning resetted.");
-          disable_run_ = false;
-          if (!states_.empty()) {
-            states_.top()->setReset(true);
-          }
+          curr_planner_ = GRAPH_BASED_PLANNERS[n];
         }
       }
       ImGui::EndMenu();
     }
 
-    if (ImGui::BeginMenu("Help")) {
-      ImGui::MenuItem("How To Use", nullptr, &show_how_to_use_window_);
-      ImGui::MenuItem("About", nullptr, &show_about_window_);
+    if (ImGui::BeginMenu("Sampling-based Planners")) {
+      for (int n = 0; n < SAMPLING_BASED_PLANNERS.size(); n++) {
+        bool selected = (SAMPLING_BASED_PLANNERS[n] == curr_planner_);
+        if (ImGui::MenuItem(SAMPLING_BASED_PLANNERS[n].c_str(), nullptr,
+                            selected, !selected)) {
+          if (!selected) {
+            // change the planner
+            logger_panel_->clear();
+            disable_run_ = false;
+            setSamplingBasedPlanner(n);
+          }
+          curr_planner_ = SAMPLING_BASED_PLANNERS[n];
+        }
+      }
       ImGui::EndMenu();
     }
-    ImGui::EndMenuBar();
+
+    ImGui::EndMenu();
+  }
+}
+
+void Game::renderRunMenu(ImGuiIO& io) {
+  if (ImGui::BeginMenu("Run")) {
+    {
+      if (disable_run_) ImGui::BeginDisabled();
+      bool clicked = ImGui::MenuItem("Start Planning");
+      if (disable_run_) ImGui::EndDisabled();
+      if (clicked) {
+        logger_panel_->info("RUN button pressed. Planning started.");
+        disable_run_ = true;
+        if (!states_.empty()) {
+          states_.top()->setRunning(true);
+        }
+      }
+    }
+    {
+      if (!disable_run_) ImGui::BeginDisabled();
+      bool clicked = ImGui::MenuItem("Reset Planner Data");
+      if (!disable_run_) ImGui::EndDisabled();
+      if (clicked) {
+        logger_panel_->info("RESET button pressed. Planning resetted.");
+        disable_run_ = false;
+        if (!states_.empty()) {
+          states_.top()->setReset(true);
+        }
+      }
+    }
+    ImGui::EndMenu();
   }
 }
 
@@ -186,86 +178,93 @@ void Game::render() {
 
     // Submit the DockSpace
     ImGuiIO& io = ImGui::GetIO();
-    ImGuiStyle& style = ImGui::GetStyle();
-    float min_window_size_x = style.WindowMinSize.x;
-    style.WindowMinSize.x = 332.f;
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
       ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
       ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     }
-    style.WindowMinSize.x = min_window_size_x;
 
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("File")) {
-        if (ImGui::MenuItem("Close", NULL, false)) window_->close();
+        renderNewPlannerMenu();
+        ImGui::Separator();
+        if (ImGui::MenuItem("Exit", NULL, false)) window_->close();
+        ImGui::EndMenu();
+      }
+      if (ImGui::BeginMenu("View")) {
+        ImGui::MenuItem("Show Control Panel", nullptr, &show_control_panel_);
+        ImGui::MenuItem("Show Console", nullptr, &show_console_);
+        ImGui::MenuItem("Show Stats", nullptr, &show_stats_panel_);
+        ImGui::EndMenu();
+      }
+      renderRunMenu(io);
+      if (ImGui::BeginMenu("Help")) {
+        ImGui::MenuItem("How To Use", nullptr, &show_how_to_use_window_);
+        ImGui::MenuItem("About", nullptr, &show_about_window_);
         ImGui::EndMenu();
       }
       ImGui::EndMenuBar();
     }
 
-    ////////////////////////////////
-    // Configurations
-    ////////////////////////////////
-    ImGui::Begin("Configurations", nullptr, ImGuiWindowFlags_MenuBar);
-    renderMenuBar(io);
-
-    ImGui::Text("Current Planner: %s", curr_planner_.c_str());
-    ImGui::Spacing();
-    ImGui::Spacing();
-
-    // render planner specific configurations
-    states_.top()->renderConfig();
-
     if (show_how_to_use_window_) {
-      if (ImGui::CollapsingHeader("How To Use")) {
-        ImGui::Text("USAGE GUIDE:");
-        ImGui::BulletText("Left-click to place/remove obstacle cells");
-        ImGui::BulletText("Left-SHIFT+left-click to change starting cell");
-        ImGui::BulletText("Left-CTRL+left-click to change end cell");
-      }
+      ImGui::Begin("How To Use");
+      ImGui::Text("USAGE GUIDE:");
+      ImGui::BulletText("Left-click to place/remove obstacle cells");
+      ImGui::BulletText("Left-SHIFT+left-click to change starting cell");
+      ImGui::BulletText("Left-CTRL+left-click to change end cell");
+      ImGui::End();
     }
 
     if (show_about_window_) {
-      if (ImGui::CollapsingHeader("About")) {
-        ImGui::Text("Path-finding Visualizer (v1.0.0)");
-        ImGui::Text("Developed and maintained by Phone Thiha Kyaw.");
-        ImGui::Text("Email: mlsdphonethk @ gmail dot com");
-        ImGui::Separator();
-        ImGui::Text("ABOUT THIS VISUALIZER:");
-        ImGui::Text(
-            "This project involves minimal implementations of\nthe popular "
-            "planning algorithms, including\nboth graph-based and "
-            "sampling-based planners.");
+      ImGui::Begin("About");
+      ImGui::Text("Path-finding Visualizer (v1.0.0)");
+      ImGui::Text("Developed and maintained by Phone Thiha Kyaw.");
+      ImGui::Text("Email: mlsdphonethk @ gmail dot com");
+      ImGui::Separator();
+      ImGui::Text("ABOUT THIS VISUALIZER:");
+      ImGui::Text(
+          "This project involves minimal implementations of\nthe popular "
+          "planning algorithms, including\nboth graph-based and "
+          "sampling-based planners.");
 
-        ImGui::Separator();
+      ImGui::Separator();
 
-        ImGui::Text("AVAILABLE PLANNERS:");
+      ImGui::Text("AVAILABLE PLANNERS:");
 
-        ImGui::BulletText("Graph-based Planners:");
-        ImGui::Indent();
-        ImGui::BulletText("Breadth-first search (BFS)");
-        ImGui::BulletText("Depth-first search (DFS)");
-        ImGui::BulletText("Dijkstra");
-        ImGui::BulletText("A*");
+      ImGui::BulletText("Graph-based Planners:");
+      ImGui::Indent();
+      ImGui::BulletText("Breadth-first search (BFS)");
+      ImGui::BulletText("Depth-first search (DFS)");
+      ImGui::BulletText("Dijkstra");
+      ImGui::BulletText("A*");
 
-        ImGui::Unindent();
-        ImGui::BulletText("Sampling-based Planners:");
-        ImGui::Indent();
-        ImGui::BulletText("Rapidly-exploring random trees (RRT)");
-        ImGui::BulletText("RRT*");
-        ImGui::Unindent();
-      }
+      ImGui::Unindent();
+      ImGui::BulletText("Sampling-based Planners:");
+      ImGui::Indent();
+      ImGui::BulletText("Rapidly-exploring random trees (RRT)");
+      ImGui::BulletText("RRT*");
+      ImGui::Unindent();
+      ImGui::End();
     }
 
-    ImGui::End();  // end Configurations
-    ////////////////////////////////
+    if (show_control_panel_) {
+      ////////////////////////////////
+      // Control Panel
+      ////////////////////////////////
+      ImGui::Begin("Control Panel");
 
-    //////////////////////////
-    //   Console Panel
-    //////////////////////////
-    ImGui::Begin("Console");
-    ImGui::End();
-    //////////////////////////
+      // render planner specific configurations
+      states_.top()->renderConfig();
+
+      ImGui::End();  // end Configurations
+    }
+
+    if (show_stats_panel_) {
+      ImGui::Begin("Stats");
+      ImGui::Text("Current Planner: %s", curr_planner_.c_str());
+      ImGui::Spacing();
+      ImGui::Spacing();
+      ImGui::End();
+    }
 
     //////////////////////////////////////////////////////////////////////
     //   Planning Scene Panel
@@ -310,8 +309,26 @@ void Game::render() {
     ImGui::PopStyleVar();
     //////////////////////////////////////////////////////////////////////
 
-    logger_panel_->render("Console");
+    if (show_console_) {
+      //////////////////////////
+      //   Console Panel
+      //////////////////////////
+      ImGui::Begin("Console");
+      ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
+      if (ImGui::Button("Clear##console_clear")) {
+        logger_panel_->clear();
+      }
+      ImGui::PopStyleVar();
+      ImGui::Spacing();
+      ImGui::Separator();
+      ImGui::End();
+      logger_panel_->render("Console");
+      //////////////////////////
+    }
+
     ImGui::End();  // dockspace end
+
+    // ImGui::ShowDemoWindow();
 
     ImGui::SFML::Render(*window_);
     window_->display();
@@ -329,6 +346,7 @@ void Game::initGuiTheme() {
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   ImGuiStyle* style = &ImGui::GetStyle();
+  style->FramePadding = ImVec2(8.f, 4.f);
 
   // dark theme colors
   auto& colors = ImGui::GetStyle().Colors;

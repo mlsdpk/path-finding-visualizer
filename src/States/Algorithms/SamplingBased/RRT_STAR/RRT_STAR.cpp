@@ -4,7 +4,7 @@ namespace path_finding_visualizer {
 namespace sampling_based {
 
 // Constructor
-RRT_STAR::RRT_STAR(std::shared_ptr<LoggerPanel> logger_panel,
+RRT_STAR::RRT_STAR(std::shared_ptr<gui::LoggerPanel> logger_panel,
                    const std::string &name)
     : RRT(logger_panel, name) {
   initParameters();
@@ -55,18 +55,12 @@ void RRT_STAR::initPlanner() {
 }
 
 void RRT_STAR::renderParametersGui() {
-  if (ImGui::InputDouble("range", &range_, 0.01, 1.0, "%.3f")) {
-    if (range_ < 0.01) range_ = 0.01;
-  }
-  if (ImGui::InputDouble("rewire_factor", &rewire_factor_, 0.01, 0.1, "%.2f")) {
-    if (rewire_factor_ < 1.0)
-      rewire_factor_ = 1.0;
-    else if (rewire_factor_ > 2.0)
-      rewire_factor_ = 2.0;
-  }
-  if (ImGui::InputDouble("goal_radius", &goal_radius_, 0.01, 1.0, "%.3f")) {
-    if (goal_radius_ < 0.01) goal_radius_ = 0.01;
-  }
+  gui::inputDouble("range", &range_, 0.01, 1000.0, 0.01, 1.0,
+                   "Maximum distance allowed between two vertices", "%.3f");
+  gui::inputDouble("rewire_factor", &rewire_factor_, 1.0, 2.0, 0.01, 0.1,
+                   "Rewiring factor", "%.2f");
+  gui::inputDouble("goal_radius", &goal_radius_, 0.01, 1000.0, 0.01, 1.0,
+                   "Distance between vertex and goal to stop planning", "%.3f");
 }
 
 void RRT_STAR::updatePlanner(bool &solved, Vertex &start, Vertex &goal) {

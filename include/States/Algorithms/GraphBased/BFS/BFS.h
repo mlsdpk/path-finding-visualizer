@@ -11,7 +11,7 @@ namespace graph_based {
 class BFS : public GraphBased {
  public:
   // Constructor
-  BFS(std::shared_ptr<LoggerPanel> logger_panel);
+  BFS(std::shared_ptr<gui::LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~BFS();

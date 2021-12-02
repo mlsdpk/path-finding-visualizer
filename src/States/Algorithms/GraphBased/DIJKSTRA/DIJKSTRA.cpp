@@ -4,7 +4,7 @@ namespace path_finding_visualizer {
 namespace graph_based {
 
 // Constructor
-DIJKSTRA::DIJKSTRA(std::shared_ptr<LoggerPanel> logger_panel)
+DIJKSTRA::DIJKSTRA(std::shared_ptr<gui::LoggerPanel> logger_panel)
     : BFS(logger_panel) {}
 
 // Destructor

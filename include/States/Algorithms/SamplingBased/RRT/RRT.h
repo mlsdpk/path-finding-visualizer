@@ -11,7 +11,7 @@ namespace sampling_based {
 class RRT : public SamplingBased {
  public:
   // Constructor
-  RRT(std::shared_ptr<LoggerPanel> logger_panel, const std::string &name);
+  RRT(std::shared_ptr<gui::LoggerPanel> logger_panel, const std::string &name);
 
   // Destructor
   virtual ~RRT();

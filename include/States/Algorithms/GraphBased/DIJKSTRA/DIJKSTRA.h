@@ -21,7 +21,7 @@ struct MinimumDistanceDIJKSTRA {
 class DIJKSTRA : public BFS {
  public:
   // Constructor
-  DIJKSTRA(std::shared_ptr<LoggerPanel> logger_panel);
+  DIJKSTRA(std::shared_ptr<gui::LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~DIJKSTRA();

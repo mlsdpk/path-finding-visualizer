@@ -2,7 +2,7 @@
 
 namespace path_finding_visualizer {
 
-State::State(std::shared_ptr<LoggerPanel> logger_panel)
+State::State(std::shared_ptr<gui::LoggerPanel> logger_panel)
     : logger_panel_{logger_panel} {}
 
 State::~State() {}

@@ -10,7 +10,7 @@
 #include <queue>
 #include <vector>
 
-#include "LoggerPanel.h"
+#include "Gui.h"
 #include "MessageQueue.h"
 #include "State.h"
 #include "States/Algorithms/GraphBased/Node.h"
@@ -22,7 +22,7 @@ namespace graph_based {
 class GraphBased : public State {
  public:
   // Constructor
-  GraphBased(std::shared_ptr<LoggerPanel> logger_panel);
+  GraphBased(std::shared_ptr<gui::LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~GraphBased();
@@ -55,6 +55,7 @@ class GraphBased : public State {
   // initialization Functions
   void initColors();
   void initVariables();
+  void initGridMapParams();
   void initNodes(bool reset = true, bool reset_neighbours_only = false);
 
   // colors
@@ -68,13 +69,13 @@ class GraphBased : public State {
   // Map Variables
   int no_of_grid_rows_;
   int no_of_grid_cols_;
-  int gridSize_;
-  int slider_grid_size_;
+  int grid_size_;
+  int ui_grid_size_;
   sf::Vector2f init_grid_xy_;
   // 0 = 4 connected grid, 1 = 8 connected grid
   int grid_connectivity_;
-  unsigned int mapWidth_;
-  unsigned int mapHeight_;
+  unsigned int map_width_;
+  unsigned int map_height_;
 
   // Algorithm related
   std::string algo_name_;

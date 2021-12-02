@@ -21,7 +21,7 @@ struct MinimumDistanceASTAR {
 class ASTAR : public BFS {
  public:
   // Constructor
-  ASTAR(std::shared_ptr<LoggerPanel> logger_panel);
+  ASTAR(std::shared_ptr<gui::LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~ASTAR();

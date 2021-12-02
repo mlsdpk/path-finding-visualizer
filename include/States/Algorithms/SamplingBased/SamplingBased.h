@@ -31,7 +31,7 @@ struct Vertex {
 class SamplingBased : public State {
  public:
   // Constructor
-  SamplingBased(std::shared_ptr<LoggerPanel> logger_panel,
+  SamplingBased(std::shared_ptr<gui::LoggerPanel> logger_panel,
                 const std::string &name);
 
   // Destructor
@@ -44,8 +44,10 @@ class SamplingBased : public State {
   void renderScene(sf::RenderTexture &render_texture) override;
 
   void updateUserInput();
+  void renderMap(sf::RenderTexture &render_texture);
   void renderObstacles(sf::RenderTexture &render_texture);
   void clearObstacles();
+  void initMapVariables();
   void initVariables();
   void updateKeyTime(const float &dt);
   const bool getKeyTime();
@@ -88,8 +90,8 @@ class SamplingBased : public State {
   // Map related
   sf::Vector2f init_grid_xy_;
   unsigned int obst_size_;
-  unsigned int map_width_;
-  unsigned int map_height_;
+  int map_width_;
+  int map_height_;
   std::vector<std::shared_ptr<sf::RectangleShape>> obstacles_;
 
   /**

@@ -4,7 +4,8 @@ namespace path_finding_visualizer {
 namespace sampling_based {
 
 // Constructor
-RRT::RRT(std::shared_ptr<LoggerPanel> logger_panel, const std::string &name)
+RRT::RRT(std::shared_ptr<gui::LoggerPanel> logger_panel,
+         const std::string &name)
     : SamplingBased(logger_panel, name) {
   initParameters();
   initialize();
@@ -50,13 +51,13 @@ void RRT::renderPlannerData(sf::RenderTexture &render_texture) {
   std::unique_lock<std::mutex> lck(mutex_);
   for (const auto &edge : edges_) {
     double p1_y = utils::map(edge.first->y, 0.0, 1.0, init_grid_xy_.x,
-                             init_grid_xy_.x + 700.0);
+                             init_grid_xy_.x + map_width_);
     double p1_x = utils::map(edge.first->x, 0.0, 1.0, init_grid_xy_.y,
-                             init_grid_xy_.y + 700.0);
+                             init_grid_xy_.y + map_height_);
     double p2_y = utils::map(edge.second->y, 0.0, 1.0, init_grid_xy_.x,
-                             init_grid_xy_.x + 700.0);
+                             init_grid_xy_.x + map_width_);
     double p2_x = utils::map(edge.second->x, 0.0, 1.0, init_grid_xy_.y,
-                             init_grid_xy_.y + 700.0);
+                             init_grid_xy_.y + map_height_);
 
     sf::Vertex line[] = {sf::Vertex(sf::Vector2f(p1_y, p1_x), EDGE_COL),
                          sf::Vertex(sf::Vector2f(p2_y, p2_x), EDGE_COL)};
@@ -70,13 +71,13 @@ void RRT::renderPlannerData(sf::RenderTexture &render_texture) {
     std::shared_ptr<Vertex> current = goal_vertex_;
     while (current->parent && current != start_vertex_) {
       double p1_y = utils::map(current->y, 0.0, 1.0, init_grid_xy_.x,
-                               init_grid_xy_.x + 700.0);
+                               init_grid_xy_.x + map_width_);
       double p1_x = utils::map(current->x, 0.0, 1.0, init_grid_xy_.y,
-                               init_grid_xy_.y + 700.0);
+                               init_grid_xy_.y + map_height_);
       double p2_y = utils::map(current->parent->y, 0.0, 1.0, init_grid_xy_.x,
-                               init_grid_xy_.x + 700.0);
+                               init_grid_xy_.x + map_width_);
       double p2_x = utils::map(current->parent->x, 0.0, 1.0, init_grid_xy_.y,
-                               init_grid_xy_.y + 700.0);
+                               init_grid_xy_.y + map_height_);
 
       utils::sfPath path(sf::Vector2f(p1_y, p1_x), sf::Vector2f(p2_y, p2_x),
                          4.f, PATH_COL);
@@ -90,13 +91,13 @@ void RRT::renderPlannerData(sf::RenderTexture &render_texture) {
   start_goal_circle.setOrigin(start_goal_circle.getRadius(),
                               start_goal_circle.getRadius());
   double start_y = utils::map(start_vertex_->y, 0.0, 1.0, init_grid_xy_.x,
-                              init_grid_xy_.x + 700.0);
+                              init_grid_xy_.x + map_width_);
   double start_x = utils::map(start_vertex_->x, 0.0, 1.0, init_grid_xy_.y,
-                              init_grid_xy_.y + 700.0);
+                              init_grid_xy_.y + map_height_);
   double goal_y = utils::map(goal_vertex_->y, 0.0, 1.0, init_grid_xy_.x,
-                             init_grid_xy_.x + 700.0);
+                             init_grid_xy_.x + map_width_);
   double goal_x = utils::map(goal_vertex_->x, 0.0, 1.0, init_grid_xy_.y,
-                             init_grid_xy_.y + 700.0);
+                             init_grid_xy_.y + map_height_);
 
   start_goal_circle.setPosition(start_y, start_x);
   start_goal_circle.setFillColor(START_COL);
@@ -108,14 +109,10 @@ void RRT::renderPlannerData(sf::RenderTexture &render_texture) {
 }
 
 void RRT::renderParametersGui() {
-  // TODO: instead of manually putting like this, its good to have custom
-  // declare functions for these parameters with different types
-  if (ImGui::InputDouble("range", &range_, 0.01, 1.0, "%.3f")) {
-    if (range_ < 0) range_ = 0.01;
-  }
-  if (ImGui::InputDouble("goal_radius", &goal_radius_, 0.01, 1.0, "%.3f")) {
-    if (goal_radius_ < 0.01) goal_radius_ = 0.01;
-  }
+  gui::inputDouble("range", &range_, 0.01, 1000.0, 0.01, 1.0,
+                   "Maximum distance allowed between two vertices", "%.3f");
+  gui::inputDouble("goal_radius", &goal_radius_, 0.01, 1000.0, 0.01, 1.0,
+                   "Distance between vertex and goal to stop planning", "%.3f");
 }
 
 void RRT::updatePlanner(bool &solved, Vertex &start, Vertex &goal) {
@@ -185,8 +182,8 @@ bool RRT::isCollision(const std::shared_ptr<const Vertex> &from_v,
     std::shared_ptr<Vertex> temp_v = std::make_shared<Vertex>();
     interpolate(from_v, to_v, d / max_dist, temp_v);
 
-    double pixel_y = utils::map(temp_v->y, 0.0, 1.0, 0.0, 700.0);
-    double pixel_x = utils::map(temp_v->x, 0.0, 1.0, 0.0, 700.0);
+    double pixel_y = utils::map(temp_v->y, 0.0, 1.0, 0.0, map_width_);
+    double pixel_x = utils::map(temp_v->x, 0.0, 1.0, 0.0, map_height_);
     for (const auto &obst : obstacles_) {
       if (obst->getGlobalBounds().contains(sf::Vector2f(pixel_y, pixel_x))) {
         return true;
@@ -196,8 +193,8 @@ bool RRT::isCollision(const std::shared_ptr<const Vertex> &from_v,
   }
 
   // now we check the destination vertex to_v
-  double pixel_y = utils::map(to_v->y, 0.0, 1.0, 0.0, 700.0);
-  double pixel_x = utils::map(to_v->x, 0.0, 1.0, 0.0, 700.0);
+  double pixel_y = utils::map(to_v->y, 0.0, 1.0, 0.0, map_width_);
+  double pixel_x = utils::map(to_v->x, 0.0, 1.0, 0.0, map_height_);
   for (const auto &obst : obstacles_) {
     if (obst->getGlobalBounds().contains(sf::Vector2f(pixel_y, pixel_x))) {
       return true;

@@ -4,6 +4,7 @@
 #include <imgui.h>
 
 namespace path_finding_visualizer {
+namespace gui {
 
 class LoggerPanel {
  public:
@@ -73,4 +74,61 @@ class LoggerPanel {
   }
 };
 
+// Helper to display a little (?) mark which shows a tooltip when hovered.
+// In your own code you may want to display an actual icon if you are using a
+// merged icon fonts (see docs/FONTS.md)
+inline void HelpMarker(const char* desc) {
+  ImGui::TextDisabled("(?)");
+  if (ImGui::IsItemHovered()) {
+    ImGui::BeginTooltip();
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+    ImGui::TextUnformatted(desc);
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
+  }
+}
+
+inline bool inputInt(const std::string& label, int* val, const int& min_val,
+                     const int& max_val, const int& step = 1,
+                     const int& step_fast = 100,
+                     const std::string& help_marker = "",
+                     ImGuiInputTextFlags flags = 0) {
+  flags |= ImGuiInputTextFlags_EnterReturnsTrue;
+  bool is_active = ImGui::InputInt(label.c_str(), val, step, step_fast, flags);
+  if (!help_marker.empty()) {
+    ImGui::SameLine();
+    HelpMarker(help_marker.c_str());
+  }
+  if (is_active) {
+    if (*val < min_val)
+      *val = min_val;
+    else if (*val > max_val)
+      *val = max_val;
+  }
+  return is_active;
+}
+
+inline bool inputDouble(const std::string& label, double* val,
+                        const double& min_val, const double& max_val,
+                        const double& step = 0.0, const double& step_fast = 0.0,
+                        const std::string& help_marker = "",
+                        const char* format = "%.6f",
+                        ImGuiInputTextFlags flags = 0) {
+  flags |= ImGuiInputTextFlags_EnterReturnsTrue;
+  bool is_active =
+      ImGui::InputDouble(label.c_str(), val, step, step_fast, format, flags);
+  if (!help_marker.empty()) {
+    ImGui::SameLine();
+    HelpMarker(help_marker.c_str());
+  }
+  if (is_active) {
+    if (*val < min_val)
+      *val = min_val;
+    else if (*val > max_val)
+      *val = max_val;
+  }
+  return is_active;
+}
+
+}  // namespace gui
 }  // namespace path_finding_visualizer

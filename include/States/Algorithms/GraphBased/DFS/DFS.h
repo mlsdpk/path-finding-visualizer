@@ -10,7 +10,7 @@ namespace graph_based {
 class DFS : public BFS {
  public:
   // Constructor
-  DFS(std::shared_ptr<LoggerPanel> logger_panel);
+  DFS(std::shared_ptr<gui::LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~DFS();

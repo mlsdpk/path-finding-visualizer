@@ -4,7 +4,7 @@ namespace path_finding_visualizer {
 namespace graph_based {
 
 // Constructor
-DFS::DFS(std::shared_ptr<LoggerPanel> logger_panel) : BFS(logger_panel) {}
+DFS::DFS(std::shared_ptr<gui::LoggerPanel> logger_panel) : BFS(logger_panel) {}
 
 // Destructor
 DFS::~DFS() {}

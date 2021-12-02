@@ -4,7 +4,8 @@ namespace path_finding_visualizer {
 namespace graph_based {
 
 // Constructor
-ASTAR::ASTAR(std::shared_ptr<LoggerPanel> logger_panel) : BFS(logger_panel) {}
+ASTAR::ASTAR(std::shared_ptr<gui::LoggerPanel> logger_panel)
+    : BFS(logger_panel) {}
 
 // Destructor
 ASTAR::~ASTAR() {}
