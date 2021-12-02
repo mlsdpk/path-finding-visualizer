@@ -11,7 +11,7 @@ namespace graph_based {
 class BFS : public GraphBased {
  public:
   // Constructor
-  BFS(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
+  BFS(std::shared_ptr<gui::LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~BFS();
@@ -23,13 +23,12 @@ class BFS : public GraphBased {
   virtual void updateNodes() override;
 
   // override render functions
-  virtual void renderNodes() override;
+  virtual void renderNodes(sf::RenderTexture &render_texture) override;
   virtual void renderParametersGui() override;
 
-  // BFS algorithm function
-  virtual void solveConcurrently(
-      std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
-      std::shared_ptr<MessageQueue<bool>> message_queue) override;
+  // override main update function
+  virtual void updatePlanner(bool &solved, Node &start_node,
+                             Node &end_node) override;
 
  private:
   // BFS related

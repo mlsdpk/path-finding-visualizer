@@ -4,9 +4,10 @@ namespace path_finding_visualizer {
 namespace sampling_based {
 
 // Constructor
-SamplingBased::SamplingBased(sf::RenderWindow* window,
-                             std::stack<std::unique_ptr<State>>& states)
-    : State(window, states), key_time_max_{1.f}, key_time_{0.f} {
+SamplingBased::SamplingBased(std::shared_ptr<gui::LoggerPanel> logger_panel,
+                             const std::string& name)
+    : State(logger_panel), key_time_max_{1.f}, key_time_{0.f} {
+  logger_panel_->info("Initialize " + name + " planner");
   initVariables();
 
   start_vertex_ = std::make_shared<Vertex>();
@@ -26,12 +27,14 @@ SamplingBased::~SamplingBased() {
   }
 }
 
-void SamplingBased::initVariables() {
-  // these variables depend on the visualizer
-  // for now, just use these and can improve it later
+void SamplingBased::initMapVariables() {
   map_width_ = 700;
   map_height_ = 700;
   obst_size_ = 20;
+}
+
+void SamplingBased::initVariables() {
+  initMapVariables();
 
   message_queue_ = std::make_shared<MessageQueue<bool>>();
 
@@ -46,8 +49,6 @@ void SamplingBased::initVariables() {
 }
 
 void SamplingBased::endState() {}
-
-void SamplingBased::updateKeybinds() { checkForQuit(); }
 
 /**
  * Getter function for Algorithm key timer.
@@ -75,17 +76,17 @@ void SamplingBased::updateKeyTime(const float& dt) {
   }
 }
 
-void SamplingBased::update(const float& dt) {
+void SamplingBased::update(const float& dt, const ImVec2& mousePos) {
   // from base classes
   updateKeyTime(dt);
-  updateMousePosition();
-  updateKeybinds();
+  updateMousePosition(mousePos);
 
   if (is_reset_) {
     is_running_ = false;
     is_initialized_ = false;
     is_reset_ = false;
     is_solved_ = false;
+    disable_gui_parameters_ = false;
 
     std::unique_lock<std::mutex> lck(mutex_);
     is_stopped_ = true;
@@ -115,6 +116,9 @@ void SamplingBased::update(const float& dt) {
       is_stopped_ = false;
       lck.unlock();
 
+      logger_panel_->info("Planning started with " +
+                          std::to_string(max_iterations_) + " iterations.");
+
       // create thread
       // solve the algorithm concurrently
       t_ = std::thread(&SamplingBased::solveConcurrently, this, start_vertex_,
@@ -122,6 +126,7 @@ void SamplingBased::update(const float& dt) {
 
       thread_joined_ = false;
       is_initialized_ = true;
+      disable_gui_parameters_ = true;
     }
 
     // check the algorithm is solved or not
@@ -132,6 +137,8 @@ void SamplingBased::update(const float& dt) {
       thread_joined_ = true;
       is_running_ = false;
       is_solved_ = true;
+      logger_panel_->info(
+          "Iterations number reach max limit. Planning stopped.");
     }
   } else {
     // only allow mouse and key inputs
@@ -142,13 +149,19 @@ void SamplingBased::update(const float& dt) {
 
 void SamplingBased::updateUserInput() {
   if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && getKeyTime()) {
-    if (mousePositionWindow_.x > 350 && mousePositionWindow_.x < 1050 &&
-        mousePositionWindow_.y > 18 && mousePositionWindow_.y < 718) {
-      sf::Vector2f mousePos = sf::Vector2f(mousePositionWindow_);
-
+    if (mousePositionWindow_.x > init_grid_xy_.x + obst_size_ / 2 &&
+        mousePositionWindow_.x <
+            init_grid_xy_.x + map_width_ - obst_size_ / 2 &&
+        mousePositionWindow_.y > init_grid_xy_.y + obst_size_ / 2 &&
+        mousePositionWindow_.y <
+            init_grid_xy_.y + map_height_ - obst_size_ / 2) {
       bool setObstacle = true;
+      sf::Vector2f relative_mouse_pos =
+          sf::Vector2f(mousePositionWindow_.x - init_grid_xy_.x,
+                       mousePositionWindow_.y - init_grid_xy_.y);
+
       for (std::size_t i = 0, e = obstacles_.size(); i != e; ++i) {
-        if (obstacles_[i]->getGlobalBounds().contains(mousePos)) {
+        if (obstacles_[i]->getGlobalBounds().contains(relative_mouse_pos)) {
           obstacles_.erase(obstacles_.begin() + i);
           setObstacle = false;
           break;
@@ -159,16 +172,20 @@ void SamplingBased::updateUserInput() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
           if (setObstacle) {
             start_vertex_->y =
-                utils::map(mousePositionWindow_.x - 350, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.x, init_grid_xy_.x,
+                           init_grid_xy_.x + map_width_, 0.0, 1.0);
             start_vertex_->x =
-                utils::map(mousePositionWindow_.y - 18, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.y, init_grid_xy_.y,
+                           init_grid_xy_.y + map_height_, 0.0, 1.0);
           }
         } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
           if (setObstacle) {
             goal_vertex_->y =
-                utils::map(mousePositionWindow_.x - 350, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.x, init_grid_xy_.x,
+                           init_grid_xy_.x + map_width_, 0.0, 1.0);
             goal_vertex_->x =
-                utils::map(mousePositionWindow_.y - 18, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.y, init_grid_xy_.y,
+                           init_grid_xy_.y + map_height_, 0.0, 1.0);
           }
         } else {
           // add new obstacle
@@ -176,7 +193,9 @@ void SamplingBased::updateUserInput() {
             std::shared_ptr<sf::RectangleShape> obstShape =
                 std::make_shared<sf::RectangleShape>(
                     sf::Vector2f(obst_size_, obst_size_));
-            obstShape->setPosition(mousePos);
+            obstShape->setPosition(
+                sf::Vector2f(relative_mouse_pos.x - obst_size_ / 2.,
+                             relative_mouse_pos.y - obst_size_ / 2.));
             obstShape->setFillColor(OBST_COL);
             obstacles_.emplace_back(std::move(obstShape));
           }
@@ -185,9 +204,11 @@ void SamplingBased::updateUserInput() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
           if (setObstacle) {
             goal_vertex_->y =
-                utils::map(mousePositionWindow_.x - 350, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.x, init_grid_xy_.x,
+                           init_grid_xy_.x + map_width_, 0.0, 1.0);
             goal_vertex_->x =
-                utils::map(mousePositionWindow_.y - 18, 0.0, 700.0, 0.0, 1.0);
+                utils::map(mousePositionWindow_.y, init_grid_xy_.y,
+                           init_grid_xy_.y + map_height_, 0.0, 1.0);
 
             // TODO: Find nearest node from goal point and set it as parent
           }
@@ -197,56 +218,29 @@ void SamplingBased::updateUserInput() {
   }
 }
 
-void SamplingBased::renderObstacles() {
+void SamplingBased::renderMap(sf::RenderTexture& render_texture) {
+  sf::RectangleShape planning_map(sf::Vector2f(map_width_, map_height_));
+  planning_map.setFillColor(sf::Color(255, 255, 255));
+  planning_map.setOutlineThickness(5);
+  planning_map.setOutlineColor(sf::Color(0, 0, 0));
+  planning_map.setPosition(sf::Vector2f(init_grid_xy_.x, init_grid_xy_.y));
+  render_texture.draw(planning_map);
+}
+
+void SamplingBased::renderObstacles(sf::RenderTexture& render_texture) {
   for (auto& shape : obstacles_) {
-    window_->draw(*shape);
+    sf::RectangleShape obst(sf::Vector2f(obst_size_, obst_size_));
+    obst.setPosition(sf::Vector2f(init_grid_xy_.x + shape->getPosition().x,
+                                  init_grid_xy_.y + shape->getPosition().y));
+    obst.setFillColor(OBST_COL);
+    render_texture.draw(obst);
   }
 }
 
 void SamplingBased::clearObstacles() { obstacles_.clear(); }
 
 void SamplingBased::renderGui() {
-  // buttons
-  {
-    // RESET button
-    {
-      if (!disable_run_ || is_running_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RESET", ImVec2(100.f, 40.f));
-      if (!disable_run_ || is_running_) ImGui::EndDisabled();
-      if (clicked && !is_running_) {
-        is_reset_ = true;
-        disable_gui_parameters_ = false;
-        disable_run_ = false;
-      }
-    }
-
-    ImGui::SameLine();
-
-    // TODO: PAUSE button
-    // always disabled (not implemented yet)
-    {
-      if (true) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("PAUSE", ImVec2(100.f, 40.f));
-      if (true) ImGui::EndDisabled();
-    }
-
-    ImGui::SameLine();
-
-    // RUN button
-    {
-      if (disable_run_) ImGui::BeginDisabled();
-      bool clicked = ImGui::Button("RUN", ImVec2(100.f, 40.f));
-      if (disable_run_) ImGui::EndDisabled();
-      if (clicked && !is_solved_) {
-        is_running_ = true;
-        disable_gui_parameters_ = true;
-        disable_run_ = true;
-      }
-    }
-  }
-
-  ImGui::Spacing();
-
+  ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
   {
     std::unique_lock<std::mutex> iter_no_lck(iter_no_mutex_);
     const float progress = static_cast<float>(
@@ -254,47 +248,112 @@ void SamplingBased::renderGui() {
                    static_cast<double>(max_iterations_), 0.0, 1.0));
     const std::string buf =
         std::to_string(curr_iter_no_) + "/" + std::to_string(max_iterations_);
+    ImGui::Text("Planning Progress:");
+    ImGui::SameLine();
+    gui::HelpMarker(
+        "Shows the current iteration number of the planning progress");
+    ImGui::Spacing();
     ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), buf.c_str());
   }
-
-  ImGui::Spacing();
-  ImGui::Separator();
+  ImGui::PopStyleVar();
   ImGui::Spacing();
 
-  if (disable_gui_parameters_) ImGui::BeginDisabled();
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.f, 8.f));
+  if (ImGui::CollapsingHeader("Edit", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (disable_gui_parameters_) ImGui::BeginDisabled();
+    ImGui::Indent(8.f);
 
-  if (ImGui::InputInt("max_iterations", &max_iterations_, 1, 1000)) {
-    if (max_iterations_ < 1) max_iterations_ = 1;
-  }
-  ImGui::Spacing();
-  // virtual function renderParametersGui()
-  // need to be implemented by derived class
-  renderParametersGui();
-  ImGui::Spacing();
-  ImGui::Separator();
-  ImGui::Spacing();
-  {
-    if (ImGui::Button("CLEAR OBSTACLES", ImVec2(154.f, 40.f))) {
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(2.f, 4.f));
+
+    ImGui::Text("Map:");
+    ImGui::SameLine();
+    gui::HelpMarker(
+        "Set width and height of the planning map.\nInternally these values "
+        "are mapped between 0 and 1.");
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.f, 2.f));
+
+    if (gui::inputInt("width", &map_width_, 500, 10000, 100, 1000)) {
+    }
+    ImGui::PopStyleVar();
+    if (gui::inputInt("height", &map_height_, 500, 10000, 100, 1000)) {
+    }
+
+    ImGui::Text("Random Obstacles:");
+    ImGui::SameLine();
+    gui::HelpMarker("TODO: Randomly generate obstacles in the gridmap");
+    static int rand_obsts_no = 10;
+    if (ImGui::InputInt("##rand_obst_input", &rand_obsts_no, 1, 10,
+                        ImGuiInputTextFlags_EnterReturnsTrue)) {
+      // TODO:
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Generate")) {
+      // TODO:
+    }
+
+    if (ImGui::Button("Clear Obstacles")) {
       clearObstacles();
     }
     ImGui::SameLine();
-    if (ImGui::Button("RESET PARAMETERS", ImVec2(154.f, 40.f))) {
-      initParameters();
+    if (ImGui::Button("Restore Defaults##edit_restore")) {
+      initMapVariables();
     }
-  }
 
-  if (disable_gui_parameters_) ImGui::EndDisabled();
+    ImGui::Unindent(8.f);
+    ImGui::PopStyleVar(2);
+    if (disable_gui_parameters_) ImGui::EndDisabled();
+    ImGui::Spacing();
+  }
+  ImGui::PopStyleVar();
+
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.f, 8.f));
+  if (ImGui::CollapsingHeader("Configuration",
+                              ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (disable_gui_parameters_) ImGui::BeginDisabled();
+    ImGui::Indent(8.f);
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(2.f, 4.f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.f, 2.f));
+
+    gui::inputInt("max_iterations", &max_iterations_, 1, 100000, 1, 1000,
+                  "Maximum number of iterations to run the planner");
+
+    // virtual function renderParametersGui()
+    // need to be implemented by derived class
+    renderParametersGui();
+
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.f, 8.f));
+    ImGui::Spacing();
+    ImGui::PopStyleVar();
+    if (ImGui::Button("Restore Defaults##config_restore")) {
+      initParameters();
+      logger_panel_->info(
+          "Planner related parameters resetted to default ones.");
+    }
+
+    ImGui::Unindent(8.f);
+    ImGui::PopStyleVar(3);
+    if (disable_gui_parameters_) ImGui::EndDisabled();
+  }
+  ImGui::PopStyleVar();
 }
 
-void SamplingBased::render() {
-  renderObstacles();
-
-  // virtual function renderPlannerData()
-  // need to be implemented by derived class
-  renderPlannerData();
-
+void SamplingBased::renderConfig() {
   // render gui
   renderGui();
+}
+
+void SamplingBased::renderScene(sf::RenderTexture& render_texture) {
+  const auto texture_size = render_texture.getSize();
+  init_grid_xy_.x = (texture_size.x / 2.) - (map_width_ / 2.);
+  init_grid_xy_.y = (texture_size.y / 2.) - (map_height_ / 2.);
+
+  renderMap(render_texture);
+  renderObstacles(render_texture);
+  // virtual function renderPlannerData()
+  // need to be implemented by derived class
+  renderPlannerData(render_texture);
 }
 
 void SamplingBased::solveConcurrently(

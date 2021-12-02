@@ -4,15 +4,9 @@
 
 A tool for visualizing numerous pathfinding algorithms in two dimensions.
 
-This project involves minimal implementations of the popular planning algorithms, including both graph-based and sampling-based planners. We provide an easy-to-use GUI to control the animation process and explore different planner configurations. This is an ongoing work and current implementation of the project only involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star and two sampling-based planners: RRT and RRT*. The project extensively uses SFML, ImGui and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
+This project involves minimal implementations of the popular planning algorithms, including both graph-based and sampling-based planners. We provide an easy-to-use GUI to control the animation process and explore different planner configurations. Current implementation of the project involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star and two sampling-based planners: RRT and RRT*. The project extensively uses SFML, ImGui and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
 
 ![](figures/img0.png)
-
-## How to use
-
-- to place/remove obstacle cells (`left-CLICKED`)
-- to change starting cell (`left-SHIFT + left-CLICKED`)
-- to change end cell (`left-CTRL + left-CLICKED`)
 
 ## Dependencies
 

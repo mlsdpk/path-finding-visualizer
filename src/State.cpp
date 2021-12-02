@@ -2,23 +2,14 @@
 
 namespace path_finding_visualizer {
 
-State::State(sf::RenderWindow *window,
-             std::stack<std::unique_ptr<State>> &states)
-    : window_{window}, states_{states}, quit_{false} {}
+State::State(std::shared_ptr<gui::LoggerPanel> logger_panel)
+    : logger_panel_{logger_panel} {}
 
 State::~State() {}
 
-const bool State::getQuit() const { return quit_; }
-
-// TODO: Check escape not working properly
-void State::checkForQuit() {
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
-    quit_ = true;
-  }
-}
-
-void State::updateMousePosition() {
-  mousePositionWindow_ = sf::Mouse::getPosition(*window_);
+void State::updateMousePosition(const ImVec2& mousePos) {
+  mousePositionWindow_.x = mousePos.x;
+  mousePositionWindow_.y = mousePos.y;
 }
 
 }  // namespace path_finding_visualizer

@@ -21,16 +21,17 @@ struct MinimumDistanceASTAR {
 class ASTAR : public BFS {
  public:
   // Constructor
-  ASTAR(sf::RenderWindow *window, std::stack<std::unique_ptr<State>> &states);
+  ASTAR(std::shared_ptr<gui::LoggerPanel> logger_panel);
 
   // Destructor
   virtual ~ASTAR();
 
   // Overriden functions
   virtual void initAlgorithm() override;
-  virtual void solveConcurrently(
-      std::shared_ptr<Node> nodeStart, std::shared_ptr<Node> nodeEnd,
-      std::shared_ptr<MessageQueue<bool>> message_queue) override;
+
+  // override main update function
+  virtual void updatePlanner(bool &solved, Node &start_node,
+                             Node &end_node) override;
 
  protected:
   // ASTAR related

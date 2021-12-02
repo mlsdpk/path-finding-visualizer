@@ -8,15 +8,21 @@
 #include "Game.h"
 
 int main() {
-  sf::VideoMode videoMode(1068u, 736u);
-  sf::RenderWindow window(videoMode, "Path-Finding Visualizer",
-                          sf::Style::Titlebar | sf::Style::Close);
+  sf::VideoMode videoMode(1600u, 960u);
+  sf::RenderWindow window(
+      videoMode, "Path-Finding Visualizer",
+      sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
   // setting frame limit
   window.setFramerateLimit(100u);
+
+  sf::RenderTexture render_texture;
+  if (!render_texture.create(700u, 700u)) {
+  }
+
   ImGui::SFML::Init(window, false);
 
   // Initialize Game
-  path_finding_visualizer::Game game(&window);
+  path_finding_visualizer::Game game(&window, &render_texture);
 
   // Game Loop
   while (game.running()) {

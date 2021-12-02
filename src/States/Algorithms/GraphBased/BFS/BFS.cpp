@@ -4,8 +4,8 @@ namespace path_finding_visualizer {
 namespace graph_based {
 
 // Constructor
-BFS::BFS(sf::RenderWindow* window, std::stack<std::unique_ptr<State>>& states)
-    : GraphBased(window, states) {}
+BFS::BFS(std::shared_ptr<gui::LoggerPanel> logger_panel)
+    : GraphBased(logger_panel) {}
 
 // Destructor
 BFS::~BFS() {}
@@ -23,14 +23,14 @@ void BFS::initAlgorithm() {
 // override updateNodes() function
 void BFS::updateNodes() {
   if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && getKeyTime()) {
-    int localY = ((mousePositionWindow_.x - 350) / gridSize_);
-    int localX = ((mousePositionWindow_.y - 18) / gridSize_);
+    int localY = ((mousePositionWindow_.x - init_grid_xy_.x) / grid_size_);
+    int localX = ((mousePositionWindow_.y - init_grid_xy_.y) / grid_size_);
 
-    if (localX >= 0 && localX < mapHeight_ / gridSize_) {
-      if (localY >= 0 && localY < mapWidth_ / gridSize_) {
+    if (localX >= 0 && localX < map_height_ / grid_size_) {
+      if (localY >= 0 && localY < map_width_ / grid_size_) {
         // get the selected node
         std::shared_ptr<Node> selectedNode =
-            nodes_[(mapWidth_ / gridSize_) * localX + localY];
+            nodes_[(map_width_ / grid_size_) * localX + localY];
 
         // check the position is Obstacle free or not
         bool isObstacle = false;
@@ -41,11 +41,19 @@ void BFS::updateNodes() {
         if (!is_solved_) {
           if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
             if (!isObstacle) {
-              if (selectedNode != nodeEnd_) nodeStart_ = selectedNode;
+              if (selectedNode != nodeEnd_) {
+                nodeStart_->setStart(false);
+                nodeStart_ = selectedNode;
+                nodeStart_->setStart(true);
+              }
             }
           } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
             if (!isObstacle) {
-              if (selectedNode != nodeStart_) nodeEnd_ = selectedNode;
+              if (selectedNode != nodeStart_) {
+                nodeEnd_->setGoal(false);
+                nodeEnd_ = selectedNode;
+                nodeEnd_->setGoal(true);
+              }
             }
           } else {
             selectedNode->setObstacle(!isObstacle);
@@ -53,7 +61,11 @@ void BFS::updateNodes() {
         } else {
           if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
             if (!isObstacle) {
-              if (selectedNode != nodeStart_) nodeEnd_ = selectedNode;
+              if (selectedNode != nodeStart_) {
+                nodeEnd_->setGoal(false);
+                nodeEnd_ = selectedNode;
+                nodeEnd_->setGoal(true);
+              }
             }
           }
         }
@@ -63,16 +75,22 @@ void BFS::updateNodes() {
 }
 
 // override renderNodes() function
-void BFS::renderNodes() {
-  for (int x = 0; x < mapHeight_ / gridSize_; x++) {
-    for (int y = 0; y < mapWidth_ / gridSize_; y++) {
-      float size = static_cast<float>(gridSize_);
+void BFS::renderNodes(sf::RenderTexture &render_texture) {
+  const auto texture_size = render_texture.getSize();
+
+  init_grid_xy_.x = (texture_size.x / 2.) - (map_width_ / 2.);
+  init_grid_xy_.y = (texture_size.y / 2.) - (map_height_ / 2.);
+
+  for (int x = 0; x < map_height_ / grid_size_; x++) {
+    for (int y = 0; y < map_width_ / grid_size_; y++) {
+      float size = static_cast<float>(grid_size_);
       sf::RectangleShape rectangle(sf::Vector2f(size, size));
       rectangle.setOutlineThickness(2.f);
       rectangle.setOutlineColor(BGN_COL);
-      rectangle.setPosition(350 + y * size, 18 + x * size);
+      rectangle.setPosition(init_grid_xy_.x + y * size,
+                            init_grid_xy_.y + x * size);
 
-      int nodeIndex = (mapWidth_ / gridSize_) * x + y;
+      int nodeIndex = (map_width_ / grid_size_) * x + y;
 
       if (nodes_[nodeIndex]->isObstacle()) {
         rectangle.setFillColor(OBST_COL);
@@ -87,19 +105,19 @@ void BFS::renderNodes() {
         rectangle.setFillColor(IDLE_COL);
       }
 
-      if (nodes_[nodeIndex] == nodeStart_) {
+      if (nodes_[nodeIndex]->isStart()) {
         rectangle.setFillColor(START_COL);
-      } else if (nodes_[nodeIndex] == nodeEnd_) {
+      } else if (nodes_[nodeIndex]->isGoal()) {
         rectangle.setFillColor(END_COL);
       }
-      window_->draw(rectangle);
+      render_texture.draw(rectangle);
     }
   }
 
   // visualizing path
   if (nodeEnd_ != nullptr) {
     std::shared_ptr<Node> current = nodeEnd_;
-    while (current->getParentNode() != nullptr && current != nodeStart_) {
+    while (current->getParentNode() != nullptr && !current->isStart()) {
       current->setPath(true);
       current = current->getParentNode();
     }
@@ -108,67 +126,26 @@ void BFS::renderNodes() {
 
 void BFS::renderParametersGui() {}
 
-void BFS::solveConcurrently(std::shared_ptr<Node> nodeStart,
-                            std::shared_ptr<Node> nodeEnd,
-                            std::shared_ptr<MessageQueue<bool>> message_queue) {
-  // copy assignment
-  // thread-safe due to shared_ptrs
-  std::shared_ptr<Node> s_nodeStart = nodeStart;
-  std::shared_ptr<Node> s_nodeEnd = nodeEnd;
-  std::shared_ptr<MessageQueue<bool>> s_message_queue = message_queue;
+void BFS::updatePlanner(bool &solved, Node &start_node, Node &end_node) {
+  if (!frontier_.empty()) {
+    std::shared_ptr<Node> node_current = frontier_.front();
+    node_current->setFrontier(false);
+    frontier_.pop();
 
-  bool solved = false;
-
-  double cycleDuration = 1.0;  // duration of a single simulation cycle in ms
-  // init stop watch
-  auto lastUpdate = std::chrono::system_clock::now();
-
-  while (true) {
-    // compute time difference to stop watch
-    long timeSinceLastUpdate =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - lastUpdate)
-            .count();
-
-    if (timeSinceLastUpdate >= cycleDuration) {
-      ////////////////////////////
-      // run the main algorithm //
-      ////////////////////////////
-      if (!frontier_.empty()) {
-        std::shared_ptr<Node> nodeCurrent = frontier_.front();
-        nodeCurrent->setFrontier(false);
-        frontier_.pop();
-
-        if (nodeCurrent == s_nodeEnd) {
-          solved = true;
-        }
-
-        for (auto nodeNeighbour : *nodeCurrent->getNeighbours()) {
-          if (!nodeNeighbour->isVisited() && nodeNeighbour->isObstacle() == 0) {
-            nodeNeighbour->setParentNode(nodeCurrent);
-            nodeNeighbour->setVisited(true);
-            nodeNeighbour->setFrontier(true);
-            frontier_.push(nodeNeighbour);
-          }
-        }
-      } else {
-        solved = true;
-      }
-      ////////////////////////////
-
-      // reset stop watch for next cycle
-      lastUpdate = std::chrono::system_clock::now();
+    if (node_current->isGoal()) {
+      solved = true;
     }
 
-    // sends an update method to the message queue using move semantics
-    auto ftr = std::async(std::launch::async, &MessageQueue<bool>::send,
-                          s_message_queue, std::move(solved));
-    ftr.wait();
-
-    if (solved) return;
-
-    // sleep at every iteration to reduce CPU usage
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    for (auto node_neighbour : *node_current->getNeighbours()) {
+      if (!node_neighbour->isVisited() && node_neighbour->isObstacle() == 0) {
+        node_neighbour->setParentNode(node_current);
+        node_neighbour->setVisited(true);
+        node_neighbour->setFrontier(true);
+        frontier_.push(node_neighbour);
+      }
+    }
+  } else {
+    solved = true;
   }
 }
 
