@@ -1,15 +1,15 @@
+Pathfinding Visualizer
+=====
 ![MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 ![CI](https://github.com/mlsdpk/path-finding-visualizer/workflows/build/badge.svg)
-
-# Pathfinding Visualizer
-
-## Overview
 
 A tool for visualizing numerous pathfinding algorithms in two dimensions.
 
 This project involves minimal implementations of the popular planning algorithms, including both graph-based and sampling-based planners. We provide an easy-to-use GUI to control the animation process and explore different planner configurations. Current implementation of the project involves four search-based planning algorithms: BFS, DFS, DIJKSTRA and A-Star and two sampling-based planners: RRT and RRT*. The project extensively uses SFML, ImGui and Modern C++ features such as smart pointers, lamda expressions along with multi-threading concepts.
 
 ![](figures/img0.png)
+
+![panel1](figures/img1.png) ![panel2](figures/img2.png)
 
 ## Dependencies
 
@@ -26,7 +26,7 @@ This project involves minimal implementations of the popular planning algorithms
 
 ## Basic Build Instructions
 
-The project depends on [SFML](https://github.com/SFML/SFML), [Dear ImGui](https://github.com/ocornut/imgui) and [ImGui-SFML](https://github.com/eliasdaler/imgui-sfml). However, you are not required to install external dependencies by yourself. The following build instructions will manage all the necessary external dependencies for you. 
+The project depends on [SFML](https://github.com/SFML/SFML), [Dear ImGui](https://github.com/ocornut/imgui) and [ImGui-SFML](https://github.com/eliasdaler/imgui-sfml). However, you are not required to install external dependencies by yourself. The following build instructions will manage all the necessary external dependencies for you.
 
 1. Clone this repo.
 2. Make a build directory in the top level project directory: `mkdir build && cd build`
