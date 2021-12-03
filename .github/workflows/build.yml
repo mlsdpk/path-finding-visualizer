@@ -1,4 +1,4 @@
-name: Ubuntu Focal Fossa 20.04
+name: build
 
 on:
   # Trigger the workflow on push or pull request,
@@ -13,7 +13,7 @@ on:
       - dev
 
 jobs:
-  build:
+  Linux:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2

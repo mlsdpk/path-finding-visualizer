@@ -1,3 +1,6 @@
+![MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![CI](https://github.com/mlsdpk/path-finding-visualizer/workflows/build/badge.svg)
+
 # Pathfinding Visualizer
 
 ## Overview
