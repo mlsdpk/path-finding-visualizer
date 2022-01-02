@@ -2,15 +2,13 @@ name: build
 
 on:
   # Trigger the workflow on push or pull request,
-  # but only for the main and dev branch
   push:
-    branches:
-      - main
-      - dev
   pull_request:
-    branches:
-      - main
-      - dev
+  schedule:
+    # 7am UTC, 12am PDT
+    - cron:  '0 7 * * *'
+  # allow manually starting this workflow
+  workflow_dispatch:
 
 jobs:
   Linux:
